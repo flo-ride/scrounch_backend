@@ -3,6 +3,10 @@ name = "scrounch_backend"
 version = "0.1.0"
 edition = "2021"
 
+# Enable high optimizations for dependencies:
+[profile.dev.package."*"]
+opt-level = 3
+
 # Git hooks
 [dev-dependencies.cargo-husky]
 version = "1.5.0"
