@@ -15,6 +15,8 @@
 //! - Ensure that the host address is available before launching the server, as any conflicts will result in a panic.
 
 use clap::Parser;
+use tower_http::trace::TraceLayer;
+use tracing_subscriber::{fmt, prelude::*};
 
 /// The main entry point for the scrounch_backend application.
 ///
@@ -25,7 +27,28 @@ async fn main() {
     dotenvy::dotenv().ok();
     let cli = scrounch_backend::Arguments::parse();
 
-    let app = scrounch_backend::app().await;
+    let filter = tracing_subscriber::filter::Targets::new()
+        .with_target("tower_http::trace::on_response", tracing::Level::TRACE)
+        .with_target("tower_http::trace::on_request", tracing::Level::TRACE)
+        .with_target("tower_http::trace::make_span", tracing::Level::DEBUG)
+        .with_target("scrounch_backend", tracing::Level::INFO)
+        .with_default(tracing::Level::INFO);
+
+    let tracing_layer = fmt::layer();
+
+    let env_filter = tracing_subscriber::EnvFilter::builder()
+        .with_default_directive(tracing_subscriber::filter::LevelFilter::INFO.into())
+        .from_env_lossy();
+
+    tracing_subscriber::registry()
+        .with(tracing_layer)
+        .with(env_filter)
+        .with(filter)
+        .init();
+
+    let app = scrounch_backend::app()
+        .await
+        .layer(TraceLayer::new_for_http());
 
     let address: std::net::SocketAddr = cli.address.parse().expect(
         &format!(
@@ -38,6 +61,7 @@ async fn main() {
         .await
         .expect("Host address is not alvaible");
 
+    tracing::info!("Server is starting on {address}");
     axum::serve(listener, app)
         .await
         .expect("Axum server couldn't start");
