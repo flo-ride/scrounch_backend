@@ -17,5 +17,7 @@ pub use cli::Arguments;
 /// It wires up the backend services such as authentication, database connections,
 /// and any other business logic needed to manage the beverage sales system.
 pub async fn app() -> axum::Router {
-    axum::Router::new().route("/status", axum::routing::get(routes::status::get_status))
+    axum::Router::new()
+        .merge(routes::openapi::openapi())
+        .route("/status", axum::routing::get(routes::status::get_status))
 }
