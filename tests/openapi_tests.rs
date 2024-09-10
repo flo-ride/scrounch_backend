@@ -6,7 +6,9 @@ use tower::util::ServiceExt;
 
 #[tokio::test]
 async fn basic_swagger_test() {
-    let app = app().await;
+    let arguments = scrounch_backend::Arguments::default();
+
+    let app = app(arguments).await;
 
     let response = app
         .clone()

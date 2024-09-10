@@ -49,7 +49,7 @@ async fn main() {
             .init();
     }
 
-    let app = scrounch_backend::app()
+    let app = scrounch_backend::app(cli.clone())
         .await
         .layer(TraceLayer::new_for_http());
 

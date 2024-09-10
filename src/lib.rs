@@ -7,6 +7,7 @@
 
 mod cli;
 mod routes;
+mod state;
 
 pub use cli::Arguments;
 
@@ -16,8 +17,11 @@ pub use cli::Arguments;
 /// and any other necessary configuration for handling HTTP requests.
 /// It wires up the backend services such as authentication, database connections,
 /// and any other business logic needed to manage the beverage sales system.
-pub async fn app() -> axum::Router {
+pub async fn app(arguments: Arguments) -> axum::Router {
+    let state = state::AppState { arguments };
+
     axum::Router::new()
         .merge(routes::openapi::openapi())
         .route("/status", axum::routing::get(routes::status::get_status))
+        .with_state(state)
 }
