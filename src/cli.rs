@@ -20,8 +20,12 @@ use clap::Parser;
 #[command(version, about, long_about = None)]
 pub struct Arguments {
     /// The address and port on which the server will listen for
-    ///   incoming connections. It defaults to `"0.0.0.0:3000"` if not specified
-    ///   via the command-line or environment variable.
+    /// incoming connections. It defaults to `"0.0.0.0:3000"` if not specified
+    /// via the command-line or environment variable.
     #[arg(env, default_value = "0.0.0.0:3000")]
     pub address: String,
+
+    /// When set, disables tracing/logging functionality in the application. Defaults to `false` if not provided.
+    #[arg(env, long, default_value_t = false)]
+    pub disable_tracing: bool,
 }

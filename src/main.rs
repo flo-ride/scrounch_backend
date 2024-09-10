@@ -27,24 +27,27 @@ async fn main() {
     dotenvy::dotenv().ok();
     let cli = scrounch_backend::Arguments::parse();
 
-    let filter = tracing_subscriber::filter::Targets::new()
-        .with_target("tower_http::trace::on_response", tracing::Level::TRACE)
-        .with_target("tower_http::trace::on_request", tracing::Level::TRACE)
-        .with_target("tower_http::trace::make_span", tracing::Level::DEBUG)
-        .with_target("scrounch_backend", tracing::Level::INFO)
-        .with_default(tracing::Level::INFO);
+    let tracing_is_enable = !cli.disable_tracing;
+    if tracing_is_enable {
+        let filter = tracing_subscriber::filter::Targets::new()
+            .with_target("tower_http::trace::on_response", tracing::Level::TRACE)
+            .with_target("tower_http::trace::on_request", tracing::Level::TRACE)
+            .with_target("tower_http::trace::make_span", tracing::Level::DEBUG)
+            .with_target("scrounch_backend", tracing::Level::INFO)
+            .with_default(tracing::Level::INFO);
 
-    let tracing_layer = fmt::layer();
+        let tracing_layer = fmt::layer();
 
-    let env_filter = tracing_subscriber::EnvFilter::builder()
-        .with_default_directive(tracing_subscriber::filter::LevelFilter::INFO.into())
-        .from_env_lossy();
+        let env_filter = tracing_subscriber::EnvFilter::builder()
+            .with_default_directive(tracing_subscriber::filter::LevelFilter::INFO.into())
+            .from_env_lossy();
 
-    tracing_subscriber::registry()
-        .with(tracing_layer)
-        .with(env_filter)
-        .with(filter)
-        .init();
+        tracing_subscriber::registry()
+            .with(tracing_layer)
+            .with(env_filter)
+            .with(filter)
+            .init();
+    }
 
     let app = scrounch_backend::app()
         .await
