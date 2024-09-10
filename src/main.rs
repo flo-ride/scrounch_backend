@@ -14,17 +14,27 @@
 //! - The server listens on `0.0.0.0:3000` by default, which makes it accessible on all network interfaces.
 //! - Ensure that the host address is available before launching the server, as any conflicts will result in a panic.
 
+use clap::Parser;
+
 /// The main entry point for the scrounch_backend application.
 ///
 /// This function initializes the application and starts the Axum web server.
-/// It sets up the TCP listener on the specified host and port (`0.0.0.0:3000`),
-/// binds the Axum application created by `scrounch_backend::app()`, and runs
-/// the server asynchronously using Tokio.
 #[tokio::main]
 async fn main() {
+    // Update environnement variable from .env
+    dotenvy::dotenv().ok();
+    let cli = scrounch_backend::Arguments::parse();
+
     let app = scrounch_backend::app().await;
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")
+    let address: std::net::SocketAddr = cli.address.parse().expect(
+        &format!(
+            "Sorry but address: {} is not correctly formatted",
+            cli.address
+        )[..],
+    );
+
+    let listener = tokio::net::TcpListener::bind(address)
         .await
         .expect("Host address is not alvaible");
 

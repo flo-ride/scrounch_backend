@@ -5,7 +5,10 @@
 //! all backend functionality for managing beverage sales. It integrates the Axum
 //! framework for handling HTTP requests and response routing.
 
+mod cli;
 mod routes;
+
+pub use cli::Arguments;
 
 /// Creates and configures the Axum application.
 ///
