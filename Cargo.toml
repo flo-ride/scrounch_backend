@@ -14,3 +14,9 @@ default-features = false
 features = ["precommit-hook", "run-cargo-check", "run-cargo-clippy", "run-cargo-fmt"]
 
 [dependencies]
+## Rest API
+axum = "0.7.5"
+tower = "0.5.1"
+
+# Runtime
+tokio = { version = "1.40.0", features = ["full"] }
