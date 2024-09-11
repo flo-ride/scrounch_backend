@@ -5,5 +5,6 @@
 //! helpers, middleware, and utilities that simplify the development of route handlers.
 
 pub mod login;
+pub mod logout;
 pub mod openapi;
 pub mod status;

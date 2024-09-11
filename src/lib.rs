@@ -59,7 +59,9 @@ pub async fn app(arguments: Arguments) -> axum::Router {
 /// and authenticated via OpenID Connect (OIDC) to access, otherwise it redirect them to the OIDC
 /// login page.
 fn auth_required_routes() -> axum::Router<state::AppState> {
-    axum::Router::new().route("/login", post(routes::utils::login::post_login))
+    axum::Router::new()
+        .route("/login", post(routes::utils::login::post_login))
+        .route("/logout", get(routes::utils::logout::get_logout))
 }
 
 /// Defines routes that do not require user authentication.
