@@ -44,8 +44,8 @@ pub async fn app(arguments: Arguments) -> axum::Router {
         .merge(auth_optional_routes())
         .layer(auth_service)
         .layer(oidc::memory_session_layer())
-        .merge(routes::openapi::openapi())
-        .route("/status", get(routes::status::get_status))
+        .merge(routes::utils::openapi::openapi())
+        .route("/status", get(routes::utils::status::get_status))
         .with_state(state)
 }
 

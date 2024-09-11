@@ -11,7 +11,7 @@
 
 use utoipa::OpenApi;
 
-use crate::routes::status::__path_get_status;
+use crate::routes::utils::status::__path_get_status;
 
 #[derive(OpenApi)]
 #[openapi(paths(get_status,))]
