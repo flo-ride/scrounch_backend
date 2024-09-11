@@ -28,4 +28,27 @@ pub struct Arguments {
     /// When set, disables tracing/logging functionality in the application. Defaults to `false` if not provided.
     #[arg(env, long, default_value_t = false)]
     pub disable_tracing: bool,
+
+    ///  The base URL of the frontend application, typically used for CORS and redirection purposes.
+    /// Example: https://app.example.com
+    #[arg(env, long)]
+    pub frontend_base_url: String,
+
+    ///  The base URL of the backend application, used for constructing API endpoints.
+    /// Example: https://app.example.com/api
+    #[arg(env, long)]
+    pub backend_base_url: String,
+
+    ///  The URL of the OpenID provider (issuer) for authentication purposes.
+    /// Example: https://auth.example.com/realms/master
+    #[arg(env, long)]
+    pub openid_issuer: String,
+
+    ///  The client ID registered with the OpenID provider, used for authentication.
+    #[arg(env, long)]
+    pub openid_client_id: String,
+
+    ///  The client secret registered with the OpenID provider, if applicable.
+    #[arg(env, long)]
+    pub openid_client_secret: Option<String>,
 }
