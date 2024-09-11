@@ -10,7 +10,10 @@ mod oidc;
 mod routes;
 mod state;
 
-use axum::{error_handling::HandleErrorLayer, routing::get};
+use axum::{
+    error_handling::HandleErrorLayer,
+    routing::{get, post},
+};
 use axum_oidc::EmptyAdditionalClaims;
 pub use cli::Arguments;
 use oidc::handle_axum_oidc_middleware_error;
@@ -56,7 +59,7 @@ pub async fn app(arguments: Arguments) -> axum::Router {
 /// and authenticated via OpenID Connect (OIDC) to access, otherwise it redirect them to the OIDC
 /// login page.
 fn auth_required_routes() -> axum::Router<state::AppState> {
-    axum::Router::new()
+    axum::Router::new().route("/login", post(routes::utils::login::post_login))
 }
 
 /// Defines routes that do not require user authentication.
