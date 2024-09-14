@@ -57,7 +57,7 @@ pub async fn app(arguments: Arguments) -> axum::Router {
 /// login page.
 fn auth_required_routes() -> axum::Router<state::AppState> {
     axum::Router::new()
-        .route("/login", get(routes::utils::login::post_login))
+        .route("/login", get(routes::utils::login::get_login))
         .route("/logout", get(routes::utils::logout::get_logout))
 }
 
