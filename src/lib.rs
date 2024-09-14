@@ -38,6 +38,20 @@ pub async fn app(arguments: Arguments) -> axum::Router {
         .layer(HandleErrorLayer::new(handle_axum_oidc_middleware_error))
         .layer(oidc_client);
 
+    let origins = [
+        arguments.frontend_base_url.parse().unwrap(),
+        arguments.backend_base_url.parse().unwrap(),
+    ];
+
+    let cors_layer = tower_http::cors::CorsLayer::new()
+        .allow_methods([Method::GET, Method::POST])
+        .allow_headers([
+            axum::http::header::AUTHORIZATION,
+            axum::http::header::ACCEPT,
+        ])
+        .allow_credentials(true)
+        .allow_origin(origins);
+
     axum::Router::new()
         .merge(auth_required_routes())
         .layer(login_service)
@@ -46,6 +60,7 @@ pub async fn app(arguments: Arguments) -> axum::Router {
         .layer(oidc::memory_session_layer())
         .merge(routes::utils::openapi::openapi())
         .route("/status", get(routes::utils::status::get_status))
+        .layer(cors_layer)
         .with_state(state)
 }
 
