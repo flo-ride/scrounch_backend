@@ -82,5 +82,5 @@ fn auth_required_routes() -> axum::Router<state::AppState> {
 /// without user authentication. These routes are publicly accessible and do not
 /// require OpenID Connect (OIDC) login.
 fn auth_optional_routes() -> axum::Router<state::AppState> {
-    axum::Router::new()
+    axum::Router::new().route("/me", get(routes::user::me::get_me))
 }
