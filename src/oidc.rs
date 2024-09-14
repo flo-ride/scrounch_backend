@@ -21,7 +21,7 @@ pub fn memory_session_layer() -> tower_sessions::SessionManagerLayer<tower_sessi
     let session_store = tower_sessions::MemoryStore::default();
     tower_sessions::SessionManagerLayer::new(session_store)
         .with_secure(false)
-        .with_same_site(tower_sessions::cookie::SameSite::Lax)
+        .with_same_site(tower_sessions::cookie::SameSite::None)
         .with_expiry(tower_sessions::Expiry::OnInactivity(
             tower_sessions::cookie::time::Duration::seconds(120),
         ))
@@ -71,7 +71,8 @@ pub async fn handle_axum_oidc_middleware_error(
 /// This struct holds the basic user information retrieved from an OIDC provider
 /// after a successful login. It contains identifying details such as the user's
 /// ID, username, name, and email address.
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, serde::Serialize, utoipa::ToSchema)]
+#[schema(example = json!({ "id": "l8F0ZoHb5TwYgNvXkJqV7SsP9gQfKzR4UmA1VrCwIxE", "name": "John Doe", "username": "JDoe", "email": "john.doe@example.com" }))]
 pub struct OidcUser {
     pub id: String,
     pub username: String,
