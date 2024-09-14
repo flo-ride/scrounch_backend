@@ -10,10 +10,7 @@ mod oidc;
 mod routes;
 mod state;
 
-use axum::{
-    error_handling::HandleErrorLayer,
-    routing::{get, post},
-};
+use axum::{error_handling::HandleErrorLayer, http::Method, routing::get};
 use axum_oidc::EmptyAdditionalClaims;
 pub use cli::Arguments;
 use oidc::handle_axum_oidc_middleware_error;
@@ -60,7 +57,7 @@ pub async fn app(arguments: Arguments) -> axum::Router {
 /// login page.
 fn auth_required_routes() -> axum::Router<state::AppState> {
     axum::Router::new()
-        .route("/login", post(routes::utils::login::post_login))
+        .route("/login", get(routes::utils::login::post_login))
         .route("/logout", get(routes::utils::logout::get_logout))
 }
 

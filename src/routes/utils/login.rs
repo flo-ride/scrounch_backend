@@ -15,13 +15,13 @@ use axum::{extract::State, response::IntoResponse};
 /// the application's configuration (command-line arguments or environment variables).
 ///
 #[utoipa::path(
-        post,
+        get,
         path = "/login",
         responses(
             (status = 307, description = "You're not logged in and you should be"),
             (status = 303, description = "You're logged in, now go back to frontend_base_url")
         )
     )]
-pub async fn post_login(State(arguments): State<crate::cli::Arguments>) -> impl IntoResponse {
+pub async fn get_login(State(arguments): State<crate::cli::Arguments>) -> impl IntoResponse {
     axum::response::Redirect::to(&arguments.frontend_base_url)
 }

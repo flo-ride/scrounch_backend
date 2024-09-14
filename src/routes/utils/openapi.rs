@@ -11,12 +11,12 @@
 
 use utoipa::OpenApi;
 
-use crate::routes::utils::login::__path_post_login;
+use crate::routes::utils::login::__path_get_login;
 use crate::routes::utils::logout::__path_get_logout;
 use crate::routes::utils::status::__path_get_status;
 
 #[derive(OpenApi)]
-#[openapi(paths(get_status, post_login, get_logout))]
+#[openapi(paths(get_status, get_login, get_logout))]
 struct ApiDoc;
 
 /// Configures the OpenAPI documentation routes.
