@@ -32,9 +32,9 @@ pub fn memory_session_layer() -> tower_sessions::SessionManagerLayer<tower_sessi
 /// This function initializes an OpenID Connect client
 pub async fn get_oidc_client(
     arguments: &crate::Arguments,
-) -> Option<axum_oidc::OidcAuthLayer<EmptyAdditionalClaims>> {
+) -> Result<axum_oidc::OidcAuthLayer<EmptyAdditionalClaims>, axum_oidc::error::Error> {
     let backend_base_url = axum::http::Uri::from_str(&arguments.backend_base_url)
-        .expect("Backend base url is not valid");
+        .expect("BACKEND_BASE_URL is not valid");
     let issuer = arguments.openid_issuer.to_owned();
     let client_id = arguments.openid_client_id.to_owned();
     let client_secret = arguments.openid_client_secret.to_owned();
@@ -44,14 +44,9 @@ pub async fn get_oidc_client(
         issuer,
         client_id,
         client_secret,
-        vec![
-            "openid".to_string(),
-            "email".to_string(),
-            "profile".to_string(),
-        ],
+        vec!["email".to_string(), "profile".to_string()],
     )
     .await
-    .ok()
 }
 
 /// Handles errors encountered in the OpenID Connect (OIDC) middleware.
