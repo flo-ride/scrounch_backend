@@ -62,7 +62,6 @@ pub struct Realm {
 pub struct Client {
     pub client_id: String,
     pub client_secret: Option<String>,
-    pub redirect_uris: Vec<String>,
 }
 
 impl Default for Client {
@@ -70,7 +69,6 @@ impl Default for Client {
         Self {
             client_id: "0".to_owned(),
             client_secret: None,
-            redirect_uris: ["*".to_owned()].to_vec(),
         }
     }
 }
