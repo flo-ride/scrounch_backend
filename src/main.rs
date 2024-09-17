@@ -65,7 +65,7 @@ async fn main() {
         .await
         .expect("Migration couldn't proceed correctly");
 
-    let app = scrounch_backend::app(cli.clone())
+    let app = scrounch_backend::app(cli.clone(), db)
         .await
         .layer(TraceLayer::new_for_http());
 

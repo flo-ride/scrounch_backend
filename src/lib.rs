@@ -14,6 +14,7 @@ use axum::{error_handling::HandleErrorLayer, http::Method, routing::get};
 use axum_oidc::EmptyAdditionalClaims;
 pub use cli::Arguments;
 use oidc::handle_axum_oidc_middleware_error;
+use sea_orm::DatabaseConnection;
 
 /// Creates and configures the Axum application.
 ///
@@ -21,9 +22,10 @@ use oidc::handle_axum_oidc_middleware_error;
 /// and any other necessary configuration for handling HTTP requests.
 /// It wires up the backend services such as authentication, database connections,
 /// and any other business logic needed to manage the beverage sales system.
-pub async fn app(arguments: Arguments) -> axum::Router {
+pub async fn app(arguments: Arguments, db_pool: DatabaseConnection) -> axum::Router {
     let state = state::AppState {
         arguments: arguments.clone(),
+        db_pool,
     };
 
     let login_service = tower::ServiceBuilder::new()
