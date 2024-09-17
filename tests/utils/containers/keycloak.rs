@@ -1,8 +1,7 @@
 //! This file is inspired from https://github.com/pfzetto/axum-oidc
 
 use testcontainers::{
-    core::Image,
-    core::{ExecCommand, WaitFor},
+    core::{CmdWaitFor, ExecCommand, Image, WaitFor},
     runners::AsyncRunner,
     ContainerAsync,
 };
@@ -23,7 +22,9 @@ impl Image for KeycloakImage {
     }
 
     fn ready_conditions(&self) -> Vec<WaitFor> {
-        vec![WaitFor::message_on_stdout("Listening on:")]
+        vec![WaitFor::message_on_stdout("Listening on:"),
+        WaitFor::message_on_stdout("Running the server in development mode. DO NOT use this configuration in production.")
+        ]
     }
 
     fn env_vars(
@@ -97,8 +98,31 @@ impl Keycloak {
             realms,
         };
 
+        keycloak
+            .container
+            .exec(
+                ExecCommand::new([
+                    "/opt/keycloak/bin/kcadm.sh",
+                    "config",
+                    "credentials",
+                    "--server",
+                    "http://localhost:8080",
+                    "--realm",
+                    "master",
+                    "--user",
+                    "admin",
+                    "--password",
+                    "admin",
+                ])
+                .with_cmd_ready_condition(CmdWaitFor::exit_code(0)),
+            )
+            .await
+            .unwrap();
+
         for realm in keycloak.realms.iter() {
-            keycloak.create_realm(&realm.name).await;
+            if realm.name != "master" {
+                keycloak.create_realm(&realm.name).await;
+            }
             for client in realm.clients.iter() {
                 keycloak
                     .create_client(
@@ -130,36 +154,62 @@ impl Keycloak {
     }
 
     async fn create_realm(&self, name: &str) {
-        self.execute(format!(
-            "/opt/keycloak/bin/kcadm.sh create realms -s realm={name} -s enabled=true"
-        ))
-        .await;
+        self.container
+            .exec(
+                ExecCommand::new([
+                    "/opt/keycloak/bin/kcadm.sh",
+                    "create",
+                    "realms",
+                    "-s",
+                    &format!("realm={name}"),
+                    "-s",
+                    "enabled=true",
+                ])
+                .with_cmd_ready_condition(CmdWaitFor::exit_code(0)),
+            )
+            .await
+            .unwrap();
     }
 
     async fn create_client(&self, client_id: &str, client_secret: Option<&str>, realm: &str) {
         if let Some(client_secret) = client_secret {
-            self.execute(format!(
-                r#"/opt/keycloak/bin/kcadm.sh create clients -r {realm} -f - << EOF
-            {{
-                "clientId": "{client_id}",
-                "secret": "{client_secret}",
-                "redirectUris": ["*"]
-            }}
-            EOF
-            "#
-            ))
-            .await;
+            self.container
+                .exec(
+                    ExecCommand::new([
+                        "/opt/keycloak/bin/kcadm.sh",
+                        "create",
+                        "clients",
+                        "-r",
+                        &realm,
+                        "-s",
+                        &format!("clientId={client_id}"),
+                        "-s",
+                        &format!("secret={client_secret}"),
+                        "-s",
+                        "redirectUris=[\"*\"]",
+                    ])
+                    .with_cmd_ready_condition(CmdWaitFor::exit_code(0)),
+                )
+                .await
+                .unwrap();
         } else {
-            self.execute(format!(
-                r#"/opt/keycloak/bin/kcadm.sh create clients -r {realm} -f - << EOF
-            {{
-                "clientId": "{client_id}",
-                "redirectUris": ["*"]
-            }}
-            EOF
-            "#
-            ))
-            .await;
+            self.container
+                .exec(
+                    ExecCommand::new([
+                        "/opt/keycloak/bin/kcadm.sh",
+                        "create",
+                        "clients",
+                        "-r",
+                        &realm,
+                        "-s",
+                        &format!("clientId={client_id}"),
+                        "-s",
+                        "redirectUris=[\"*\"]",
+                    ])
+                    .with_cmd_ready_condition(CmdWaitFor::exit_code(0)),
+                )
+                .await
+                .unwrap();
         }
     }
 
@@ -172,14 +222,47 @@ impl Keycloak {
         password: &str,
         realm: &str,
     ) {
-        let id = self.execute(format!("/opt/keycloak/bin/kcadm.sh create users -r {realm} -s username={username} -s enabled=true -s emailVerified=true -s email={email} -s firstName={firstname} -s lastName={lastname}"))
-    .await;
-        self.execute(format!("/opt/keycloak/bin/kcadm.sh set-password -r {realm} --username {username} --new-password {password}"))
-        .await;
-        id
-    }
+        self.container
+            .exec(
+                ExecCommand::new([
+                    "/opt/keycloak/bin/kcadm.sh",
+                    "create",
+                    "users",
+                    "-r",
+                    &realm,
+                    "-s",
+                    &format!("username={username}"),
+                    "-s",
+                    "enabled=true",
+                    "-s",
+                    "emailVerified=true",
+                    "-s",
+                    &format!("email={email}"),
+                    "-s",
+                    &format!("firstName={firstname}"),
+                    "-s",
+                    &format!("lastName={lastname}"),
+                ])
+                .with_cmd_ready_condition(CmdWaitFor::exit_code(0)),
+            )
+            .await
+            .unwrap();
 
-    async fn execute(&self, cmd: String) {
-        let _ = self.container.exec(ExecCommand::new([cmd])).await;
+        self.container
+            .exec(
+                ExecCommand::new([
+                    "/opt/keycloak/bin/kcadm.sh",
+                    "set-password",
+                    "-r",
+                    &realm,
+                    "--username",
+                    username,
+                    "--new-password",
+                    password,
+                ])
+                .with_cmd_ready_condition(CmdWaitFor::exit_code(0)),
+            )
+            .await
+            .unwrap();
     }
 }
