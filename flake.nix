@@ -52,6 +52,7 @@
             cargo-nextest
             rust-analyzer
             lldb
+            sea-orm-cli
           ];
         };
       });
