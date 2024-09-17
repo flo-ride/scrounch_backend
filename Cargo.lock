@@ -3180,6 +3180,7 @@ dependencies = [
  "serde_json",
  "service",
  "testcontainers",
+ "testcontainers-modules",
  "tokio",
  "tower 0.5.1",
  "tower-http",
@@ -4072,6 +4073,15 @@ dependencies = [
  "tokio-stream",
  "tokio-util",
  "url",
+]
+
+[[package]]
+name = "testcontainers-modules"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "359d9a225791e1b9f60aab01f9ae9471898b9b9904b5db192104a71e96785079"
+dependencies = [
+ "testcontainers",
 ]
 
 [[package]]
