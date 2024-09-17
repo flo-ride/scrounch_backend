@@ -51,4 +51,10 @@ pub struct Arguments {
     ///  The client secret registered with the OpenID provider, if applicable.
     #[arg(env, long)]
     pub openid_client_secret: Option<String>,
+
+    /// The URL of the database the application connects to, typically in the format of a connection string
+    /// Example:
+    /// - postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+    #[arg(env, long)]
+    pub database_url: String,
 }
