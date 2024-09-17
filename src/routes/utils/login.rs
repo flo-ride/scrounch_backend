@@ -23,5 +23,5 @@ use axum::{extract::State, response::IntoResponse};
         )
     )]
 pub async fn get_login(State(arguments): State<crate::cli::Arguments>) -> impl IntoResponse {
-    axum::response::Redirect::to(&arguments.frontend_base_url)
+    axum::response::Redirect::to(&arguments.frontend_url)
 }

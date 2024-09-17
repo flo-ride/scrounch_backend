@@ -33,8 +33,8 @@ pub fn memory_session_layer() -> tower_sessions::SessionManagerLayer<tower_sessi
 pub async fn get_oidc_client(
     arguments: &crate::Arguments,
 ) -> Result<axum_oidc::OidcAuthLayer<EmptyAdditionalClaims>, axum_oidc::error::Error> {
-    let backend_base_url = axum::http::Uri::from_str(&arguments.backend_base_url)
-        .expect("BACKEND_BASE_URL is not valid");
+    let backend_base_url =
+        axum::http::Uri::from_str(&arguments.backend_url).expect("BACKEND_BASE_URL is not valid");
     let issuer = arguments.openid_issuer.to_owned();
     let client_id = arguments.openid_client_id.to_owned();
     let client_secret = arguments.openid_client_secret.to_owned();

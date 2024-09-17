@@ -39,8 +39,8 @@ pub async fn app(arguments: Arguments) -> axum::Router {
         .layer(oidc_client);
 
     let origins = [
-        arguments.frontend_base_url.parse().unwrap(),
-        arguments.backend_base_url.parse().unwrap(),
+        arguments.frontend_url.parse().unwrap(),
+        arguments.backend_url.parse().unwrap(),
     ];
 
     let cors_layer = tower_http::cors::CorsLayer::new()

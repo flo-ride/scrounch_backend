@@ -32,12 +32,12 @@ pub struct Arguments {
     ///  The base URL of the frontend application, typically used for CORS and redirection purposes.
     /// Example: https://app.example.com
     #[arg(env, long)]
-    pub frontend_base_url: String,
+    pub frontend_url: String,
 
     ///  The base URL of the backend application, used for constructing API endpoints.
     /// Example: https://app.example.com/api
     #[arg(env, long)]
-    pub backend_base_url: String,
+    pub backend_url: String,
 
     ///  The URL of the OpenID provider (issuer) for authentication purposes.
     /// Example: https://auth.example.com/realms/master

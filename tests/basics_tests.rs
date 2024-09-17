@@ -40,8 +40,8 @@ async fn basic_login_oidc() {
     arguments.openid_issuer = issuer.clone();
     arguments.openid_client_id = basic_client.client_id.clone();
     arguments.openid_client_secret = basic_client.client_secret.clone();
-    arguments.backend_base_url = "http://localhost:3000".to_string();
-    arguments.frontend_base_url = "http://localhost:5173".to_string();
+    arguments.backend_url = "http://localhost:3000".to_string();
+    arguments.frontend_url = "http://localhost:5173".to_string();
 
     let app = app(arguments).await;
 

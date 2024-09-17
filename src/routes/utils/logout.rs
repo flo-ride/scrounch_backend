@@ -20,7 +20,7 @@ pub async fn get_logout(
     State(arguments): State<crate::cli::Arguments>,
     logout: OidcRpInitiatedLogout,
 ) -> impl IntoResponse {
-    let url = Uri::from_str(&arguments.frontend_base_url)
+    let url = Uri::from_str(&arguments.frontend_url)
         .expect("Frontend url shoul'd be correctyl formatted");
     logout.with_post_logout_redirect(url)
 }
