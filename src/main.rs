@@ -35,6 +35,12 @@ async fn main() {
             .with_target("tower_http::trace::on_response", tracing::Level::TRACE)
             .with_target("tower_http::trace::on_request", tracing::Level::TRACE)
             .with_target("tower_http::trace::make_span", tracing::Level::DEBUG)
+            .with_target("migration", tracing::Level::INFO)
+            .with_target("entity", tracing::Level::INFO)
+            .with_target("service", tracing::Level::INFO)
+            .with_target("sea_orm_migration::migrator", tracing::Level::INFO)
+            .with_target("sqlx::query", tracing::Level::WARN)
+            .with_target("sqlx::postgres::notice", tracing::Level::WARN)
             .with_target("scrounch_backend", tracing::Level::INFO)
             .with_default(tracing::Level::INFO);
 
