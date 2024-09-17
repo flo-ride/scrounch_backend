@@ -15,8 +15,6 @@
 //! - Ensure that the host address is available before launching the server, as any conflicts will result in a panic.
 
 use clap::Parser;
-use migration::MigratorTrait;
-use std::time::Duration;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{fmt, prelude::*};
 
@@ -57,15 +55,7 @@ async fn main() {
             .init();
     }
 
-    let db = get_database_conn(&cli.database_url, None)
-        .await
-        .expect("Couldn't connect to the database");
-
-    migration::Migrator::up(&db, None)
-        .await
-        .expect("Migration couldn't proceed correctly");
-
-    let app = scrounch_backend::app(cli.clone(), db)
+    let app = scrounch_backend::app(cli.clone())
         .await
         .layer(TraceLayer::new_for_http());
 
@@ -84,23 +74,4 @@ async fn main() {
     axum::serve(listener, app)
         .await
         .expect("Axum server couldn't start");
-}
-
-async fn get_database_conn(
-    url: &str,
-    default_schema: Option<String>,
-) -> Result<sea_orm::prelude::DatabaseConnection, sea_orm::prelude::DbErr> {
-    let mut opt = sea_orm::ConnectOptions::new(url);
-    opt.max_connections(50)
-        .min_connections(3)
-        .connect_timeout(Duration::from_secs(8))
-        .acquire_timeout(Duration::from_secs(8))
-        .idle_timeout(Duration::from_secs(8))
-        .max_lifetime(Duration::from_secs(8));
-
-    if let Some(default_schema) = default_schema {
-        opt.set_schema_search_path(default_schema);
-    }
-
-    sea_orm::Database::connect(opt).await
 }

@@ -6,15 +6,18 @@
 //! framework for handling HTTP requests and response routing.
 
 mod cli;
+mod extractors;
 mod oidc;
 mod routes;
 mod state;
 
+use std::time::Duration;
+
 use axum::{error_handling::HandleErrorLayer, http::Method, routing::get};
 use axum_oidc::EmptyAdditionalClaims;
 pub use cli::Arguments;
+use migration::MigratorTrait;
 use oidc::handle_axum_oidc_middleware_error;
-use sea_orm::DatabaseConnection;
 
 /// Creates and configures the Axum application.
 ///
@@ -22,7 +25,15 @@ use sea_orm::DatabaseConnection;
 /// and any other necessary configuration for handling HTTP requests.
 /// It wires up the backend services such as authentication, database connections,
 /// and any other business logic needed to manage the beverage sales system.
-pub async fn app(arguments: Arguments, db_pool: DatabaseConnection) -> axum::Router {
+pub async fn app(arguments: Arguments) -> axum::Router {
+    let db_pool = get_database_conn(&arguments.database_url, None)
+        .await
+        .expect("Couldn't connect to the database");
+
+    migration::Migrator::up(&db_pool, None)
+        .await
+        .expect("Migration couldn't proceed correctly");
+
     let state = state::AppState {
         arguments: arguments.clone(),
         db_pool,
@@ -85,4 +96,23 @@ fn auth_required_routes() -> axum::Router<state::AppState> {
 /// require OpenID Connect (OIDC) login.
 fn auth_optional_routes() -> axum::Router<state::AppState> {
     axum::Router::new().route("/me", get(routes::user::me::get_me))
+}
+
+async fn get_database_conn(
+    url: &str,
+    default_schema: Option<String>,
+) -> Result<sea_orm::prelude::DatabaseConnection, sea_orm::prelude::DbErr> {
+    let mut opt = sea_orm::ConnectOptions::new(url);
+    opt.max_connections(50)
+        .min_connections(3)
+        .connect_timeout(Duration::from_secs(8))
+        .acquire_timeout(Duration::from_secs(8))
+        .idle_timeout(Duration::from_secs(8))
+        .max_lifetime(Duration::from_secs(8));
+
+    if let Some(default_schema) = default_schema {
+        opt.set_schema_search_path(default_schema);
+    }
+
+    sea_orm::Database::connect(opt).await
 }
