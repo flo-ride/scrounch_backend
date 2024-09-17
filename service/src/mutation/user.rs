@@ -4,17 +4,14 @@ use sea_orm::*;
 use sqlx::types::Uuid;
 
 impl Mutation {
-    pub async fn create_user(
-        db: &DbConn,
-        form_data: user::Model,
-    ) -> Result<user::ActiveModel, DbErr> {
+    pub async fn create_user(db: &DbConn, form_data: user::Model) -> Result<user::Model, DbErr> {
         user::ActiveModel {
             id: Set(form_data.id),
             email: Set(form_data.email),
             name: Set(form_data.name),
             username: Set(form_data.username),
         }
-        .save(db)
+        .insert(db)
         .await
     }
 
