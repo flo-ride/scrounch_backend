@@ -23,7 +23,7 @@ pub fn memory_session_layer() -> tower_sessions::SessionManagerLayer<tower_sessi
         .with_secure(false)
         .with_same_site(tower_sessions::cookie::SameSite::None)
         .with_expiry(tower_sessions::Expiry::OnInactivity(
-            tower_sessions::cookie::time::Duration::seconds(120),
+            tower_sessions::cookie::time::Duration::minutes(120),
         ))
 }
 
