@@ -1,18 +1,20 @@
 mod utils;
 
 use crate::utils::containers::keycloak::{Client, Keycloak, Realm, User};
-use axum::{body::Body, extract::Request, http::StatusCode};
+use axum::http::StatusCode;
+use axum_test::TestServerConfig;
+use reqwest::redirect::Policy;
 use scrounch_backend::{app, Arguments};
-use tower::ServiceExt;
+use serde_json::{json, Value};
 
 #[tokio::test(flavor = "multi_thread")]
 async fn basic_login_oidc() {
     let john = User {
-        username: "john".to_string(),
+        username: "jojo".to_string(),
         email: "john.doe@example.com".to_string(),
         firstname: "john".to_string(),
         lastname: "doe".to_string(),
-        password: "jojo".to_string(),
+        password: "jopass".to_string(),
     };
 
     let basic_client = Client {
@@ -21,7 +23,7 @@ async fn basic_login_oidc() {
         ..Default::default()
     };
 
-    let realm_name = "master";
+    let realm_name = "test";
 
     let keycloak = Keycloak::start(vec![Realm {
         name: realm_name.to_string(),
@@ -43,32 +45,52 @@ async fn basic_login_oidc() {
 
     let app = app(arguments).await;
 
-    let response = app
-        .clone()
-        .oneshot(
-            Request::builder()
-                .uri("/login")
-                .method("GET")
-                .body(Body::empty())
-                .unwrap(),
-        )
-        .await
+    let server = TestServerConfig::builder()
+        .save_cookies()
+        .http_transport()
+        .build_server(app)
         .unwrap();
 
-    assert_eq!(response.status(), StatusCode::TEMPORARY_REDIRECT);
-
-    let client_id = basic_client.client_id.clone();
-    let redirect_uri = "http%3A%2F%2Flocalhost%3A3000%2Flogin";
-
-    let redirect_regex = regex::Regex::new(&format!(
-        r"{issuer}/protocol/openid-connect/auth\?response_type=code&client_id={client_id}&state=[a-zA-Z0-9_-]+&code_challenge=[a-zA-Z0-9_-]+&code_challenge_method=[a-zA-Z0-9_-]+&redirect_uri={redirect_uri}&scope=openid\+email\+profile&nonce=[a-zA-Z0-9_-]+"
-    )).unwrap();
-    let redirect = response
-        .headers()
-        .get("Location")
-        .unwrap()
-        .to_str()
+    let client = reqwest::ClientBuilder::new()
+        .cookie_store(true)
+        .redirect(Policy::none())
+        .build()
         .unwrap();
 
-    assert!(redirect_regex.is_match(redirect));
+    // GET /me
+    let response = server.get("/me").await;
+    response.assert_status(StatusCode::NO_CONTENT);
+
+    // GET /login
+    let response = server.get("/login").await;
+    response.assert_status(StatusCode::TEMPORARY_REDIRECT);
+    let url = utils::extract::extract_location_header_testresponse(response).unwrap();
+
+    // GET keycloak/auth
+    let response = client.get(url).send().await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let html = response.text().await.unwrap();
+    let url_regex = regex::Regex::new(r#"action="([^"]+)""#).unwrap();
+    let url = url_regex.captures(&html).unwrap().get(1).unwrap().as_str();
+    let params = [("username", "jojo"), ("password", "jopass")];
+
+    // POST keycloak/auth
+    let response = client.post(url).form(&params).send().await.unwrap();
+    assert_eq!(response.status(), StatusCode::FOUND);
+    let url = utils::extract::extract_location_header_response(response).unwrap();
+    let url = url.replace("http://localhost:3000", ""); // Remove http://localhost:3000
+
+    // GET /login-callback
+    let response = server.get(&url).await;
+    response.assert_status(StatusCode::TEMPORARY_REDIRECT);
+    response.assert_header("Location", "http://localhost:3000/login");
+
+    // GET /me
+    let response = server.get("/me").await;
+    response.assert_status(StatusCode::OK);
+    let binding = response.json::<Value>();
+    let id = binding.get("id").unwrap();
+    response.assert_json(
+        &json!({"id": id, "name": "john doe", "email": "john.doe@example.com" , "username": "jojo"}),
+    )
 }
