@@ -6,6 +6,8 @@ use axum_test::TestServerConfig;
 use reqwest::redirect::Policy;
 use scrounch_backend::{app, Arguments};
 use serde_json::{json, Value};
+use testcontainers::runners::AsyncRunner;
+use testcontainers_modules::postgres::Postgres;
 
 #[tokio::test(flavor = "multi_thread")]
 async fn basic_login_oidc() {
@@ -33,15 +35,22 @@ async fn basic_login_oidc() {
     .await
     .unwrap();
 
-    let url = keycloak.url();
-    let issuer = format!("{url}/realms/{realm_name}");
+    let keycloak_url = keycloak.url();
+    let issuer = format!("{keycloak_url}/realms/{realm_name}");
 
-    let mut arguments = Arguments::default();
+    let db_node = Postgres::default().start().await.unwrap();
+    let db_url = &format!(
+        "postgres://postgres:postgres@127.0.0.1:{}/postgres",
+        db_node.get_host_port_ipv4(5432).await.unwrap()
+    );
+
+    let mut arguments = scrounch_backend::Arguments::default();
     arguments.openid_issuer = issuer.clone();
-    arguments.openid_client_id = basic_client.client_id.clone();
-    arguments.openid_client_secret = basic_client.client_secret.clone();
+    arguments.openid_client_id = basic_client.client_id;
+    arguments.openid_client_secret = basic_client.client_secret;
     arguments.backend_url = "http://localhost:3000".to_string();
     arguments.frontend_url = "http://localhost:5173".to_string();
+    arguments.database_url = db_url.to_string();
 
     let app = app(arguments).await;
 

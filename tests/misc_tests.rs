@@ -4,6 +4,8 @@ use axum::{body::Body, extract::Request, http::StatusCode};
 use http_body_util::BodyExt;
 use scrounch_backend::app;
 use serde_json::{json, Value};
+use testcontainers::runners::AsyncRunner;
+use testcontainers_modules::postgres::Postgres;
 use tower::util::ServiceExt;
 
 use crate::utils::containers::keycloak::{Client, Keycloak, Realm};
@@ -25,14 +27,21 @@ async fn basic_swagger_test() {
     .await
     .unwrap();
 
-    let url = keycloak.url();
+    let keycloak_url = keycloak.url();
+
+    let db_node = Postgres::default().start().await.unwrap();
+    let db_url = &format!(
+        "postgres://postgres:postgres@127.0.0.1:{}/postgres",
+        db_node.get_host_port_ipv4(5432).await.unwrap()
+    );
 
     let mut arguments = scrounch_backend::Arguments::default();
-    arguments.openid_issuer = format!("{url}/realms/{realm_name}");
+    arguments.openid_issuer = format!("{keycloak_url}/realms/{realm_name}");
     arguments.openid_client_id = basic_client.client_id;
     arguments.openid_client_secret = basic_client.client_secret;
     arguments.backend_url = "http://localhost:3000".to_string();
     arguments.frontend_url = "http://localhost:5173".to_string();
+    arguments.database_url = db_url.to_string();
 
     let app = app(arguments).await;
 
@@ -95,14 +104,21 @@ async fn basic_status_test() {
     .await
     .unwrap();
 
-    let url = keycloak.url();
+    let keycloak_url = keycloak.url();
+
+    let db_node = Postgres::default().start().await.unwrap();
+    let db_url = &format!(
+        "postgres://postgres:postgres@127.0.0.1:{}/postgres",
+        db_node.get_host_port_ipv4(5432).await.unwrap()
+    );
 
     let mut arguments = scrounch_backend::Arguments::default();
-    arguments.openid_issuer = format!("{url}/realms/{realm_name}");
+    arguments.openid_issuer = format!("{keycloak_url}/realms/{realm_name}");
     arguments.openid_client_id = basic_client.client_id;
     arguments.openid_client_secret = basic_client.client_secret;
     arguments.backend_url = "http://localhost:3000".to_string();
     arguments.frontend_url = "http://localhost:5173".to_string();
+    arguments.database_url = db_url.to_string();
 
     let app = app(arguments).await;
 
