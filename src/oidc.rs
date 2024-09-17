@@ -6,11 +6,8 @@
 
 use std::str::FromStr;
 
-use axum::{extract::FromRequestParts, response::IntoResponse};
-use axum_oidc::{
-    error::{ExtractorError, MiddlewareError},
-    EmptyAdditionalClaims, OidcClaims,
-};
+use axum::response::IntoResponse;
+use axum_oidc::{error::MiddlewareError, EmptyAdditionalClaims};
 
 /// Provides a session layer for managing user sessions.
 ///
@@ -73,52 +70,4 @@ pub struct OidcUser {
     pub username: String,
     pub name: String,
     pub email: String,
-}
-
-/// Extracts an `OidcUser` from the request parts.
-///
-/// This implementation enables the extraction of the `OidcUser` struct from incoming
-/// HTTP request parts using Axum's `FromRequestParts` trait. The user information is
-/// retrieved from the OpenID Connect (OIDC) claims, and the required fields (ID, username,
-/// name, and email) are extracted from the OIDC token claims.
-#[axum::async_trait]
-impl<S> FromRequestParts<S> for OidcUser
-where
-    S: Send + Sync,
-{
-    type Rejection = <OidcClaims<EmptyAdditionalClaims> as FromRequestParts<
-        OidcClaims<EmptyAdditionalClaims>,
-    >>::Rejection;
-
-    async fn from_request_parts(
-        parts: &mut axum::http::request::Parts,
-        state: &S,
-    ) -> Result<Self, Self::Rejection> {
-        let extractor =
-            OidcClaims::<EmptyAdditionalClaims>::from_request_parts(parts, state).await?;
-        let id = extractor.subject().to_string();
-
-        let username = extractor
-            .preferred_username()
-            .ok_or(ExtractorError::Unauthorized)?
-            .to_string();
-        let name = extractor
-            .name()
-            .ok_or(ExtractorError::Unauthorized)?
-            .get(None)
-            .expect("Name is not in correct Langage")
-            .to_string();
-        let email = extractor
-            .email()
-            .ok_or(ExtractorError::Unauthorized)?
-            .to_string();
-
-        let user = OidcUser {
-            id,
-            username,
-            name,
-            email,
-        };
-        Ok(user)
-    }
 }
