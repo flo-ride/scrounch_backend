@@ -3,6 +3,9 @@ name = "scrounch_backend"
 version = "0.1.0"
 edition = "2021"
 
+[workspace]
+members = [".", "migration", "entity", "service"]
+
 # Enable high optimizations for dependencies:
 [profile.dev.package."*"]
 opt-level = 3
@@ -28,6 +31,12 @@ tower = "0.5.1"
 
 # Runtime
 tokio = { version = "1.40.0", features = ["full"] }
+
+# Database
+sea-orm = { version = "1.0.1", features = ["sqlx-postgres", "runtime-tokio-rustls"] }
+migration = { path = "migration" }
+entity = { path = "entity" }
+service = { path = "service" }
 
 # CLI + Env + Config
 clap = { version = "4.5.17", features = ["derive", "env"] }
