@@ -4,7 +4,7 @@ use crate::utils::containers::keycloak::{Client, Keycloak, Realm, User};
 use axum::http::StatusCode;
 use axum_test::TestServerConfig;
 use reqwest::redirect::Policy;
-use scrounch_backend::{app, Arguments};
+use scrounch_backend::app;
 use serde_json::{json, Value};
 use testcontainers::runners::AsyncRunner;
 use testcontainers_modules::postgres::Postgres;
