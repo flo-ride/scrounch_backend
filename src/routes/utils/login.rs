@@ -10,6 +10,7 @@ use crate::error::AppError;
 use crate::{oidc::OidcUser, state::AppState};
 use axum::{extract::State, response::IntoResponse};
 use entity::user::Model as User;
+use service::Connection;
 
 /// Handles the login route by redirecting the user to the frontend.
 ///
@@ -27,9 +28,10 @@ use entity::user::Model as User;
     )]
 pub async fn get_login(
     user: OidcUser,
+    State(conn): State<Connection>,
     State(state): State<AppState>,
 ) -> Result<impl IntoResponse, AppError> {
-    if service::Query::find_user_by_id(&state.db_pool, user.id.clone())
+    if service::Query::find_user_by_id(&conn, user.id.clone())
         .await?
         .is_none()
     {
@@ -38,7 +40,7 @@ pub async fn get_login(
             sea_orm::sqlx::types::Uuid::try_parse(&id).map_err(|_| AppError::DatabaseError)?;
 
         service::Mutation::create_user(
-            &state.db_pool,
+            &conn,
             User {
                 id: uuid,
                 username: user.username,

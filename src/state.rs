@@ -31,3 +31,11 @@ impl axum::extract::FromRef<AppState> for DatabaseConnection {
         state.db_pool.clone()
     }
 }
+
+impl axum::extract::FromRef<AppState> for service::Connection {
+    fn from_ref(state: &AppState) -> Self {
+        Self {
+            db_connection: state.db_pool.clone(),
+        }
+    }
+}
