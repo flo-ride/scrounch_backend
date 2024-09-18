@@ -19,3 +19,6 @@ features = [
     "runtime-tokio-native-tls",
     "sqlx-postgres",
 ]
+
+[features]
+cache = ["dep:fred"]

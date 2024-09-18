@@ -20,4 +20,6 @@ pub use sea_orm;
 /// application, ensuring consistent management of these resources.
 pub struct Connection {
     pub db_connection: sea_orm::DbConn,
+    #[cfg(feature = "cache")]
+    pub cache_connection: Option<fred::prelude::RedisClient>,
 }
