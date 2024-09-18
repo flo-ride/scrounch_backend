@@ -6,6 +6,7 @@
 //! framework for handling HTTP requests and response routing.
 
 mod cli;
+mod error;
 mod extractors;
 mod oidc;
 mod routes;
