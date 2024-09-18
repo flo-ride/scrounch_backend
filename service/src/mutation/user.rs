@@ -1,3 +1,10 @@
+//! User mutation services for the `scrounch_backend` application.
+//!
+//! This module defines services and functions related to modifying user data in the application.
+//! It encapsulates the logic for creating, updating, and deleting user records in the database.
+//! These services provide a layer of abstraction over database mutations, ensuring that changes
+//! to user data are handled efficiently and consistently.
+
 use crate::{mutation::Mutation, Connection};
 use ::entity::{user, user::Entity as User};
 use sea_orm::*;

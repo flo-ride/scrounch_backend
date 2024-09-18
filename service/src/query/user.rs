@@ -1,3 +1,10 @@
+//! User query services for the `scrounch_backend` application.
+//!
+//! This module defines services and functions related to querying user data in the application.
+//! It encapsulates the logic for retrieving user information from the database based on various
+//! criteria such as user ID, username, or email. These services provide a layer of abstraction
+//! over database interactions, allowing for efficient and consistent data retrieval related to users.
+
 use crate::{query::Query, Connection};
 use ::entity::{user, user::Entity as User};
 use sea_orm::*;

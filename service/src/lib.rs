@@ -1,3 +1,10 @@
+//! Service layer of the `scrounch_backend` application.
+//!
+//! This module defines the service layer, which includes business logic and interactions
+//! between different parts of the application. Services encapsulate operations and coordinate
+//! tasks such as data retrieval, processing, and manipulation. They act as an intermediary
+//! between request handlers and the underlying data sources or other services.
+
 mod mutation;
 mod query;
 
