@@ -8,6 +8,7 @@
 mod cli;
 mod error;
 mod extractors;
+mod handlers;
 mod oidc;
 mod routes;
 mod state;
