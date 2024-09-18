@@ -57,4 +57,14 @@ pub struct Arguments {
     /// - postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
     #[arg(env, long)]
     pub database_url: String,
+
+    #[cfg(feature = "cache")]
+    /// The URL of the caching server (redis/valkey)
+    /// Can be 0, 1 or more
+    /// Example
+    /// redis://${HOST}:${PORT}/
+    /// redis://${USERNAME}:${PASSWORD}@${HOST}:${PORT}/
+    /// Please take a look at: [from_url](fred::types::RedisConfig#method.from_url) for more information
+    #[arg(env, long)]
+    pub cache_url: Option<String>,
 }
