@@ -3624,6 +3624,7 @@ dependencies = [
  "fred",
  "sea-orm",
  "serde_json",
+ "tokio",
 ]
 
 [[package]]
