@@ -67,16 +67,20 @@ macro_rules! cache_set {
         use fred::{interfaces::KeysInterface, types::Expiration};
         if let Ok(value) = serde_json::to_value($model.to_owned()) {
             if let Some(conn) = &$conn.cache_connection {
-                let _ = conn
-                    .set::<fred::bytes::Bytes, _, _>(
-                        $id,
-                        value.to_string(),
-                        Some(Expiration::EX($expiration_secs)),
-                        None,
-                        false,
-                    )
-                    .await
-                    .unwrap();
+                let value_str = value.to_string();
+                let cache_conn = conn.clone();
+                tokio::spawn(async move {
+                    let _ = cache_conn
+                        .set::<fred::bytes::Bytes, _, _>(
+                            $id,
+                            value_str,
+                            Some(Expiration::EX($expiration_secs)),
+                            None,
+                            false,
+                        )
+                        .await
+                        .unwrap();
+                });
             }
         }
     }};
