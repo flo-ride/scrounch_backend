@@ -5,6 +5,7 @@
 //! tasks such as data retrieval, processing, and manipulation. They act as an intermediary
 //! between request handlers and the underlying data sources or other services.
 
+mod r#macro;
 mod mutation;
 mod query;
 
