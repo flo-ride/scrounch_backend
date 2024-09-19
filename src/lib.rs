@@ -36,10 +36,36 @@ pub async fn app(arguments: Arguments) -> axum::Router {
         .await
         .expect("Migration couldn't proceed correctly");
 
-    let state = state::AppState {
+    let mut state = state::AppState {
         arguments: arguments.clone(),
         db_pool,
+        #[cfg(feature = "cache")]
+        cache_pool: None,
     };
+
+    #[cfg(feature = "cache")]
+    if let Some(cache_url) = arguments.cache_url.clone() {
+        use fred::interfaces::ClientLike;
+
+        let config = fred::types::RedisConfig::from_url(&cache_url)
+            .expect("Cache URL is not correctly formatted");
+        let mut builder = fred::types::Builder::from_config(config);
+        builder
+            .set_policy(fred::types::ReconnectPolicy::new_exponential(
+                0, 100, 10_000, 2,
+            ))
+            .with_config(|c| {
+                c.fail_fast = false;
+                c.tracing.enabled = true;
+            });
+        let cache_pool = builder
+            .build_pool(8)
+            .expect("Could not connect to Cache Pool");
+        cache_pool.init().await.expect("Failed to connect to Cache");
+        tracing::info!("Cache is connected");
+
+        state.cache_pool = Some(cache_pool)
+    }
 
     let login_service = tower::ServiceBuilder::new()
         .layer(HandleErrorLayer::new(handle_axum_oidc_middleware_error))
