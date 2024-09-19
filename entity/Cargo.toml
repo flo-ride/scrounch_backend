@@ -9,5 +9,12 @@ name = "entity"
 path = "src/lib.rs"
 
 [dependencies]
-sea-orm = { version = "1.0.1" }
 serde = { version = "1.0.210", features = ["derive"] }
+
+[dependencies.sea-orm]
+version = "1.0.1"
+features = [
+    "runtime-tokio-native-tls",
+    "sqlx-postgres",
+    "with-json"
+]
