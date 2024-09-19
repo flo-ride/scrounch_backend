@@ -10,6 +10,8 @@ use sea_orm::DatabaseConnection;
 pub struct AppState {
     pub arguments: Arguments,
     pub db_pool: DatabaseConnection,
+    #[cfg(feature = "cache")]
+    pub cache_pool: Option<fred::clients::RedisPool>,
 }
 
 /// Allows Axum to extract the `Arguments` from `AppState`.
@@ -36,6 +38,8 @@ impl axum::extract::FromRef<AppState> for service::Connection {
     fn from_ref(state: &AppState) -> Self {
         Self {
             db_connection: state.db_pool.clone(),
+            #[cfg(feature = "cache")]
+            cache_connection: state.cache_pool.clone(),
         }
     }
 }
