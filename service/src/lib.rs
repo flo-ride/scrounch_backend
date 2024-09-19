@@ -21,5 +21,5 @@ pub use sea_orm;
 pub struct Connection {
     pub db_connection: sea_orm::DbConn,
     #[cfg(feature = "cache")]
-    pub cache_connection: Option<fred::prelude::RedisClient>,
+    pub cache_connection: Option<fred::prelude::RedisPool>,
 }
