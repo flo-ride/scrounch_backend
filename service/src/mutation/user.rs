@@ -15,14 +15,22 @@ impl Mutation {
         conn: &Connection,
         form_data: user::Model,
     ) -> Result<user::Model, DbErr> {
-        user::ActiveModel {
+        let result = user::ActiveModel {
             id: Set(form_data.id),
             email: Set(form_data.email),
             name: Set(form_data.name),
             username: Set(form_data.username),
         }
         .insert(&conn.db_connection)
-        .await
+        .await;
+
+        #[cfg(feature = "cache")]
+        if let Ok(model) = &result {
+            let id = form_data.id.to_string();
+            crate::cache_set!(conn, format!("user:{id}"), model, 60 * 15);
+        }
+
+        result
     }
 
     pub async fn update_user<S: Into<String>>(
@@ -40,14 +48,21 @@ impl Mutation {
             .ok_or(DbErr::Custom(format!("Cannot find user: \"{id}\"")))
             .map(Into::into)?;
 
-        user::ActiveModel {
+        let result = user::ActiveModel {
             id: user.id,
             email: Set(form_data.email),
             username: Set(form_data.username),
             name: Set(form_data.name),
         }
         .update(&conn.db_connection)
-        .await
+        .await;
+
+        #[cfg(feature = "cache")]
+        if let Ok(model) = &result {
+            crate::cache_set!(conn, format!("user:{id}"), model, 60 * 15);
+        }
+
+        result
     }
 
     pub async fn delete_user<S: Into<String>>(
@@ -64,7 +79,17 @@ impl Mutation {
             .ok_or(DbErr::Custom(format!("Cannot find user: \"{id}\"")))
             .map(Into::into)?;
 
-        user.delete(&conn.db_connection).await
+        let result = user.delete(&conn.db_connection).await;
+
+        #[cfg(feature = "cache")]
+        if result.is_ok() {
+            use fred::{bytes::Bytes, interfaces::KeysInterface};
+            if let Some(cache) = &conn.cache_connection {
+                let _ = cache.del::<Bytes, _>(format!("user:{id}")).await;
+            }
+        }
+
+        result
     }
 
     pub async fn delete_all_users(db: &DbConn) -> Result<DeleteResult, DbErr> {
