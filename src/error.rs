@@ -10,10 +10,18 @@
 /// provide more meaningful error messages when something goes wrong.
 pub enum AppError {
     DatabaseError,
+    OidcError,
+    Unknow,
 }
 
 impl From<sea_orm::DbErr> for AppError {
     fn from(_value: sea_orm::DbErr) -> Self {
         Self::DatabaseError
+    }
+}
+
+impl From<axum_oidc::error::ExtractorError> for AppError {
+    fn from(_value: axum_oidc::error::ExtractorError) -> Self {
+        Self::OidcError
     }
 }
