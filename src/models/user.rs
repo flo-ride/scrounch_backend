@@ -10,11 +10,11 @@
 #[derive(Debug, Default, Clone, PartialEq, serde::Serialize, utoipa::ToSchema)]
 #[schema(example = json!({ "id": "l8F0ZoHb5TwYgNvXkJqV7SsP9gQfKzR4UmA1VrCwIxE", "name": "John Doe", "username": "JDoe", "email": "john.doe@example.com", "is_admin": false }))]
 pub struct User {
-    id: String,
-    email: String,
-    name: String,
-    username: String,
-    is_admin: bool,
+    pub id: String,
+    pub email: String,
+    pub name: String,
+    pub username: String,
+    pub is_admin: bool,
 }
 
 impl From<entity::user::Model> for User {
