@@ -39,6 +39,8 @@ pub async fn get_login(
         let uuid =
             sea_orm::sqlx::types::Uuid::try_parse(&id).map_err(|_| AppError::DatabaseError)?;
 
+        let mut is_admin = false;
+
         service::Mutation::create_user(
             &conn,
             User {
@@ -46,6 +48,7 @@ pub async fn get_login(
                 username: user.username,
                 name: user.name,
                 email: user.email,
+                is_admin,
             },
         )
         .await?;
