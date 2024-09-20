@@ -11,7 +11,7 @@
 
 use utoipa::OpenApi;
 
-use crate::models::oidc_user::OidcUser;
+use crate::models::user::User;
 use crate::routes::user::me::__path_get_me;
 use crate::routes::utils::login::__path_get_login;
 use crate::routes::utils::logout::__path_get_logout;
@@ -20,7 +20,7 @@ use crate::routes::utils::status::__path_get_status;
 #[derive(OpenApi)]
 #[openapi(
     paths(get_status, get_login, get_logout, get_me),
-    components(schemas(OidcUser))
+    components(schemas(User))
 )]
 struct ApiDoc;
 
