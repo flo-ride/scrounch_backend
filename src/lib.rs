@@ -93,6 +93,20 @@ pub async fn app(arguments: Arguments) -> axum::Router {
         .allow_credentials(true)
         .allow_origin(origins);
 
+    #[cfg(feature = "cache")]
+    if let Some(pool) = state.cache_pool.clone() {
+        return axum::Router::new()
+            .merge(auth_required_routes())
+            .layer(login_service)
+            .merge(auth_optional_routes())
+            .layer(auth_service)
+            .layer(oidc::cache_session_layer(pool))
+            .merge(routes::utils::openapi::openapi())
+            .route("/status", get(routes::utils::status::get_status))
+            .layer(cors_layer)
+            .with_state(state);
+    }
+
     axum::Router::new()
         .merge(auth_required_routes())
         .layer(login_service)
