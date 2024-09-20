@@ -17,7 +17,20 @@ use axum_oidc::{error::MiddlewareError, EmptyAdditionalClaims};
 pub fn memory_session_layer() -> tower_sessions::SessionManagerLayer<tower_sessions::MemoryStore> {
     let session_store = tower_sessions::MemoryStore::default();
     tower_sessions::SessionManagerLayer::new(session_store)
-        .with_secure(false)
+        .with_same_site(tower_sessions::cookie::SameSite::None)
+        .with_expiry(tower_sessions::Expiry::OnInactivity(
+            tower_sessions::cookie::time::Duration::minutes(120),
+        ))
+}
+
+#[cfg(feature = "cache")]
+pub fn cache_session_layer(
+    pool: fred::clients::RedisPool,
+) -> tower_sessions::SessionManagerLayer<
+    tower_sessions_redis_store::RedisStore<fred::clients::RedisPool>,
+> {
+    let session_store = tower_sessions_redis_store::RedisStore::new(pool);
+    tower_sessions::SessionManagerLayer::new(session_store)
         .with_same_site(tower_sessions::cookie::SameSite::None)
         .with_expiry(tower_sessions::Expiry::OnInactivity(
             tower_sessions::cookie::time::Duration::minutes(120),
