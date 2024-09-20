@@ -12,6 +12,7 @@ pub enum AppError {
     DatabaseError,
     OidcError,
     Unknow,
+    Forbidden,
 }
 
 impl From<sea_orm::DbErr> for AppError {

@@ -14,10 +14,13 @@ use axum::response::IntoResponse;
 /// automatically converted into a meaningful HTTP response with an appropriate status code.
 impl IntoResponse for AppError {
     fn into_response(self) -> axum::response::Response {
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "Unhandled internal error",
-        )
-            .into_response()
+        match self {
+            AppError::Forbidden => (StatusCode::FORBIDDEN, "You cannot view/do this"),
+            _ => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Unhandled internal error",
+            ),
+        }
+        .into_response()
     }
 }
