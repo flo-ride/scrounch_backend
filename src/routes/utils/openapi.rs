@@ -11,7 +11,7 @@
 
 use utoipa::OpenApi;
 
-use crate::oidc::OidcUser;
+use crate::models::oidc_user::OidcUser;
 use crate::routes::user::me::__path_get_me;
 use crate::routes::utils::login::__path_get_login;
 use crate::routes::utils::logout::__path_get_logout;

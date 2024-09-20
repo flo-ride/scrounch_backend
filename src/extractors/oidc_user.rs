@@ -4,7 +4,7 @@
 //! authenticated user information from the OpenID Connect (OIDC) claims. The extracted
 //! user data is used to handle authorization and personalized responses.
 
-use crate::oidc::OidcUser;
+use crate::models::oidc_user::OidcUser;
 use axum::extract::FromRequestParts;
 use axum_oidc::{error::ExtractorError, EmptyAdditionalClaims, OidcClaims};
 

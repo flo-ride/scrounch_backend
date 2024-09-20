@@ -20,7 +20,7 @@ use serde_json::json;
             (status = 204, description = "You're not logged in")
         )
     )]
-pub async fn get_me(user: Option<crate::oidc::OidcUser>) -> impl IntoResponse {
+pub async fn get_me(user: Option<crate::models::oidc_user::OidcUser>) -> impl IntoResponse {
     if let Some(user) = user {
         (StatusCode::OK, json!(user).to_string()).into_response()
     } else {
