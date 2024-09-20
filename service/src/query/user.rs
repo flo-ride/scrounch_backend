@@ -31,4 +31,18 @@ impl Query {
 
         Ok(result)
     }
+
+    pub async fn list_users_with_condition<F: sea_query::IntoCondition>(
+        conn: &Connection,
+        filter: F,
+    ) -> Result<Vec<user::Model>, DbErr> {
+        User::find().filter(filter).all(&conn.db_connection).await
+    }
+
+    pub async fn count_users_with_condition<F: sea_query::IntoCondition>(
+        conn: &Connection,
+        filter: F,
+    ) -> Result<u64, DbErr> {
+        User::find().filter(filter).count(&conn.db_connection).await
+    }
 }
