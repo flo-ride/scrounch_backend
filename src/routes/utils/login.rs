@@ -41,6 +41,13 @@ pub async fn get_login(
 
         let mut is_admin = false;
 
+        // In case no User exist, the first one become an Admin
+        if let Ok(0) =
+            service::Query::count_users_with_condition(&conn, sea_orm::Condition::any()).await
+        {
+            is_admin = true;
+        }
+
         service::Mutation::create_user(
             &conn,
             User {
