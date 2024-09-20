@@ -1,13 +1,18 @@
+//! User extractors for the `scrounch_backend` application.
+//!
+//! This module contains implementations for extracting user-related information
+//! from HTTP requests within the `scrounch_backend` application. These extractors
+//! are used to retrieve user data, typically associated with authentication
+//! processes, making it easier to access user information in route handlers.
+
 use crate::{error::AppError, models::oidc_user::OidcUser, models::user::User};
 use axum::extract::{FromRef, FromRequestParts};
 use service::Connection;
 
-/// Extracts an `OidcUser` from the request parts.
+/// Extractor implementation for retrieving a `User` from HTTP request parts.
 ///
-/// This implementation enables the extraction of the `OidcUser` struct from incoming
-/// HTTP request parts using Axum's `FromRequestParts` trait. The user information is
-/// retrieved from the OpenID Connect (OIDC) claims, and the required fields (ID, username,
-/// name, and email) are extracted from the OIDC token claims.
+/// This implementation of `FromRequestParts` allows Axum to automatically
+/// extract a `User` instance from incoming HTTP requests.
 #[axum::async_trait]
 impl<S> FromRequestParts<S> for User
 where
