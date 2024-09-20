@@ -53,8 +53,9 @@ utoipa = { version = "4.2.0", features = ["axum_extras"] }
 utoipa-swagger-ui = { version = "6.0.0", features = ["axum"] }
 
 # Auth + OIDC
-axum-oidc = "0.4.0"
-tower-sessions = "0.12.0"
+# axum-oidc = "0.4.0"
+axum-oidc = { git = "https://github.com/FloRide1/axum-oidc", branch = "feat-upgrade-tower-session-version" }
+tower-sessions = "0.13.0"
 
 # Serialisation + Deserialisation 
 serde = { version = "1.0.210", features = ["derive"] }
@@ -65,4 +66,4 @@ fred = { version = "9.2.1", optional = true, features = ["partial-tracing", "ser
 
 [features]
 default = ["cache"]
-cache = ["dep:fred", "service/cache"]
+cache = ["dep:fred", "service/cache" ]
