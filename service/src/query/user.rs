@@ -22,13 +22,13 @@ impl Query {
         #[cfg(feature = "cache")]
         crate::cache_get!(conn, format!("user:{id}"), user::Model);
 
-        let result = User::find_by_id(uuid).one(&conn.db_connection).await;
+        let result = User::find_by_id(uuid).one(&conn.db_connection).await?;
 
         #[cfg(feature = "cache")]
-        if let Ok(Some(model)) = &result {
+        if let Some(model) = &result {
             crate::cache_set!(conn, format!("user:{id}"), model, 60 * 15);
         }
 
-        result
+        Ok(result)
     }
 }
