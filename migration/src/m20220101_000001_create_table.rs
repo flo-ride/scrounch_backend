@@ -16,6 +16,12 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(User::Email).string().not_null())
                     .col(ColumnDef::new(User::Name).string().not_null())
                     .col(ColumnDef::new(User::Username).string().not_null())
+                    .col(
+                        ColumnDef::new(User::IsAdmin)
+                            .boolean()
+                            .default(false)
+                            .not_null(),
+                    )
                     .to_owned(),
             )
             .await
@@ -35,4 +41,5 @@ enum User {
     Name,
     Email,
     Username,
+    IsAdmin,
 }
