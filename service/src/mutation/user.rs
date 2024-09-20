@@ -20,6 +20,7 @@ impl Mutation {
             email: Set(form_data.email),
             name: Set(form_data.name),
             username: Set(form_data.username),
+            is_admin: Set(form_data.is_admin),
         }
         .insert(&conn.db_connection)
         .await;
@@ -53,6 +54,7 @@ impl Mutation {
             email: Set(form_data.email),
             username: Set(form_data.username),
             name: Set(form_data.name),
+            is_admin: Set(form_data.is_admin),
         }
         .update(&conn.db_connection)
         .await;
