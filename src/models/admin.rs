@@ -8,7 +8,7 @@
 /// This struct is used to encapsulate user information such as their
 /// identity, profile, and role within the system.
 #[derive(Debug, Default, Clone, PartialEq, serde::Serialize, utoipa::ToSchema)]
-#[schema(example = json!({ "id": "l8F0ZoHb5TwYgNvXkJqV7SsP9gQfKzR4UmA1VrCwIxE", "name": "John Doe", "username": "JDoe", "email": "john.doe@example.com", "is_admin": false }))]
+#[schema(example = json!({ "id": "l8F0ZoHb5TwYgNvXkJqV7SsP9gQfKzR4UmA1VrCwIxE", "name": "John Doe", "username": "JDoe", "email": "john.doe@example.com" }))]
 pub struct Admin {
     pub id: String,
     pub email: String,
