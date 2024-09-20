@@ -6,3 +6,4 @@
 //! details, and making that data available to route handlers.
 
 pub mod oidc_user;
+pub mod user;
