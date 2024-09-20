@@ -5,5 +5,6 @@
 //! parsing incoming request data, such as headers, query parameters, or authentication
 //! details, and making that data available to route handlers.
 
+pub mod admin;
 pub mod oidc_user;
 pub mod user;
