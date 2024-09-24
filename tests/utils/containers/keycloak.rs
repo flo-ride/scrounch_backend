@@ -213,7 +213,7 @@ impl Keycloak {
         }
     }
 
-    async fn create_user(
+    pub async fn create_user(
         &self,
         username: &str,
         email: &str,
@@ -221,8 +221,9 @@ impl Keycloak {
         lastname: &str,
         password: &str,
         realm: &str,
-    ) {
-        self.container
+    ) -> String {
+        let stderr = self
+            .container
             .exec(
                 ExecCommand::new([
                     "/opt/keycloak/bin/kcadm.sh",
@@ -246,7 +247,13 @@ impl Keycloak {
                 .with_cmd_ready_condition(CmdWaitFor::exit_code(0)),
             )
             .await
+            .unwrap()
+            .stderr_to_vec()
+            .await
             .unwrap();
+
+        let stderr = String::from_utf8_lossy(&stderr);
+        let id = stderr.split('\'').nth(1).unwrap().to_string();
 
         self.container
             .exec(
@@ -264,5 +271,6 @@ impl Keycloak {
             )
             .await
             .unwrap();
+        id
     }
 }
