@@ -5,7 +5,7 @@ use axum::http::StatusCode;
 use axum_test::TestServerConfig;
 use reqwest::redirect::Policy;
 use scrounch_backend::app;
-use serde_json::{json, Value};
+use serde_json::json;
 use testcontainers::runners::AsyncRunner;
 use testcontainers_modules::postgres::Postgres;
 
@@ -29,11 +29,21 @@ async fn basic_login_oidc() {
 
     let keycloak = Keycloak::start(vec![Realm {
         name: realm_name.to_string(),
-        users: vec![john.clone()],
         clients: vec![basic_client.clone()],
+        users: vec![],
     }])
     .await
     .unwrap();
+    let user_id = keycloak
+        .create_user(
+            &john.username,
+            &john.email,
+            &john.firstname,
+            &john.lastname,
+            &john.password,
+            realm_name,
+        )
+        .await;
 
     let keycloak_url = keycloak.url();
     let issuer = format!("{keycloak_url}/realms/{realm_name}");
@@ -56,7 +66,7 @@ async fn basic_login_oidc() {
 
     let server = TestServerConfig::builder()
         .save_cookies()
-        .http_transport()
+        .http_transport_with_ip_port(Some("127.0.0.1".parse().unwrap()), Some(3000))
         .build_server(app)
         .unwrap();
 
@@ -94,12 +104,15 @@ async fn basic_login_oidc() {
     response.assert_status(StatusCode::TEMPORARY_REDIRECT);
     response.assert_header("Location", "http://localhost:3000/login");
 
+    // GET /login
+    let response = server.get("/login").await;
+    response.assert_status(StatusCode::SEE_OTHER);
+    response.assert_header("Location", "http://localhost:5173");
+
     // GET /me
     let response = server.get("/me").await;
     response.assert_status(StatusCode::OK);
-    let binding = response.json::<Value>();
-    let id = binding.get("id").unwrap();
     response.assert_json(
-        &json!({"id": id, "name": "john doe", "email": "john.doe@example.com" , "username": "jojo"}),
+        &json!({"id": user_id, "name": "john doe", "email": "john.doe@example.com" , "username": "jojo", "is_admin": true }),
     )
 }
