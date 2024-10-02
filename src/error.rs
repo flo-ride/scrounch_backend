@@ -10,6 +10,8 @@
 /// provide more meaningful error messages when something goes wrong.
 #[derive(Debug)]
 pub enum AppError {
+    S3Error(s3::error::S3Error),
+    MultipartError(axum::extract::multipart::MultipartError),
     MissingOption(String),
     DatabaseError(sea_orm::DbErr),
     OidcError(axum_oidc::error::ExtractorError),
@@ -22,6 +24,8 @@ impl std::fmt::Display for AppError {
         match &self {
             Self::DatabaseError(value) => write!(f, "DatabaseError: {value}"),
             Self::OidcError(value) => write!(f, "OidcError: {value}"),
+            Self::S3Error(value) => write!(f, "S3Error: {value}"),
+            Self::MultipartError(value) => write!(f, "MultipartError: {value}"),
             Self::MissingOption(value) => write!(f, "MissingOption: {value}"),
             Self::Unknow(value) => write!(f, "Unknow Error - This should NEVER happened - {value}"),
             _ => write!(f, "{:?}", self),
@@ -38,5 +42,17 @@ impl From<sea_orm::DbErr> for AppError {
 impl From<axum_oidc::error::ExtractorError> for AppError {
     fn from(value: axum_oidc::error::ExtractorError) -> Self {
         Self::OidcError(value)
+    }
+}
+
+impl From<axum::extract::multipart::MultipartError> for AppError {
+    fn from(value: axum::extract::multipart::MultipartError) -> Self {
+        Self::MultipartError(value)
+    }
+}
+
+impl From<s3::error::S3Error> for AppError {
+    fn from(value: s3::error::S3Error) -> Self {
+        Self::S3Error(value)
     }
 }
