@@ -36,8 +36,11 @@ pub async fn get_login(
         .is_none()
     {
         let id = user.id;
-        let uuid =
-            sea_orm::sqlx::types::Uuid::try_parse(&id).map_err(|_| AppError::DatabaseError)?;
+        let uuid = sea_orm::sqlx::types::Uuid::try_parse(&id).map_err(|_| {
+            AppError::DatabaseError(sea_orm::DbErr::Custom(format!(
+                "Canno't Serialize id: {id}"
+            )))
+        })?;
 
         let mut is_admin = false;
 

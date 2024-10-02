@@ -27,10 +27,13 @@ where
     ) -> Result<Self, Self::Rejection> {
         let conn = Connection::from_ref(state);
         let oidc_user = OidcUser::from_request_parts(parts, state).await?;
+        let id = oidc_user.id;
 
-        let user = service::Query::find_user_by_id(&conn, oidc_user.id)
+        let user = service::Query::find_user_by_id(&conn, id.clone())
             .await?
-            .ok_or(AppError::Unknow)?; // This sould never happen
+            .ok_or(AppError::Unknow(format!(
+                "Can't find user {id} in db but OidcUser exist"
+            )))?; // This sould never happen
 
         Ok(user.into())
     }

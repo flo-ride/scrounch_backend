@@ -15,11 +15,21 @@ use axum::response::IntoResponse;
 impl IntoResponse for AppError {
     fn into_response(self) -> axum::response::Response {
         match self {
-            AppError::Forbidden => (StatusCode::FORBIDDEN, "You cannot view/do this"),
-            _ => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "Unhandled internal error",
-            ),
+            AppError::Forbidden => (StatusCode::FORBIDDEN, "You cannot view/do this".to_string()),
+            AppError::MissingOption(value) => {
+                tracing::error!("MissingOption: {value}");
+                (
+                    StatusCode::BAD_REQUEST,
+                    format!("Your request is missing something: {value}"),
+                )
+            }
+            _ => {
+                tracing::error!("{self}");
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Unhandled internal error".to_string(),
+                )
+            }
         }
         .into_response()
     }

@@ -8,21 +8,35 @@
 ///
 /// The `AppError` type is used throughout the application to simplify error management and
 /// provide more meaningful error messages when something goes wrong.
+#[derive(Debug)]
 pub enum AppError {
-    DatabaseError,
-    OidcError,
-    Unknow,
+    MissingOption(String),
+    DatabaseError(sea_orm::DbErr),
+    OidcError(axum_oidc::error::ExtractorError),
+    Unknow(String),
     Forbidden,
 }
 
+impl std::fmt::Display for AppError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self {
+            Self::DatabaseError(value) => write!(f, "DatabaseError: {value}"),
+            Self::OidcError(value) => write!(f, "OidcError: {value}"),
+            Self::MissingOption(value) => write!(f, "MissingOption: {value}"),
+            Self::Unknow(value) => write!(f, "Unknow Error - This should NEVER happened - {value}"),
+            _ => write!(f, "{:?}", self),
+        }
+    }
+}
+
 impl From<sea_orm::DbErr> for AppError {
-    fn from(_value: sea_orm::DbErr) -> Self {
-        Self::DatabaseError
+    fn from(value: sea_orm::DbErr) -> Self {
+        Self::DatabaseError(value)
     }
 }
 
 impl From<axum_oidc::error::ExtractorError> for AppError {
-    fn from(_value: axum_oidc::error::ExtractorError) -> Self {
-        Self::OidcError
+    fn from(value: axum_oidc::error::ExtractorError) -> Self {
+        Self::OidcError(value)
     }
 }
