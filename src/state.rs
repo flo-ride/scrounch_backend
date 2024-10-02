@@ -12,6 +12,8 @@ pub struct AppState {
     pub db_pool: DatabaseConnection,
     #[cfg(feature = "cache")]
     pub cache_pool: Option<fred::clients::RedisPool>,
+
+    pub s3_bucket: s3::Bucket,
 }
 
 /// Allows Axum to extract the `Arguments` from `AppState`.
@@ -31,6 +33,16 @@ impl axum::extract::FromRef<AppState> for Arguments {
 impl axum::extract::FromRef<AppState> for DatabaseConnection {
     fn from_ref(state: &AppState) -> Self {
         state.db_pool.clone()
+    }
+}
+
+/// Allows Axum to extract the `Bucket` from `AppState`.
+///
+/// This implementation enables Axum's request handlers to extract the s3 connection
+/// from the shared application state using the `FromRef` trait.
+impl axum::extract::FromRef<AppState> for s3::Bucket {
+    fn from_ref(state: &AppState) -> Self {
+        state.s3_bucket.clone()
     }
 }
 

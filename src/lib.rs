@@ -33,6 +33,16 @@ pub async fn app(arguments: Arguments) -> axum::Router {
         .await
         .expect("Couldn't connect to the database");
 
+    let s3_bucket = get_bucket_conn(
+        arguments.aws_s3_bucket.clone(),
+        arguments.aws_region.clone(),
+        arguments.aws_endpoint_url.clone(),
+        arguments.aws_access_key_id.clone(),
+        arguments.aws_secret_access_key.clone(),
+    )
+    .await
+    .expect("Couldn't connect to S3 Bucket");
+
     migration::Migrator::up(&db_pool, None)
         .await
         .expect("Migration couldn't proceed correctly");
@@ -42,6 +52,7 @@ pub async fn app(arguments: Arguments) -> axum::Router {
         db_pool,
         #[cfg(feature = "cache")]
         cache_pool: None,
+        s3_bucket,
     };
 
     #[cfg(feature = "cache")]
@@ -158,4 +169,18 @@ async fn get_database_conn(
     }
 
     sea_orm::Database::connect(opt).await
+}
+
+async fn get_bucket_conn(
+    bucket: String,
+    region: String,
+    endpoint: String,
+    access_key: String,
+    secret_key: String,
+) -> Result<s3::Bucket, s3::error::S3Error> {
+    let region = s3::Region::Custom { region, endpoint };
+    let credentials =
+        s3::creds::Credentials::new(Some(&access_key), Some(&secret_key), None, None, None)?;
+    let bucket = s3::Bucket::new(&bucket, region, credentials)?.with_path_style();
+    Ok(*bucket)
 }
