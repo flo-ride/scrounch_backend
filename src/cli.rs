@@ -67,4 +67,28 @@ pub struct Arguments {
     /// Please take a look at: [from_url](fred::types::RedisConfig#method.from_url) for more information
     #[arg(env, long)]
     pub cache_url: Option<String>,
+
+    /// The AWS / Minio access key ID used to authenticate API requests to AWS services.
+    #[arg(env, long)]
+    pub aws_access_key_id: String,
+
+    /// The AWS / Minio secret access key used to authenticate API requests to AWS services.
+    #[arg(env, long)]
+    pub aws_secret_access_key: String,
+
+    /// The AWS region in which your resources (such as S3 buckets) are hosted.
+    /// Example: us-east-1
+    #[arg(env, long, default_value = "eu-central-1")]
+    pub aws_region: String,
+
+    /// The custom AWS endpoint URL, typically used for local testing with services
+    /// like LocalStack.
+    /// Example: http://localhost:4566
+    #[arg(env, long)]
+    pub aws_endpoint_url: String,
+
+    /// The name of the AWS S3 bucket where files will be stored.
+    /// This bucket must already exist.
+    #[arg(env, long)]
+    pub aws_s3_bucket: String,
 }
