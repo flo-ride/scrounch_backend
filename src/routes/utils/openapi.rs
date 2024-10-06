@@ -11,16 +11,18 @@
 
 use utoipa::OpenApi;
 
+use crate::models::file::FileType;
 use crate::models::user::User;
 use crate::routes::user::me::__path_get_me;
 use crate::routes::utils::login::__path_get_login;
 use crate::routes::utils::logout::__path_get_logout;
 use crate::routes::utils::status::__path_get_status;
+use crate::routes::utils::upload::{FileSchema, __path_post_upload_files};
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(get_status, get_login, get_logout, get_me),
-    components(schemas(User))
+    paths(get_status, get_login, get_logout, get_me, post_upload_files),
+    components(schemas(User), schemas(FileType), schemas(FileSchema))
 )]
 struct ApiDoc;
 
