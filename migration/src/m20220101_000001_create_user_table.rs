@@ -1,4 +1,4 @@
-use sea_orm_migration::prelude::*;
+use sea_orm_migration::{prelude::*, schema::*};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -6,22 +6,16 @@ pub struct Migration;
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        // Replace the sample below with your own migration scripts
         manager
             .create_table(
                 Table::create()
                     .table(User::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(User::Id).uuid().not_null().primary_key())
-                    .col(ColumnDef::new(User::Email).string().not_null())
-                    .col(ColumnDef::new(User::Name).string().not_null())
-                    .col(ColumnDef::new(User::Username).string().not_null())
-                    .col(
-                        ColumnDef::new(User::IsAdmin)
-                            .boolean()
-                            .default(false)
-                            .not_null(),
-                    )
+                    .col(uuid(User::Id).primary_key())
+                    .col(string(User::Email))
+                    .col(string(User::Name))
+                    .col(string(User::Username))
+                    .col(boolean(User::IsAdmin).default(false))
                     .to_owned(),
             )
             .await
