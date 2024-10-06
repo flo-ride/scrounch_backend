@@ -17,5 +17,6 @@ features = [
     "runtime-tokio-native-tls",
     "sqlx-postgres",
     "with-json",
-    "with-chrono"
+    "with-chrono",
+    "with-uuid"
 ]

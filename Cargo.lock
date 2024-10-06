@@ -3871,6 +3871,7 @@ dependencies = [
  "sea-orm",
  "serde_json",
  "tokio",
+ "uuid",
 ]
 
 [[package]]
