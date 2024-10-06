@@ -21,6 +21,8 @@ impl Mutation {
             name: Set(form_data.name),
             username: Set(form_data.username),
             is_admin: Set(form_data.is_admin),
+            creation_time: Set(chrono::offset::Local::now().into()),
+            last_access_time: Set(chrono::offset::Local::now().into()),
         }
         .insert(&conn.db_connection)
         .await;
@@ -55,6 +57,42 @@ impl Mutation {
             username: Set(form_data.username),
             name: Set(form_data.name),
             is_admin: Set(form_data.is_admin),
+            creation_time: NotSet,
+            last_access_time: Set(chrono::offset::Local::now().into()),
+        }
+        .update(&conn.db_connection)
+        .await;
+
+        #[cfg(feature = "cache")]
+        if let Ok(model) = &result {
+            crate::cache_set!(conn, format!("user:{id}"), model, 60 * 15);
+        }
+
+        result
+    }
+
+    pub async fn update_user_last_access_time<S: Into<String>>(
+        conn: &Connection,
+        id: S,
+    ) -> Result<user::Model, DbErr> {
+        let id = id.into();
+        let uuid = Uuid::try_parse(&id)
+            .map_err(|e| DbErr::Custom(format!("Could not Serialise given id: \"{id}\" - {e}")))?;
+
+        let user: user::ActiveModel = User::find_by_id(uuid)
+            .one(&conn.db_connection)
+            .await?
+            .ok_or(DbErr::Custom(format!("Cannot find user: \"{id}\"")))
+            .map(Into::into)?;
+
+        let result = user::ActiveModel {
+            id: user.id,
+            email: NotSet,
+            username: NotSet,
+            name: NotSet,
+            is_admin: NotSet,
+            creation_time: NotSet,
+            last_access_time: Set(chrono::offset::Local::now().into()),
         }
         .update(&conn.db_connection)
         .await;
