@@ -16,6 +16,14 @@ impl MigrationTrait for Migration {
                     .col(string(User::Name))
                     .col(string(User::Username))
                     .col(boolean(User::IsAdmin).default(false))
+                    .col(
+                        timestamp_with_time_zone(User::CreationTime)
+                            .default(Expr::current_timestamp()),
+                    )
+                    .col(
+                        timestamp_with_time_zone(User::LastAccessTime)
+                            .default(Expr::current_timestamp()),
+                    )
                     .to_owned(),
             )
             .await
@@ -36,4 +44,6 @@ enum User {
     Email,
     Username,
     IsAdmin,
+    CreationTime,
+    LastAccessTime,
 }
