@@ -16,7 +16,11 @@ mod state;
 
 use std::time::Duration;
 
-use axum::{error_handling::HandleErrorLayer, http::Method, routing::get};
+use axum::{
+    error_handling::HandleErrorLayer,
+    http::Method,
+    routing::{get, post},
+};
 use axum_oidc::EmptyAdditionalClaims;
 pub use cli::Arguments;
 use migration::MigratorTrait;
@@ -101,6 +105,7 @@ pub async fn app(arguments: Arguments) -> axum::Router {
         .allow_headers([
             axum::http::header::AUTHORIZATION,
             axum::http::header::ACCEPT,
+            axum::http::header::CONTENT_TYPE,
         ])
         .allow_credentials(true)
         .allow_origin(origins);
@@ -149,7 +154,9 @@ fn auth_required_routes() -> axum::Router<state::AppState> {
 /// without user authentication. These routes are publicly accessible and do not
 /// require OpenID Connect (OIDC) login.
 fn auth_optional_routes() -> axum::Router<state::AppState> {
-    axum::Router::new().route("/me", get(routes::user::me::get_me))
+    axum::Router::new()
+        .route("/me", get(routes::user::me::get_me))
+        .route("/upload", post(routes::utils::upload::post_upload_files))
 }
 
 async fn get_database_conn(
