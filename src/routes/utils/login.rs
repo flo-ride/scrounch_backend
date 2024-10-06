@@ -59,9 +59,13 @@ pub async fn get_login(
                 name: user.name,
                 email: user.email,
                 is_admin,
+                creation_time: chrono::offset::Local::now().into(),
+                last_access_time: chrono::offset::Local::now().into(),
             },
         )
         .await?;
+    } else {
+        service::Mutation::update_user_last_access_time(&conn, user.id).await?;
     }
 
     Ok(axum::response::Redirect::to(&state.arguments.frontend_url))
