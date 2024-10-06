@@ -36,16 +36,12 @@ impl Mutation {
         result
     }
 
-    pub async fn update_user<S: Into<String>>(
+    pub async fn update_user(
         conn: &Connection,
-        id: S,
+        id: uuid::Uuid,
         form_data: user::Model,
     ) -> Result<user::Model, DbErr> {
-        let id = id.into();
-        let uuid = Uuid::try_parse(&id)
-            .map_err(|e| DbErr::Custom(format!("Could not Serialise given id: \"{id}\" - {e}")))?;
-
-        let user: user::ActiveModel = User::find_by_id(uuid)
+        let user: user::ActiveModel = User::find_by_id(id)
             .one(&conn.db_connection)
             .await?
             .ok_or(DbErr::Custom(format!("Cannot find user: \"{id}\"")))

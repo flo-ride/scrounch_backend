@@ -8,21 +8,16 @@
 use crate::{query::Query, Connection};
 use ::entity::{user, user::Entity as User};
 use sea_orm::*;
-use sqlx::types::Uuid;
 
 impl Query {
-    pub async fn find_user_by_id<S: Into<String>>(
+    pub async fn find_user_by_id(
         conn: &Connection,
-        id: S,
+        id: uuid::Uuid,
     ) -> Result<Option<user::Model>, DbErr> {
-        let id = id.into();
-        let uuid = Uuid::try_parse(&id)
-            .map_err(|e| DbErr::Custom(format!("Could not Serialise given id: \"{id}\" - {e}")))?;
-
         #[cfg(feature = "cache")]
         crate::cache_get!(conn, format!("user:{id}"), user::Model);
 
-        let result = User::find_by_id(uuid).one(&conn.db_connection).await?;
+        let result = User::find_by_id(id).one(&conn.db_connection).await?;
 
         #[cfg(feature = "cache")]
         if let Some(model) = &result {
