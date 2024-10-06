@@ -3499,6 +3499,7 @@ dependencies = [
  "axum-oidc",
  "axum-test",
  "cargo-husky",
+ "chrono",
  "clap 4.5.17",
  "dotenvy",
  "entity",
@@ -3864,6 +3865,7 @@ dependencies = [
 name = "service"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "entity",
  "fred",
  "sea-orm",

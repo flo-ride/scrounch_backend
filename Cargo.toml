@@ -36,7 +36,7 @@ tokio-util = { version = "0.7.12", features = ["io"] }
 futures = "0.3.30"
 
 # Database
-sea-orm = { version = "1.0.1", features = ["sqlx-postgres", "runtime-tokio-rustls"] }
+sea-orm = { version = "1.0.1", features = ["sqlx-postgres", "runtime-tokio-rustls", "with-chrono" ] }
 migration = { path = "migration" }
 entity = { path = "entity" }
 service = { path = "service" }
@@ -71,6 +71,7 @@ rust-s3 = "0.35.1"
 
 # Utils
 uuid = { version = "1.10.0", features = ["v4", "fast-rng"] }
+chrono = "0.4.38"
 
 [features]
 default = ["cache"]
