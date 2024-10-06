@@ -31,16 +31,11 @@ pub async fn get_login(
     State(conn): State<Connection>,
     State(state): State<AppState>,
 ) -> Result<impl IntoResponse, AppError> {
-    if service::Query::find_user_by_id(&conn, user.id.clone())
+    if service::Query::find_user_by_id(&conn, user.id)
         .await?
         .is_none()
     {
         let id = user.id;
-        let uuid = sea_orm::sqlx::types::Uuid::try_parse(&id).map_err(|_| {
-            AppError::DatabaseError(sea_orm::DbErr::Custom(format!(
-                "Canno't Serialize id: {id}"
-            )))
-        })?;
 
         let mut is_admin = false;
 
@@ -54,7 +49,7 @@ pub async fn get_login(
         service::Mutation::create_user(
             &conn,
             User {
-                id: uuid,
+                id,
                 username: user.username,
                 name: user.name,
                 email: user.email,

@@ -85,7 +85,7 @@ pub async fn post_upload_files(
         conn.put_object_tagging(
             &s3_path,
             &[
-                ("Author", &user.id),
+                ("Author", &user.id.to_string()),
                 ("Type", &params.upload_type.to_string()),
             ],
         )

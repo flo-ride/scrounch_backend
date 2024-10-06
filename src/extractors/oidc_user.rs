@@ -30,6 +30,9 @@ where
         match extractor {
             Ok(extractor) => {
                 let id = extractor.subject().to_string();
+                let uuid = uuid::Uuid::try_parse(&id).map_err(|e| {
+                    Self::Rejection::Unknow(format!("Could not Serialise given id: \"{id}\" - {e}"))
+                })?;
 
                 let username = extractor
                     .preferred_username()
@@ -55,7 +58,7 @@ where
                     .to_string();
 
                 let user = OidcUser {
-                    id,
+                    id: uuid,
                     username,
                     name,
                     email,

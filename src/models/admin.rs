@@ -10,7 +10,7 @@
 #[derive(Debug, Default, Clone, PartialEq, serde::Serialize, utoipa::ToSchema)]
 #[schema(example = json!({ "id": "l8F0ZoHb5TwYgNvXkJqV7SsP9gQfKzR4UmA1VrCwIxE", "name": "John Doe", "username": "JDoe", "email": "john.doe@example.com" }))]
 pub struct Admin {
-    pub id: String,
+    pub id: uuid::Uuid,
     pub email: String,
     pub name: String,
     pub username: String,
@@ -19,7 +19,7 @@ pub struct Admin {
 impl From<crate::models::user::User> for Admin {
     fn from(value: crate::models::user::User) -> Self {
         Self {
-            id: value.id.to_string(),
+            id: value.id,
             email: value.email,
             name: value.name,
             username: value.username,

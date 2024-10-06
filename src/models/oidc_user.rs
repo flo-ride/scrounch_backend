@@ -12,7 +12,7 @@
 #[derive(Debug, Default, Clone, serde::Serialize, utoipa::ToSchema)]
 #[schema(example = json!({ "id": "l8F0ZoHb5TwYgNvXkJqV7SsP9gQfKzR4UmA1VrCwIxE", "name": "John Doe", "username": "JDoe", "email": "john.doe@example.com" }))]
 pub struct OidcUser {
-    pub id: String,
+    pub id: uuid::Uuid,
     pub username: String,
     pub name: String,
     pub email: String,

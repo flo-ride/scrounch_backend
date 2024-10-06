@@ -29,7 +29,7 @@ where
         let oidc_user = OidcUser::from_request_parts(parts, state).await?;
         let id = oidc_user.id;
 
-        let user = service::Query::find_user_by_id(&conn, id.clone())
+        let user = service::Query::find_user_by_id(&conn, id)
             .await?
             .ok_or(AppError::Unknow(format!(
                 "Can't find user {id} in db but OidcUser exist"
