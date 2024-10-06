@@ -12,6 +12,8 @@ pub struct Model {
     pub name: String,
     pub username: String,
     pub is_admin: bool,
+    pub creation_time: DateTimeWithTimeZone,
+    pub last_access_time: DateTimeWithTimeZone,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
