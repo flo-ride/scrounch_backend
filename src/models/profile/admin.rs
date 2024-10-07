@@ -16,8 +16,8 @@ pub struct Admin {
     pub username: String,
 }
 
-impl From<crate::models::user::User> for Admin {
-    fn from(value: crate::models::user::User) -> Self {
+impl From<crate::models::profile::user::User> for Admin {
+    fn from(value: crate::models::profile::user::User) -> Self {
         Self {
             id: value.id,
             email: value.email,

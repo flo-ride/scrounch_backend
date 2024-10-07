@@ -7,7 +7,7 @@
 //!
 
 use crate::error::AppError;
-use crate::{models::oidc_user::OidcUser, state::AppState};
+use crate::{models::profile::oidc_user::OidcUser, state::AppState};
 use axum::{extract::State, response::IntoResponse};
 use entity::user::Model as User;
 use service::Connection;

@@ -7,7 +7,7 @@
 
 use crate::{
     error::AppError,
-    models::{admin::Admin, user::User},
+    models::profile::{admin::Admin, user::User},
 };
 use axum::extract::FromRequestParts;
 use service::Connection;

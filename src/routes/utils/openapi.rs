@@ -12,7 +12,7 @@
 use utoipa::OpenApi;
 
 use crate::models::file::FileType;
-use crate::models::user::User;
+use crate::models::profile::user::User;
 use crate::routes::user::me::__path_get_me;
 use crate::routes::utils::login::__path_get_login;
 use crate::routes::utils::logout::__path_get_logout;

@@ -11,7 +11,7 @@ use futures::stream::TryStreamExt;
 
 use crate::{
     error::AppError,
-    models::{admin::Admin, file::FileType},
+    models::{file::FileType, profile::admin::Admin},
 };
 #[derive(Debug, PartialEq, Clone, Copy, serde::Deserialize)]
 pub struct UploadParams {

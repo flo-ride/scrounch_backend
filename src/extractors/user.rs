@@ -5,7 +5,7 @@
 //! are used to retrieve user data, typically associated with authentication
 //! processes, making it easier to access user information in route handlers.
 
-use crate::{error::AppError, models::oidc_user::OidcUser, models::user::User};
+use crate::{error::AppError, models::profile::oidc_user::OidcUser, models::profile::user::User};
 use axum::extract::{FromRef, FromRequestParts};
 use service::Connection;
 
