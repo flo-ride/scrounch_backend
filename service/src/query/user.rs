@@ -27,11 +27,39 @@ impl Query {
         Ok(result)
     }
 
-    pub async fn list_users_with_condition<F: sea_query::IntoCondition>(
+    pub async fn list_users_with_condition<
+        F: sea_query::IntoCondition + std::fmt::Debug + Clone,
+        A: Into<u64> + Copy,
+        P: Into<u64> + Copy,
+    >(
         conn: &Connection,
         filter: F,
+        page: A,
+        per_page: P,
     ) -> Result<Vec<user::Model>, DbErr> {
-        User::find().filter(filter).all(&conn.db_connection).await
+        #[cfg(feature = "cache")]
+        crate::cache_mget!(
+            conn,
+            format!("users:{filter:?}-{}/{}", page.into(), per_page.into()),
+            user::Model
+        );
+
+        let result = User::find()
+            .filter(filter.clone())
+            .paginate(&conn.db_connection, per_page.into())
+            .fetch_page(page.into())
+            .await?;
+
+        #[cfg(feature = "cache")]
+        crate::cache_mset!(
+            conn,
+            format!("users:{filter:?}-{}/{}", page.into(), per_page.into()),
+            result,
+            60 * 15,
+            "user:"
+        );
+
+        Ok(result)
     }
 
     pub async fn count_users_with_condition<F: sea_query::IntoCondition>(
