@@ -40,6 +40,36 @@ macro_rules! cache_get {
     }};
 }
 
+/// Macro to retrieve multiple cached values from Redis based on a list of keys.
+/// The macro first gets the list of keys from Redis and then attempts to retrieve the corresponding values.
+/// If all values are found and can be deserialized into the specified model, they are returned as a result.
+#[cfg(feature = "cache")]
+#[macro_export]
+macro_rules! cache_mget {
+    ($conn:expr, $id:expr, $model:ty) => {{
+        {
+            use fred::interfaces::KeysInterface;
+            if let Some(conn) = &$conn.cache_connection {
+                if let Ok(values) = conn.get::<serde_json::Value, _>($id.clone()).await {
+                    if let Ok(values) = serde_json::from_value::<Vec<String>>(values) {
+                        if let Ok(values) =
+                            conn.mget::<Vec<fred::serde_json::Value>, _>(values).await
+                        {
+                            let result = values
+                                .iter()
+                                .map(|x| serde_json::from_value::<$model>(x.clone()))
+                                .collect::<Vec<_>>();
+                            if result.iter().all(|x| x.is_ok()) {
+                                return Ok(result.into_iter().filter_map(|x| x.ok()).collect());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }};
+}
+
 /// A macro for setting cached data in Redis with an expiration time.
 ///
 /// This macro allows storing a value in Redis for a specified period. It serializes the given model
@@ -69,17 +99,69 @@ macro_rules! cache_set {
             if let Some(conn) = &$conn.cache_connection {
                 let value_str = value.to_string();
                 let cache_conn = conn.clone();
+                let id = $id;
                 tokio::spawn(async move {
                     let _ = cache_conn
                         .set::<fred::bytes::Bytes, _, _>(
-                            $id,
+                            id,
                             value_str,
                             Some(Expiration::EX($expiration_secs)),
                             None,
                             false,
                         )
-                        .await
-                        .unwrap();
+                        .await;
+                });
+            }
+        }
+    }};
+}
+
+/// Macro to store multiple values in Redis with a specified expiration time.
+/// The macro first stores a list of keys associated with the objects, and then sets each object with its corresponding key in Redis.
+/// This is done asynchronously using `tokio::spawn` to avoid blocking the main thread.
+#[cfg(feature = "cache")]
+#[macro_export]
+macro_rules! cache_mset {
+    ($conn:expr, $id:expr, $result:expr, $expiration_secs:expr, $prefix:expr) => {{
+        {
+            use fred::{interfaces::KeysInterface, types::Expiration};
+            if let Some(conn) = &$conn.cache_connection {
+                let cache_conn = conn.clone();
+                let id = $id.to_owned();
+                let result = $result.to_owned();
+                let prefix = $prefix.to_owned();
+                tokio::spawn(async move {
+                    if let Ok(value) = serde_json::to_value(
+                        result
+                            .iter()
+                            .map(|x| format!("{prefix}{}", x.id))
+                            .collect::<Vec<_>>(),
+                    ) {
+                        let _ = cache_conn
+                            .set::<fred::bytes::Bytes, _, _>(
+                                id,
+                                value.to_string(),
+                                Some(Expiration::EX($expiration_secs)),
+                                None,
+                                false,
+                            )
+                            .await;
+                    }
+
+                    for user in result {
+                        let key = format!("{prefix}{}", user.id);
+                        if let Ok(value) = serde_json::to_string(&user) {
+                            let _ = cache_conn
+                                .set::<fred::bytes::Bytes, _, _>(
+                                    key,
+                                    value,
+                                    Some(Expiration::EX($expiration_secs)),
+                                    None,
+                                    false,
+                                )
+                                .await;
+                        }
+                    }
                 });
             }
         }
