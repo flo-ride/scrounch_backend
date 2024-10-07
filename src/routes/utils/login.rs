@@ -41,7 +41,7 @@ pub async fn get_login(
 
         // In case no User exist, the first one become an Admin
         if let Ok(0) =
-            service::Query::count_users_with_condition(&conn, sea_orm::Condition::any()).await
+            service::Query::count_users_with_condition(&conn, service::every_condition()).await
         {
             is_admin = true;
         }

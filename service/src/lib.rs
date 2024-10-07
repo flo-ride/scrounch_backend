@@ -8,9 +8,11 @@
 mod r#macro;
 mod mutation;
 mod query;
+mod utils;
 
 pub use mutation::Mutation;
 pub use query::Query;
+pub use utils::every_condition;
 
 pub use sea_orm;
 
