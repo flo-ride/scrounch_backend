@@ -5,4 +5,5 @@
 //! data. They do not represent database entities but serve as structures for application log
 pub mod file;
 pub mod profile;
+pub mod request;
 pub mod utils;
