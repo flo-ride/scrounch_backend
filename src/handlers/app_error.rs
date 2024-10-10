@@ -23,6 +23,13 @@ impl IntoResponse for AppError {
                     format!("Your request is missing something: {value}"),
                 )
             }
+            AppError::BadOption(value) => {
+                tracing::error!("BadOption: {value}");
+                (
+                    StatusCode::BAD_REQUEST,
+                    format!("Some parameter you've given is not correctly formatted: {value}"),
+                )
+            }
             _ => {
                 tracing::error!("{self}");
                 (
