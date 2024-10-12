@@ -11,7 +11,7 @@ pub struct FileParams {
 /// This enum is used to differentiate between various types of file.
 /// It is deserialized from lowercase string values.
 #[derive(Debug, PartialEq, Clone, Copy, serde::Deserialize, utoipa::ToSchema)]
-#[serde(rename_all_fields = "lowercase")]
+#[serde(rename_all = "lowercase")]
 pub enum FileType {
     /// Type for product-related files.
     Product,
