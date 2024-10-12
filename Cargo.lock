@@ -4965,6 +4965,7 @@ dependencies = [
  "quote",
  "regex",
  "syn 2.0.77",
+ "uuid",
 ]
 
 [[package]]

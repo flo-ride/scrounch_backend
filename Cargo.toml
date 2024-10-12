@@ -52,7 +52,7 @@ tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 log = "0.4.22"
 
 # OpenAPI
-utoipa = { version = "4.2.0", features = ["axum_extras"] }
+utoipa = { version = "4.2.0", features = ["axum_extras", "uuid", "chrono", "time", "decimal"] }
 utoipa-swagger-ui = { version = "6.0.0", features = ["axum"] }
 
 # Auth + OIDC
