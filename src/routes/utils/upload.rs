@@ -27,11 +27,13 @@ pub struct FileSchema {
 /// It uses multipart form data to handle file uploads and stores them in a temporary S3 directory.
 #[utoipa::path(post, path = "/upload", 
         params(
-            ("upload_type" = FileType, Path, description = "The type of uploaded file")
+            ("type" = FileType, Query, description = "The type of uploaded file")
         ),
         responses(
-            (status = 200, description = "The file is correctly uploaded"),
-            (status = 400, description = "You're missing some field")
+            (status = 200, description = "The file is correctly uploaded", body = String),
+            (status = 400, description = "You're missing some field"),
+            (status = 500, description = "An internal error, most likely related to s3, occurred."), 
+
         ),
         request_body(content = FileSchema, content_type = "multipart/form-data")
 
