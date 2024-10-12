@@ -16,15 +16,22 @@ impl IntoResponse for AppError {
     fn into_response(self) -> axum::response::Response {
         match self {
             AppError::Forbidden => (StatusCode::FORBIDDEN, "You cannot view/do this".to_string()),
+            AppError::NotFound(value) => {
+                tracing::warn!("NotFound: {value}");
+                (
+                    StatusCode::NOT_FOUND,
+                    format!("Sorry, but cannot found the ressource you're asking for: {value}"),
+                )
+            }
             AppError::MissingOption(value) => {
-                tracing::error!("MissingOption: {value}");
+                tracing::warn!("MissingOption: {value}");
                 (
                     StatusCode::BAD_REQUEST,
                     format!("Your request is missing something: {value}"),
                 )
             }
             AppError::BadOption(value) => {
-                tracing::error!("BadOption: {value}");
+                tracing::warn!("BadOption: {value}");
                 (
                     StatusCode::BAD_REQUEST,
                     format!("Some parameter you've given is not correctly formatted: {value}"),

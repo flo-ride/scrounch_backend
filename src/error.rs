@@ -12,6 +12,7 @@
 pub enum AppError {
     S3Error(s3::error::S3Error),
     MultipartError(axum::extract::multipart::MultipartError),
+    NotFound(String),
     MissingOption(String),
     BadOption(String),
     DatabaseError(sea_orm::DbErr),
@@ -27,6 +28,7 @@ impl std::fmt::Display for AppError {
             Self::OidcError(value) => write!(f, "OidcError: {value}"),
             Self::S3Error(value) => write!(f, "S3Error: {value}"),
             Self::MultipartError(value) => write!(f, "MultipartError: {value}"),
+            Self::NotFound(value) => write!(f, "NotFound: {value}"),
             Self::MissingOption(value) => write!(f, "MissingOption: {value}"),
             Self::BadOption(value) => write!(f, "BadOption: {value}"),
             Self::Unknow(value) => write!(f, "Unknow Error - This should NEVER happened - {value}"),
