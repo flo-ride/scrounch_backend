@@ -4,6 +4,7 @@
 //! route handlers in the application. It can be used to define common route-related
 //! helpers, middleware, and utilities that simplify the development of route handlers.
 
+pub mod download;
 pub mod login;
 pub mod logout;
 pub mod openapi;

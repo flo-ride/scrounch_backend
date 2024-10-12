@@ -157,6 +157,10 @@ fn auth_optional_routes() -> axum::Router<state::AppState> {
     axum::Router::new()
         .route("/me", get(routes::user::me::get_me))
         .route("/upload", post(routes::utils::upload::post_upload_files))
+        .route(
+            "/download/:filename",
+            get(routes::utils::download::download_file),
+        )
 }
 
 async fn get_database_conn(
