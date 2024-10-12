@@ -11,12 +11,8 @@ use futures::stream::TryStreamExt;
 
 use crate::{
     error::AppError,
-    models::{file::FileType, profile::admin::Admin},
+    models::{file::FileParams, profile::admin::Admin},
 };
-#[derive(Debug, PartialEq, Clone, Copy, serde::Deserialize)]
-pub struct UploadParams {
-    pub upload_type: FileType,
-}
 
 #[derive(utoipa::ToSchema)]
 pub struct FileSchema {
@@ -43,7 +39,7 @@ pub struct FileSchema {
 pub async fn post_upload_files(
     user: Admin,
     State(conn): State<s3::Bucket>,
-    params: Query<UploadParams>,
+    params: Query<FileParams>,
     mut multipart: Multipart,
 ) -> Result<Json<Vec<(String, String)>>, AppError> {
     let mut result: Vec<(String, String)> = vec![];
@@ -79,14 +75,14 @@ pub async fn post_upload_files(
         futures::pin_mut!(reader);
 
         let new_filename = format!("{}_{name}.{extension}", uuid::Uuid::new_v4());
-        let s3_path = format!("{}/{new_filename}", params.upload_type);
+        let s3_path = format!("{}/{new_filename}", params.file_type);
         conn.put_object_stream_with_content_type(&mut reader, &s3_path, &mimetype)
             .await?;
         conn.put_object_tagging(
             &s3_path,
             &[
                 ("Author", &user.id.to_string()),
-                ("Type", &params.upload_type.to_string()),
+                ("Type", &params.file_type.to_string()),
             ],
         )
         .await?;

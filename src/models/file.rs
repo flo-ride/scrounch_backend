@@ -1,5 +1,11 @@
 //! File related models
 
+#[derive(Debug, PartialEq, Clone, Copy, serde::Deserialize)]
+pub struct FileParams {
+    #[serde(alias = "type")]
+    pub file_type: FileType,
+}
+
 /// Enum representing the different types of files.
 ///
 /// This enum is used to differentiate between various types of file.
