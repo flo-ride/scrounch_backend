@@ -50,6 +50,16 @@ pub async fn post_upload_files(
                 "Multipart Field is missing name".to_string(),
             ))?
             .to_string();
+        let max_length = 32;
+        if name.is_empty() {
+            return Err(AppError::BadOption("Name cannot be empty".to_string()));
+        }
+        if name.len() > max_length {
+            return Err(AppError::BadOption(format!(
+                "Name cannot be longer than {max_length}: {name}",
+            )));
+        }
+
         let filename = field
             .file_name()
             .ok_or(AppError::MissingOption(
