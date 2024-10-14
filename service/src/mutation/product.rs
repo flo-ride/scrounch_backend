@@ -35,14 +35,8 @@ impl Mutation {
         id: uuid::Uuid,
         form_data: product::Model,
     ) -> Result<product::Model, DbErr> {
-        let product: product::ActiveModel = Product::find_by_id(id)
-            .one(&conn.db_connection)
-            .await?
-            .ok_or(DbErr::Custom(format!("Cannot find product: \"{id}\"")))
-            .map(Into::into)?;
-
         let result = product::ActiveModel {
-            id: product.id,
+            id: Set(id),
             image: Set(form_data.image),
             name: Set(form_data.name),
             price: Set(form_data.price),

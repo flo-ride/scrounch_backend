@@ -41,14 +41,8 @@ impl Mutation {
         id: uuid::Uuid,
         form_data: user::Model,
     ) -> Result<user::Model, DbErr> {
-        let user: user::ActiveModel = User::find_by_id(id)
-            .one(&conn.db_connection)
-            .await?
-            .ok_or(DbErr::Custom(format!("Cannot find user: \"{id}\"")))
-            .map(Into::into)?;
-
         let result = user::ActiveModel {
-            id: user.id,
+            id: Set(id),
             email: Set(form_data.email),
             username: Set(form_data.username),
             name: Set(form_data.name),
@@ -67,22 +61,12 @@ impl Mutation {
         result
     }
 
-    pub async fn update_user_last_access_time<S: Into<String>>(
+    pub async fn update_user_last_access_time(
         conn: &Connection,
-        id: S,
+        id: uuid::Uuid,
     ) -> Result<user::Model, DbErr> {
-        let id = id.into();
-        let uuid = Uuid::try_parse(&id)
-            .map_err(|e| DbErr::Custom(format!("Could not Serialise given id: \"{id}\" - {e}")))?;
-
-        let user: user::ActiveModel = User::find_by_id(uuid)
-            .one(&conn.db_connection)
-            .await?
-            .ok_or(DbErr::Custom(format!("Cannot find user: \"{id}\"")))
-            .map(Into::into)?;
-
         let result = user::ActiveModel {
-            id: user.id,
+            id: Set(id),
             email: NotSet,
             username: NotSet,
             name: NotSet,
