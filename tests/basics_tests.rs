@@ -2,7 +2,7 @@ mod utils;
 
 use crate::utils::containers::keycloak::{Client, Keycloak, Realm, User};
 use axum::http::StatusCode;
-use axum_test::TestServerConfig;
+use axum_test::TestServerBuilder;
 use reqwest::redirect::Policy;
 use scrounch_backend::app;
 use serde_json::json;
@@ -68,10 +68,10 @@ async fn basic_login_oidc() {
 
     let app = app(arguments).await;
 
-    let mut server = TestServerConfig::builder()
+    let mut server = TestServerBuilder::new()
         .save_cookies()
         .http_transport_with_ip_port(Some("127.0.0.1".parse().unwrap()), Some(3000))
-        .build_server(app)
+        .build(app)
         .unwrap();
 
     let client = reqwest::ClientBuilder::new()

@@ -1,5 +1,5 @@
 use axum::http::StatusCode;
-use axum_test::{TestServer, TestServerConfig};
+use axum_test::{TestServer, TestServerBuilder};
 use containers::keycloak::{Keycloak, Realm, User};
 use futures::future::join_all;
 use scrounch_backend::app;
@@ -67,9 +67,9 @@ pub async fn create_basic_session(
 
     let app = app(arguments).await;
 
-    let server = TestServerConfig::builder()
+    let server = TestServerBuilder::new()
         .http_transport_with_ip_port(Some("127.0.0.1".parse().unwrap()), Some(3000))
-        .build_server(app)
+        .build(app)
         .unwrap();
 
     (server, ids, (keycloak, db_node, minio_node))
@@ -80,7 +80,7 @@ pub async fn create_user_session(
     server: &mut TestServer,
     user: User,
 ) -> tower_sessions::cookie::Cookie<'static> {
-    server.do_save_cookies();
+    server.save_cookies();
     server.clear_cookies();
 
     let client = reqwest::ClientBuilder::new()
