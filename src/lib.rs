@@ -193,5 +193,12 @@ async fn get_bucket_conn(
     let credentials =
         s3::creds::Credentials::new(Some(&access_key), Some(&secret_key), None, None, None)?;
     let bucket = s3::Bucket::new(&bucket, region, credentials)?.with_path_style();
-    Ok(*bucket)
+
+    match bucket.exists().await? {
+        true => Ok(*bucket),
+        false => Err(s3::error::S3Error::HttpFailWithBody(
+            404,
+            "Bucket doesn't exist".to_string(),
+        )),
+    }
 }
