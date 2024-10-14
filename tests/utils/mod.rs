@@ -68,7 +68,7 @@ pub async fn create_basic_session(
     let app = app(arguments).await;
 
     let server = TestServerBuilder::new()
-        .http_transport_with_ip_port(Some("127.0.0.1".parse().unwrap()), Some(3000))
+        .mock_transport()
         .build(app)
         .unwrap();
 
