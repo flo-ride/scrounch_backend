@@ -1,6 +1,9 @@
 # Scrounch Backend
 > By Florian 'FloRide' Reimat
 
+## About
+This project is a backend API built using Rust with the Axum web framework, designed to handle operations for an e-commerce-like platform. The core functionalities include product management (CRUD operations), file handling, and caching, making it efficient and scalable for a variety of use cases
+
 ## Usage
 ### Manual
 ```sh
