@@ -34,16 +34,7 @@ async fn basic_login_oidc() {
     }])
     .await
     .unwrap();
-    let user_id = keycloak
-        .create_user(
-            &john.username,
-            &john.email,
-            &john.firstname,
-            &john.lastname,
-            &john.password,
-            realm_name,
-        )
-        .await;
+    let user_id = keycloak.create_user(&john, realm_name).await;
 
     let keycloak_url = keycloak.url();
     let issuer = format!("{keycloak_url}/realms/{realm_name}");

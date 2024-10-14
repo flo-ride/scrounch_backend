@@ -133,16 +133,7 @@ impl Keycloak {
                     .await;
             }
             for user in realm.users.iter() {
-                keycloak
-                    .create_user(
-                        &user.username,
-                        &user.email,
-                        &user.firstname,
-                        &user.lastname,
-                        &user.password,
-                        &realm.name,
-                    )
-                    .await;
+                keycloak.create_user(user, &realm.name).await;
             }
         }
 
@@ -213,15 +204,7 @@ impl Keycloak {
         }
     }
 
-    pub async fn create_user(
-        &self,
-        username: &str,
-        email: &str,
-        firstname: &str,
-        lastname: &str,
-        password: &str,
-        realm: &str,
-    ) -> String {
+    pub async fn create_user(&self, user: &User, realm: &str) -> String {
         let stderr = self
             .container
             .exec(
@@ -232,17 +215,17 @@ impl Keycloak {
                     "-r",
                     &realm,
                     "-s",
-                    &format!("username={username}"),
+                    &format!("username={}", user.username),
                     "-s",
                     "enabled=true",
                     "-s",
                     "emailVerified=true",
                     "-s",
-                    &format!("email={email}"),
+                    &format!("email={}", user.email),
                     "-s",
-                    &format!("firstName={firstname}"),
+                    &format!("firstName={}", user.firstname),
                     "-s",
-                    &format!("lastName={lastname}"),
+                    &format!("lastName={}", user.lastname),
                 ])
                 .with_cmd_ready_condition(CmdWaitFor::exit_code(0)),
             )
@@ -263,9 +246,9 @@ impl Keycloak {
                     "-r",
                     &realm,
                     "--username",
-                    username,
+                    &user.username,
                     "--new-password",
-                    password,
+                    &user.password,
                 ])
                 .with_cmd_ready_condition(CmdWaitFor::exit_code(0)),
             )
