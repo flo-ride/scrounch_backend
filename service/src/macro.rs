@@ -18,13 +18,7 @@
 /// - `$conn`: The cache connection, expected to be an instance with a Redis connection.
 /// - `$id`: The cache key to retrieve the value from.
 /// - `$model`: The type of model to deserialize the cached value into.
-///
-/// # Usage
-/// ```rust
-/// cache_get!(conn, id, your_module::Model);
-/// ```
 #[cfg(feature = "cache")]
-#[macro_export]
 macro_rules! cache_get {
     ($conn:expr, $id:expr, $model:ty) => {{
         {
@@ -44,7 +38,6 @@ macro_rules! cache_get {
 /// The macro first gets the list of keys from Redis and then attempts to retrieve the corresponding values.
 /// If all values are found and can be deserialized into the specified model, they are returned as a result.
 #[cfg(feature = "cache")]
-#[macro_export]
 macro_rules! cache_mget {
     ($conn:expr, $id:expr, $model:ty) => {{
         {
@@ -85,13 +78,7 @@ macro_rules! cache_mget {
 /// - `$id`: The cache key under which the value will be stored.
 /// - `$model`: The model to be serialized and stored in the cache.
 /// - `$expiration_secs`: The expiration time in seconds for the cached value.
-///
-/// # Usage
-/// ```rust
-/// cache_set!(conn, id, your_module::Model, 60 * 20);
-/// ```
 #[cfg(feature = "cache")]
-#[macro_export]
 macro_rules! cache_set {
     ($conn:expr, $id:expr, $model:expr, $expiration_secs:expr) => {{
         use fred::{interfaces::KeysInterface, types::Expiration};
@@ -120,7 +107,6 @@ macro_rules! cache_set {
 /// The macro first stores a list of keys associated with the objects, and then sets each object with its corresponding key in Redis.
 /// This is done asynchronously using `tokio::spawn` to avoid blocking the main thread.
 #[cfg(feature = "cache")]
-#[macro_export]
 macro_rules! cache_mset {
     ($conn:expr, $id:expr, $result:expr, $expiration_secs:expr, $prefix:expr) => {{
         {
@@ -167,3 +153,8 @@ macro_rules! cache_mset {
         }
     }};
 }
+
+pub(crate) use cache_get;
+pub(crate) use cache_mget;
+pub(crate) use cache_mset;
+pub(crate) use cache_set;

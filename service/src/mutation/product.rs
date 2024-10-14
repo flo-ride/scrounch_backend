@@ -1,4 +1,4 @@
-use crate::{mutation::Mutation, Connection};
+use crate::{mutation::Mutation, r#macro::cache_set, Connection};
 use ::entity::{product, product::Entity as Product};
 use sea_orm::*;
 use sqlx::types::Uuid;
@@ -24,7 +24,7 @@ impl Mutation {
         #[cfg(feature = "cache")]
         if let Ok(model) = &result {
             let id = form_data.id.to_string();
-            crate::cache_set!(conn, format!("product:{id}"), model, 60 * 15);
+            cache_set!(conn, format!("product:{id}"), model, 60 * 15);
         }
 
         result
@@ -50,7 +50,7 @@ impl Mutation {
 
         #[cfg(feature = "cache")]
         if let Ok(model) = &result {
-            crate::cache_set!(conn, format!("product:{id}"), model, 60 * 15);
+            cache_set!(conn, format!("product:{id}"), model, 60 * 15);
         }
 
         result

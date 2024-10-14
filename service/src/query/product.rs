@@ -1,4 +1,8 @@
-use crate::{query::Query, Connection};
+use crate::{
+    query::Query,
+    r#macro::{cache_get, cache_mget, cache_mset, cache_set},
+    Connection,
+};
 use ::entity::{product, product::Entity as Product};
 use sea_orm::*;
 
@@ -8,13 +12,13 @@ impl Query {
         id: uuid::Uuid,
     ) -> Result<Option<product::Model>, DbErr> {
         #[cfg(feature = "cache")]
-        crate::cache_get!(conn, format!("product:{id}"), product::Model);
+        cache_get!(conn, format!("product:{id}"), product::Model);
 
         let result = Product::find_by_id(id).one(&conn.db_connection).await?;
 
         #[cfg(feature = "cache")]
         if let Some(model) = &result {
-            crate::cache_set!(conn, format!("product:{id}"), model, 60 * 60 * 3);
+            cache_set!(conn, format!("product:{id}"), model, 60 * 60 * 3);
         }
 
         Ok(result)
@@ -31,7 +35,7 @@ impl Query {
         per_page: P,
     ) -> Result<Vec<product::Model>, DbErr> {
         #[cfg(feature = "cache")]
-        crate::cache_mget!(
+        cache_mget!(
             conn,
             format!("products:{filter:?}-{}/{}", page.into(), per_page.into()),
             product::Model
@@ -44,7 +48,7 @@ impl Query {
             .await?;
 
         #[cfg(feature = "cache")]
-        crate::cache_mset!(
+        cache_mset!(
             conn,
             format!("products:{filter:?}-{}/{}", page.into(), per_page.into()),
             result,
