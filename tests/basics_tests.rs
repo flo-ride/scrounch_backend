@@ -68,7 +68,7 @@ async fn basic_login_oidc() {
 
     let app = app(arguments).await;
 
-    let server = TestServerConfig::builder()
+    let mut server = TestServerConfig::builder()
         .save_cookies()
         .http_transport_with_ip_port(Some("127.0.0.1".parse().unwrap()), Some(3000))
         .build_server(app)
@@ -107,14 +107,18 @@ async fn basic_login_oidc() {
     let response = server.get(&url).await;
     response.assert_status(StatusCode::TEMPORARY_REDIRECT);
     response.assert_header("Location", "http://localhost:3000/login");
+    let cookie = response.cookie("id");
+
+    server.clear_cookies();
+    server.do_not_save_cookies();
 
     // GET /login
-    let response = server.get("/login").await;
+    let response = server.get("/login").add_cookie(cookie.clone()).await;
     response.assert_status(StatusCode::SEE_OTHER);
     response.assert_header("Location", "http://localhost:5173");
 
     // GET /me
-    let response = server.get("/me").await;
+    let response = server.get("/me").add_cookie(cookie.clone()).await;
     response.assert_status(StatusCode::OK);
     response.assert_json(
         &json!({"id": user_id, "name": "john doe", "email": "john.doe@example.com" , "username": "jojo", "is_admin": true }),
