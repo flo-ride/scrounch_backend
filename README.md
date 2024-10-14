@@ -10,6 +10,9 @@ This project is a backend API built using Rust with the Axum web framework, desi
 # Dependencies (Optional)
 nix develop
 
+# Setup example env
+mv .env.prod.example .env
+
 cargo run --release
 # or if you want to build the exec
 cargo build --release
@@ -19,6 +22,9 @@ cargo build --release
 
 ### Nix
 ```
+# Setup example env
+mv .env.prod.example .env
+
 nix build
 ```
 
