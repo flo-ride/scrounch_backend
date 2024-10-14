@@ -69,7 +69,7 @@ impl Default for Client {
     fn default() -> Self {
         Self {
             client_id: "0".to_owned(),
-            client_secret: None,
+            client_secret: Some("coucou".to_owned()),
         }
     }
 }
@@ -81,6 +81,18 @@ pub struct User {
     pub firstname: String,
     pub lastname: String,
     pub password: String,
+}
+
+impl Default for User {
+    fn default() -> Self {
+        Self {
+            username: "John Doe".to_string(),
+            email: "john.doe@example.com".to_string(),
+            firstname: "John".to_string(),
+            lastname: "Doe".to_string(),
+            password: "password".to_string(),
+        }
+    }
 }
 
 impl Keycloak {
