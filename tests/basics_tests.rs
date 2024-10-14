@@ -7,7 +7,7 @@ use reqwest::redirect::Policy;
 use scrounch_backend::app;
 use serde_json::json;
 use testcontainers::runners::AsyncRunner;
-use testcontainers_modules::postgres::Postgres;
+use testcontainers_modules::{minio::MinIO, postgres::Postgres};
 
 #[tokio::test(flavor = "multi_thread")]
 async fn basic_login_oidc() {
@@ -54,6 +54,14 @@ async fn basic_login_oidc() {
         db_node.get_host_port_ipv4(5432).await.unwrap()
     );
 
+    let minio_node = MinIO::default().start().await.unwrap();
+    let minio_url = &format!(
+        "http://localhost:{}",
+        minio_node.get_host_port_ipv4(9000).await.unwrap()
+    );
+    let minio_user = "minioadmin";
+    let minio_pass = "minioadmin";
+
     let mut arguments = scrounch_backend::Arguments::default();
     arguments.openid_issuer = issuer.clone();
     arguments.openid_client_id = basic_client.client_id;
@@ -61,6 +69,11 @@ async fn basic_login_oidc() {
     arguments.backend_url = "http://localhost:3000".to_string();
     arguments.frontend_url = "http://localhost:5173".to_string();
     arguments.database_url = db_url.to_string();
+
+    arguments.aws_access_key_id = minio_user.to_string();
+    arguments.aws_secret_access_key = minio_pass.to_string();
+    arguments.aws_endpoint_url = minio_url.to_string();
+    arguments.aws_s3_bucket = "miniobucket".to_string();
 
     let app = app(arguments).await;
 

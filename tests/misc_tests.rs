@@ -5,7 +5,7 @@ use http_body_util::BodyExt;
 use scrounch_backend::app;
 use serde_json::{json, Value};
 use testcontainers::runners::AsyncRunner;
-use testcontainers_modules::postgres::Postgres;
+use testcontainers_modules::{minio::MinIO, postgres::Postgres};
 use tower::util::ServiceExt;
 
 use crate::utils::containers::keycloak::{Client, Keycloak, Realm};
@@ -35,6 +35,14 @@ async fn basic_swagger_test() {
         db_node.get_host_port_ipv4(5432).await.unwrap()
     );
 
+    let minio_node = MinIO::default().start().await.unwrap();
+    let minio_url = &format!(
+        "http://localhost:{}",
+        minio_node.get_host_port_ipv4(9000).await.unwrap()
+    );
+    let minio_user = "minioadmin";
+    let minio_pass = "minioadmin";
+
     let mut arguments = scrounch_backend::Arguments::default();
     arguments.openid_issuer = format!("{keycloak_url}/realms/{realm_name}");
     arguments.openid_client_id = basic_client.client_id;
@@ -42,6 +50,11 @@ async fn basic_swagger_test() {
     arguments.backend_url = "http://localhost:3000".to_string();
     arguments.frontend_url = "http://localhost:5173".to_string();
     arguments.database_url = db_url.to_string();
+
+    arguments.aws_access_key_id = minio_user.to_string();
+    arguments.aws_secret_access_key = minio_pass.to_string();
+    arguments.aws_endpoint_url = minio_url.to_string();
+    arguments.aws_s3_bucket = "miniobucket".to_string();
 
     let app = app(arguments).await;
 
@@ -112,6 +125,14 @@ async fn basic_status_test() {
         db_node.get_host_port_ipv4(5432).await.unwrap()
     );
 
+    let minio_node = MinIO::default().start().await.unwrap();
+    let minio_url = &format!(
+        "http://localhost:{}",
+        minio_node.get_host_port_ipv4(9000).await.unwrap()
+    );
+    let minio_user = "minioadmin";
+    let minio_pass = "minioadmin";
+
     let mut arguments = scrounch_backend::Arguments::default();
     arguments.openid_issuer = format!("{keycloak_url}/realms/{realm_name}");
     arguments.openid_client_id = basic_client.client_id;
@@ -119,6 +140,11 @@ async fn basic_status_test() {
     arguments.backend_url = "http://localhost:3000".to_string();
     arguments.frontend_url = "http://localhost:5173".to_string();
     arguments.database_url = db_url.to_string();
+
+    arguments.aws_access_key_id = minio_user.to_string();
+    arguments.aws_secret_access_key = minio_pass.to_string();
+    arguments.aws_endpoint_url = minio_url.to_string();
+    arguments.aws_s3_bucket = "miniobucket".to_string();
 
     let app = app(arguments).await;
 
