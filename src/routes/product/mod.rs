@@ -11,4 +11,5 @@ pub fn router() -> axum::Router<crate::state::AppState> {
         .route("/", get(get::get_all_products))
         .route("/", post(new::post_new_product))
         .route("/:id", put(edit::edit_product))
+        .route("/:id", delete(delete::delete_product))
 }
