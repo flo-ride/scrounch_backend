@@ -183,7 +183,7 @@ async fn get_database_conn(
 }
 
 async fn get_bucket_conn(
-    bucket: String,
+    bucket_name: String,
     region: String,
     endpoint: String,
     access_key: String,
@@ -192,13 +192,20 @@ async fn get_bucket_conn(
     let region = s3::Region::Custom { region, endpoint };
     let credentials =
         s3::creds::Credentials::new(Some(&access_key), Some(&secret_key), None, None, None)?;
-    let bucket = s3::Bucket::new(&bucket, region, credentials)?.with_path_style();
+    let bucket =
+        s3::Bucket::new(&bucket_name, region.clone(), credentials.clone())?.with_path_style();
 
     match bucket.exists().await? {
         true => Ok(*bucket),
-        false => Err(s3::error::S3Error::HttpFailWithBody(
-            404,
-            "Bucket doesn't exist".to_string(),
-        )),
+        false => {
+            s3::Bucket::create_with_path_style(
+                &bucket_name,
+                region,
+                credentials,
+                s3::BucketConfiguration::default(),
+            )
+            .await?;
+            Ok(*bucket)
+        }
     }
 }
