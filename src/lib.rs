@@ -161,6 +161,7 @@ fn auth_optional_routes() -> axum::Router<state::AppState> {
             "/download/:filename",
             get(routes::utils::download::download_file),
         )
+        .nest("/product", routes::product::router())
 }
 
 async fn get_database_conn(

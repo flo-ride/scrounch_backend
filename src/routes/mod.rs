@@ -8,5 +8,6 @@
 //! # Structure
 //! - This file exports submodules that define individual route handlers.
 //! - Each submodule is responsible for a specific section of the API
+pub mod product;
 pub mod user;
 pub mod utils;
