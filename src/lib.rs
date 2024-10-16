@@ -110,28 +110,39 @@ pub async fn app(arguments: Arguments) -> axum::Router {
         .allow_credentials(true)
         .allow_origin(origins);
 
+    let path = url::Url::parse(&arguments.backend_url)
+        .expect("Cannot parse backend_url")
+        .path()
+        .to_string();
+
     #[cfg(feature = "cache")]
     if let Some(pool) = state.cache_pool.clone() {
         return axum::Router::new()
-            .merge(auth_required_routes())
+            .merge(auth_required_routes(&path))
             .layer(login_service)
-            .merge(auth_optional_routes())
+            .merge(auth_optional_routes(&path))
             .layer(auth_service)
             .layer(oidc::cache_session_layer(pool))
-            .merge(routes::utils::openapi::openapi())
-            .route("/status", get(routes::utils::status::get_status))
+            .merge(routes::utils::openapi::openapi(&path))
+            .nest(
+                &path,
+                axum::Router::new().route("/status", get(routes::utils::status::get_status)),
+            )
             .layer(cors_layer)
             .with_state(state);
     }
 
     axum::Router::new()
-        .merge(auth_required_routes())
+        .merge(auth_required_routes(&path))
         .layer(login_service)
-        .merge(auth_optional_routes())
+        .merge(auth_optional_routes(&path))
         .layer(auth_service)
         .layer(oidc::memory_session_layer())
-        .merge(routes::utils::openapi::openapi())
-        .route("/status", get(routes::utils::status::get_status))
+        .merge(routes::utils::openapi::openapi(&path))
+        .nest(
+            &path,
+            axum::Router::new().route("/status", get(routes::utils::status::get_status)),
+        )
         .layer(cors_layer)
         .with_state(state)
 }
@@ -142,10 +153,13 @@ pub async fn app(arguments: Arguments) -> axum::Router {
 /// protected by authentication. These routes require the user to be logged in
 /// and authenticated via OpenID Connect (OIDC) to access, otherwise it redirect them to the OIDC
 /// login page.
-fn auth_required_routes() -> axum::Router<state::AppState> {
-    axum::Router::new()
-        .route("/login", get(routes::utils::login::get_login))
-        .route("/logout", get(routes::utils::logout::get_logout))
+fn auth_required_routes(path: &str) -> axum::Router<state::AppState> {
+    axum::Router::new().nest(
+        path,
+        axum::Router::new()
+            .route("/login", get(routes::utils::login::get_login))
+            .route("/logout", get(routes::utils::logout::get_logout)),
+    )
 }
 
 /// Defines routes that do not require user authentication.
@@ -153,15 +167,18 @@ fn auth_required_routes() -> axum::Router<state::AppState> {
 /// This function creates an `axum::Router` for routes that can be accessed
 /// without user authentication. These routes are publicly accessible and do not
 /// require OpenID Connect (OIDC) login.
-fn auth_optional_routes() -> axum::Router<state::AppState> {
-    axum::Router::new()
-        .route("/me", get(routes::user::me::get_me))
-        .route("/upload", post(routes::utils::upload::post_upload_files))
-        .route(
-            "/download/:filename",
-            get(routes::utils::download::download_file),
-        )
-        .nest("/product", routes::product::router())
+fn auth_optional_routes(path: &str) -> axum::Router<state::AppState> {
+    axum::Router::new().nest(
+        path,
+        axum::Router::new()
+            .route("/me", get(routes::user::me::get_me))
+            .route("/upload", post(routes::utils::upload::post_upload_files))
+            .route(
+                "/download/:filename",
+                get(routes::utils::download::download_file),
+            )
+            .nest("/product", routes::product::router()),
+    )
 }
 
 async fn get_database_conn(

@@ -60,11 +60,16 @@ struct ApiDoc;
 /// # Behavior
 /// - **Debug Mode**: If the application is running in debug mode the function will return a router with Swagger UI and OpenAPI schema endpoints enabled.
 /// - **Release Mode**: In release mode, it returns an empty router with no OpenAPI documentation routes.
-pub fn openapi() -> axum::Router<crate::state::AppState> {
+pub fn openapi(path: &str) -> axum::Router<crate::state::AppState> {
     // Enable openapi documentation only in debug (not in release)
     if cfg!(debug_assertions) {
+        let path = match path {
+            "/" => "",
+            _ => path,
+        };
+
         axum::Router::new().merge(
-            utoipa_swagger_ui::SwaggerUi::new("/swagger-ui")
+            utoipa_swagger_ui::SwaggerUi::new(format!("{path}/swagger-ui"))
                 .url("/api-docs/openapi.json", ApiDoc::openapi()),
         )
     } else {
