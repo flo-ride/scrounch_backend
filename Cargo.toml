@@ -73,6 +73,7 @@ rust-s3 = "0.35.1"
 # Utils
 uuid = { version = "1.10.0", features = ["v4", "fast-rng", "serde"] }
 chrono = "0.4.38"
+url = "2.5.2"
 
 [features]
 default = ["cache"]

@@ -3536,6 +3536,7 @@ dependencies = [
  "tower-sessions-redis-store",
  "tracing",
  "tracing-subscriber",
+ "url",
  "utoipa",
  "utoipa-swagger-ui",
  "uuid",
