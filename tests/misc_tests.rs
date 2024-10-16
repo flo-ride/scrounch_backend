@@ -1,168 +1,36 @@
 mod utils;
 
-use axum::{body::Body, extract::Request, http::StatusCode};
-use http_body_util::BodyExt;
-use scrounch_backend::app;
-use serde_json::{json, Value};
-use testcontainers::runners::AsyncRunner;
-use testcontainers_modules::{minio::MinIO, postgres::Postgres};
-use tower::util::ServiceExt;
-
-use crate::utils::containers::keycloak::{Client, Keycloak, Realm};
+use crate::utils::containers::keycloak::{Client, Realm};
+use utils::create_basic_session;
 
 #[tokio::test(flavor = "multi_thread")]
 async fn basic_swagger_test() {
-    let realm_name = "master";
-    let basic_client = Client {
-        client_id: "scrouch-backend-example-basic".to_string(),
-        client_secret: Some("123456".to_string()),
-        ..Default::default()
+    let realm = Realm {
+        name: "misc_test".to_string(),
+        clients: vec![Client::default()],
+        users: vec![],
     };
 
-    let keycloak = Keycloak::start(vec![Realm {
-        name: realm_name.to_string(),
-        users: vec![],
-        clients: vec![basic_client.clone()],
-    }])
-    .await
-    .unwrap();
+    let (server, _, _nodes) = create_basic_session(realm.clone()).await;
 
-    let keycloak_url = keycloak.url();
+    let response = server.get("/swagger-ui").await;
+    response.assert_status_see_other();
 
-    let db_node = Postgres::default().start().await.unwrap();
-    let db_url = &format!(
-        "postgres://postgres:postgres@127.0.0.1:{}/postgres",
-        db_node.get_host_port_ipv4(5432).await.unwrap()
-    );
-
-    let minio_node = MinIO::default().start().await.unwrap();
-    let minio_url = &format!(
-        "http://localhost:{}",
-        minio_node.get_host_port_ipv4(9000).await.unwrap()
-    );
-    let minio_user = "minioadmin";
-    let minio_pass = "minioadmin";
-
-    let mut arguments = scrounch_backend::Arguments::default();
-    arguments.openid_issuer = format!("{keycloak_url}/realms/{realm_name}");
-    arguments.openid_client_id = basic_client.client_id;
-    arguments.openid_client_secret = basic_client.client_secret;
-    arguments.backend_url = "http://localhost:3000".to_string();
-    arguments.frontend_url = "http://localhost:5173".to_string();
-    arguments.database_url = db_url.to_string();
-
-    arguments.aws_access_key_id = minio_user.to_string();
-    arguments.aws_secret_access_key = minio_pass.to_string();
-    arguments.aws_endpoint_url = minio_url.to_string();
-    arguments.aws_s3_bucket = "miniobucket".to_string();
-
-    let app = app(arguments).await;
-
-    let response = app
-        .clone()
-        .oneshot(
-            Request::builder()
-                .uri("/swagger-ui")
-                .method("GET")
-                .body(Body::empty())
-                .unwrap(),
-        )
-        .await
-        .unwrap();
-
-    if cfg!(debug_assertions) {
-        assert_eq!(response.status(), StatusCode::SEE_OTHER);
-    } else {
-        assert_eq!(response.status(), StatusCode::NOT_FOUND);
-    }
-
-    let response = app
-        .oneshot(
-            Request::builder()
-                .uri("/api-docs/openapi.json")
-                .method("GET")
-                .body(Body::empty())
-                .unwrap(),
-        )
-        .await
-        .unwrap();
-
-    if cfg!(debug_assertions) {
-        assert_eq!(response.status(), StatusCode::OK);
-
-        let body = response.into_body().collect().await.unwrap().to_bytes();
-        let body: Value = serde_json::from_slice(&body).unwrap();
-
-        // Simple text for beeing sure that openapi is working, don't forget to bump version
-        assert_eq!(*body.get("openapi").unwrap(), json!("3.0.3"));
-    } else {
-        assert_eq!(response.status(), StatusCode::NOT_FOUND);
-    }
+    let response = server.get("/api-docs/openapi.json").await;
+    response.assert_status_ok();
 }
 
-#[tokio::test]
+#[tokio::test(flavor = "multi_thread")]
 async fn basic_status_test() {
-    let realm_name = "master";
-    let basic_client = Client {
-        client_id: "scrouch-backend-example-basic".to_string(),
-        client_secret: Some("123456".to_string()),
-        ..Default::default()
+    let realm = Realm {
+        name: "misc_test".to_string(),
+        clients: vec![Client::default()],
+        users: vec![],
     };
 
-    let keycloak = Keycloak::start(vec![Realm {
-        name: realm_name.to_string(),
-        users: vec![],
-        clients: vec![basic_client.clone()],
-    }])
-    .await
-    .unwrap();
+    let (server, _, _nodes) = create_basic_session(realm.clone()).await;
 
-    let keycloak_url = keycloak.url();
-
-    let db_node = Postgres::default().start().await.unwrap();
-    let db_url = &format!(
-        "postgres://postgres:postgres@127.0.0.1:{}/postgres",
-        db_node.get_host_port_ipv4(5432).await.unwrap()
-    );
-
-    let minio_node = MinIO::default().start().await.unwrap();
-    let minio_url = &format!(
-        "http://localhost:{}",
-        minio_node.get_host_port_ipv4(9000).await.unwrap()
-    );
-    let minio_user = "minioadmin";
-    let minio_pass = "minioadmin";
-
-    let mut arguments = scrounch_backend::Arguments::default();
-    arguments.openid_issuer = format!("{keycloak_url}/realms/{realm_name}");
-    arguments.openid_client_id = basic_client.client_id;
-    arguments.openid_client_secret = basic_client.client_secret;
-    arguments.backend_url = "http://localhost:3000".to_string();
-    arguments.frontend_url = "http://localhost:5173".to_string();
-    arguments.database_url = db_url.to_string();
-
-    arguments.aws_access_key_id = minio_user.to_string();
-    arguments.aws_secret_access_key = minio_pass.to_string();
-    arguments.aws_endpoint_url = minio_url.to_string();
-    arguments.aws_s3_bucket = "miniobucket".to_string();
-
-    let app = app(arguments).await;
-
-    let response = app
-        .oneshot(
-            Request::builder()
-                .uri("/status")
-                .method("GET")
-                .body(Body::empty())
-                .unwrap(),
-        )
-        .await
-        .unwrap();
-
-    assert_eq!(response.status(), StatusCode::OK);
-
-    let body = response.into_body().collect().await.unwrap().to_bytes();
-    let body = std::str::from_utf8(&body).unwrap();
-
-    assert_eq!(body, "UP");
+    let response = server.get("/status").await;
+    response.assert_status_ok();
+    response.assert_text("UP");
 }
