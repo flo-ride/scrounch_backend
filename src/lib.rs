@@ -115,6 +115,10 @@ pub async fn app(arguments: Arguments) -> axum::Router {
         .path()
         .to_string();
 
+    if path != "/" {
+        tracing::info!("Server with use path: {path}");
+    }
+
     #[cfg(feature = "cache")]
     if let Some(pool) = state.cache_pool.clone() {
         return axum::Router::new()
