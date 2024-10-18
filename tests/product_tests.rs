@@ -39,7 +39,7 @@ async fn product_test_1() {
     // GET /product with not product
     let response = server.get("/product").await;
     response.assert_status_ok();
-    response.assert_json(&json!([]));
+    response.assert_json(&json!({ "total_page": 1, "current_page": 0, "products": [] }));
 
     // GET /product/id doesn't exist
     let response = server
@@ -79,16 +79,24 @@ async fn product_test_1() {
     response.assert_status_ok();
 
     let json: Value = response.json();
-    let creation_time = json[0].get("creation_time").unwrap();
+    let creation_time = json.get("products").unwrap()[0]
+        .get("creation_time")
+        .unwrap();
 
-    response.assert_json(&json!([ {
-        "id":  new_product_id,
-        "name": "Bug Magnet",
-        "image": image_id,
-        "price": 2.51,
-        "quantity": 15,
-        "creation_time": creation_time
-    }]));
+    response.assert_json(&json!({
+        "current_page": 0,
+        "total_page": 1,
+        "products": [
+            {
+                "id":  new_product_id,
+                "name": "Bug Magnet",
+                "image": image_id,
+                "price": 2.51,
+                "quantity": 15,
+                "creation_time": creation_time
+            }
+        ]
+    }));
 
     // GET /product/{id}
     let response = server.get(&format!("/product/{new_product_id}")).await;
@@ -573,215 +581,224 @@ async fn product_test_2() {
     let response = server.get("/product").await;
     response.assert_status_ok();
 
-    response.assert_json_contains(&json!([
-        {
-            "id": bug_magnet_id,
-            "name": "Bug Magnet",
-            "image": image_id,
-            "price": 2.51,
-            "quantity": 15,
-        },
-        {
-            "id": logic_drill_id,
-            "name": "Logic Drill",
-            "image": image_id,
-            "price": 1.38,
-            "quantity": 54,
-        },
-        {
-            "id": error_hammer_id,
-            "name": "Error Hammer",
-            "image": image_id,
-            "price": 3.25,
-            "quantity": 30,
-        },
-        {
-            "id": null_pointer_detector_id,
-            "name": "Null Pointer Detector",
-            "image": image_id,
-            "price": 0.99,
-            "quantity": 100,
-        },
-        {
-            "id": memory_leak_sponge_id,
-            "name": "Memory Leak Sponge",
-            "image": image_id,
-            "price": 4.99,
-            "quantity": 12,
-        },
-        {
-            "id": infinite_loop_lasso_id,
-            "name": "Infinite Loop Lasso",
-            "image": image_id,
-            "price": 2.75,
-            "quantity": 25,
-        },
-        {
-            "id": segfault_tape_id,
-            "name": "Segmentation Fault Tape",
-            "image": image_id,
-            "price": 1.65,
-            "quantity": 33,
-        },
-        {
-            "id": four_o_four_finder_id,
-            "name": "404 Finder",
-            "image": image_id,
-            "price": 3.10,
-            "quantity": 20,
-        },
-        {
-            "id": crash_cushion_id,
-            "name": "Crash Cushion",
-            "image": image_id,
-            "price": 2.80,
-            "quantity": 18,
-        },
-        {
-            "id": latency_compass_id,
-            "name": "Latency Compass",
-            "image": image_id,
-            "price": 1.45,
-            "quantity": 40,
-        },
-        {
-            "id": syntax_eraser_id,
-            "name": "Syntax Eraser",
-            "image": image_id,
-            "price": 2.99,
-            "quantity": 50,
-        },
-        {
-            "id": thread_cutter_id,
-            "name": "Concurrent Thread Cutter",
-            "image": image_id,
-            "price": 4.10,
-            "quantity": 10,
-        },
-        {
-            "id": debugger_pliers_id,
-            "name": "Debugger Pliers",
-            "image": image_id,
-            "price": 3.55,
-            "quantity": 28,
-        },
-        {
-            "id": recursion_snips_id,
-            "name": "Infinite Recursion Snips",
-            "image": image_id,
-            "price": 5.99,
-            "quantity": 15,
-        },
-        {
-            "id": gc_net_id,
-            "name": "Garbage Collector Net",
-            "image": image_id,
-            "price": 3.20,
-            "quantity": 42,
-        },
-        {
-            "id": so_helmet_id,
-            "name": "Stack Overflow Helmet",
-            "image": image_id,
-            "price": 2.80,
-            "quantity": 18,
-        },
-        {
-            "id": ruler_id,
-            "name": "Off-By-One Ruler",
-            "image": image_id,
-            "price": 1.99,
-            "quantity": 99,
-        },
-        {
-            "id": deadlock_scissors_id,
-            "name": "Deadlock Scissors",
-            "image": image_id,
-            "price": 4.20,
-            "quantity": 5,
-        },
-        {
-            "id": memory_dump_bag_id,
-            "name": "Memory Dump Bag",
-            "image": image_id,
-            "price": 2.40,
-            "quantity": 35,
-        },
-        {
-            "id": heap_shovel_id,
-            "name": "Heap Allocator Shovel",
-            "image": image_id,
-            "price": 3.90,
-            "quantity": 22,
-        },
-    ]));
+    response.assert_json_contains(&json!({
+        "current_page": 0,
+        "total_page": 2,
+        "products": [
+            {
+                "id": bug_magnet_id,
+                "name": "Bug Magnet",
+                "image": image_id,
+                "price": 2.51,
+                "quantity": 15,
+            },
+            {
+                "id": logic_drill_id,
+                "name": "Logic Drill",
+                "image": image_id,
+                "price": 1.38,
+                "quantity": 54,
+            },
+            {
+                "id": error_hammer_id,
+                "name": "Error Hammer",
+                "image": image_id,
+                "price": 3.25,
+                "quantity": 30,
+            },
+            {
+                "id": null_pointer_detector_id,
+                "name": "Null Pointer Detector",
+                "image": image_id,
+                "price": 0.99,
+                "quantity": 100,
+            },
+            {
+                "id": memory_leak_sponge_id,
+                "name": "Memory Leak Sponge",
+                "image": image_id,
+                "price": 4.99,
+                "quantity": 12,
+            },
+            {
+                "id": infinite_loop_lasso_id,
+                "name": "Infinite Loop Lasso",
+                "image": image_id,
+                "price": 2.75,
+                "quantity": 25,
+            },
+            {
+                "id": segfault_tape_id,
+                "name": "Segmentation Fault Tape",
+                "image": image_id,
+                "price": 1.65,
+                "quantity": 33,
+            },
+            {
+                "id": four_o_four_finder_id,
+                "name": "404 Finder",
+                "image": image_id,
+                "price": 3.10,
+                "quantity": 20,
+            },
+            {
+                "id": crash_cushion_id,
+                "name": "Crash Cushion",
+                "image": image_id,
+                "price": 2.80,
+                "quantity": 18,
+            },
+            {
+                "id": latency_compass_id,
+                "name": "Latency Compass",
+                "image": image_id,
+                "price": 1.45,
+                "quantity": 40,
+            },
+            {
+                "id": syntax_eraser_id,
+                "name": "Syntax Eraser",
+                "image": image_id,
+                "price": 2.99,
+                "quantity": 50,
+            },
+            {
+                "id": thread_cutter_id,
+                "name": "Concurrent Thread Cutter",
+                "image": image_id,
+                "price": 4.10,
+                "quantity": 10,
+            },
+            {
+                "id": debugger_pliers_id,
+                "name": "Debugger Pliers",
+                "image": image_id,
+                "price": 3.55,
+                "quantity": 28,
+            },
+            {
+                "id": recursion_snips_id,
+                "name": "Infinite Recursion Snips",
+                "image": image_id,
+                "price": 5.99,
+                "quantity": 15,
+            },
+            {
+                "id": gc_net_id,
+                "name": "Garbage Collector Net",
+                "image": image_id,
+                "price": 3.20,
+                "quantity": 42,
+            },
+            {
+                "id": so_helmet_id,
+                "name": "Stack Overflow Helmet",
+                "image": image_id,
+                "price": 2.80,
+                "quantity": 18,
+            },
+            {
+                "id": ruler_id,
+                "name": "Off-By-One Ruler",
+                "image": image_id,
+                "price": 1.99,
+                "quantity": 99,
+            },
+            {
+                "id": deadlock_scissors_id,
+                "name": "Deadlock Scissors",
+                "image": image_id,
+                "price": 4.20,
+                "quantity": 5,
+            },
+            {
+                "id": memory_dump_bag_id,
+                "name": "Memory Dump Bag",
+                "image": image_id,
+                "price": 2.40,
+                "quantity": 35,
+            },
+            {
+                "id": heap_shovel_id,
+                "name": "Heap Allocator Shovel",
+                "image": image_id,
+                "price": 3.90,
+                "quantity": 22,
+            },
+        ]
+    }));
 
     let response = server.get("/product").add_query_param("page", "1").await;
     response.assert_status_ok();
 
-    response.assert_json_contains(&json!([
-        {
-            "id": semaphore_semaphore_id,
-            "name": "Semaphore Semaphore",
-            "image": image_id,
-            "price": 5.10,
-            "quantity": 6,
-        },
-        {
-            "id": mutex_keychain_id,
-            "name": "Mutex Lock Keychain",
-            "image": image_id,
-            "price": 1.75,
-            "quantity": 65,
-        },
-        {
-            "id": timeout_timer_id,
-            "name": "Timeout Timer",
-            "image": image_id,
-            "price": 2.70,
-            "quantity": 38,
-        },
-        {
-            "id": concurrency_gauge_id,
-            "name": "Concurrency Gauge",
-            "image": image_id,
-            "price": 3.15,
-            "quantity": 45,
-        },
-        {
-            "id": race_stopwatch_id,
-            "name": "Race Condition Stopwatch",
-            "image": image_id,
-            "price": 2.60,
-            "quantity": 27,
-        },
-        {
-            "id": event_queue_clipboard_id,
-            "name": "Event Queue Clipboard",
-            "image": image_id,
-            "price": 3.75,
-            "quantity": 14,
-        },
-        {
-            "id": uninit_pointer_bookmark_id,
-            "name": "Uninitialized Pointer Bookmark",
-            "image": image_id,
-            "price": 1.50,
-            "quantity": 90,
-        },
-        {
-            "id": stack_trace_notepad_id,
-            "name": "Stack Trace Notepad",
-            "image": image_id,
-            "price": 3.85,
-            "quantity": 12,
-        },
-        {
-            "id": compiler_highlighter_id,
-            "name": "Compiler Warning Highlighter",
-            "image": image_id,
-            "price": 1.95,
-            "quantity": 70,
-        }
-    ]));
+    response.assert_json_contains(&json!({
+        "current_page": 1,
+        "total_page": 2,
+        "products": [
+            {
+                "id": semaphore_semaphore_id,
+                "name": "Semaphore Semaphore",
+                "image": image_id,
+                "price": 5.10,
+                "quantity": 6,
+            },
+            {
+                "id": mutex_keychain_id,
+                "name": "Mutex Lock Keychain",
+                "image": image_id,
+                "price": 1.75,
+                "quantity": 65,
+            },
+            {
+                "id": timeout_timer_id,
+                "name": "Timeout Timer",
+                "image": image_id,
+                "price": 2.70,
+                "quantity": 38,
+            },
+            {
+                "id": concurrency_gauge_id,
+                "name": "Concurrency Gauge",
+                "image": image_id,
+                "price": 3.15,
+                "quantity": 45,
+            },
+            {
+                "id": race_stopwatch_id,
+                "name": "Race Condition Stopwatch",
+                "image": image_id,
+                "price": 2.60,
+                "quantity": 27,
+            },
+            {
+                "id": event_queue_clipboard_id,
+                "name": "Event Queue Clipboard",
+                "image": image_id,
+                "price": 3.75,
+                "quantity": 14,
+            },
+            {
+                "id": uninit_pointer_bookmark_id,
+                "name": "Uninitialized Pointer Bookmark",
+                "image": image_id,
+                "price": 1.50,
+                "quantity": 90,
+            },
+            {
+                "id": stack_trace_notepad_id,
+                "name": "Stack Trace Notepad",
+                "image": image_id,
+                "price": 3.85,
+                "quantity": 12,
+            },
+            {
+                "id": compiler_highlighter_id,
+                "name": "Compiler Warning Highlighter",
+                "image": image_id,
+                "price": 1.95,
+                "quantity": 70,
+            }
+        ]
+    }
+        ));
 }

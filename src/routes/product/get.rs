@@ -3,7 +3,9 @@
 use crate::{
     error::AppError,
     models::{
-        profile::admin::Admin, response::product::ProductResponse, utils::pagination::Pagination,
+        profile::admin::Admin,
+        response::product::{ProductListResponse, ProductResponse},
+        utils::pagination::Pagination,
     },
 };
 use axum::{
@@ -82,14 +84,14 @@ pub async fn get_product(
                 responses(
                    (status = 500, description = "An internal error, most likely related to the database, occurred."), 
                    (status = 400, description = "The request is improperly formatted."), 
-                   (status = 200, description = "Successfully retrieved a list of products.", body = Vec<ProductResponse>)
+                   (status = 200, description = "Successfully retrieved a list of products.", body = ProductListResponse)
                 )
             )]
 pub async fn get_all_products(
     admin: Option<Admin>,
     Query(pagination): Query<Pagination>,
     State(conn): State<Connection>,
-) -> Result<Json<Vec<ProductResponse>>, AppError> {
+) -> Result<Json<ProductListResponse>, AppError> {
     let page = pagination.page.unwrap_or(0);
     let per_page = pagination.per_page.unwrap_or(20);
 
@@ -100,11 +102,19 @@ pub async fn get_all_products(
     };
 
     let result =
-        service::Query::list_products_with_condition(&conn, condition, page, per_page).await?;
+        service::Query::list_products_with_condition(&conn, condition.clone(), page, per_page)
+            .await?;
 
-    let result = result
+    let total_page =
+        (service::Query::count_products_with_condition(&conn, condition).await? / per_page) + 1;
+
+    let products = result
         .into_iter()
         .map(|x| x.try_into())
         .collect::<Result<_, AppError>>()?;
-    Ok(Json(result))
+    Ok(Json(ProductListResponse {
+        current_page: page,
+        total_page,
+        products,
+    }))
 }

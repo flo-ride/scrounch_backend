@@ -58,3 +58,20 @@ impl TryFrom<entity::product::Model> for ProductResponse {
         })
     }
 }
+
+#[derive(Debug, Clone, PartialEq, serde::Serialize, utoipa::ToSchema)]
+#[schema(example = json!(
+    {
+        "total_page": 1, 
+        "current_page": 0, 
+        "products": [
+            { "id": "1a731f58-18f1-4c95-8de5-611bde07f4f1", "image": "2fa4c8d3-fd93-4066-a7f3-68a35ab72288_water.png", "name": "water", "price": 0.80, "quantity": 27, "creation_time": "2024-10-09T17:55:30.795279Z" }, 
+            { "id": "0a7e6dd2-2c98-44b1-9cd3-0d8a3d7666b3", "image": "377265f4-1aad-4b57-a6f2-4bb6387184c2_tea.png", "name": "tea", "price": 1.52, "quantity": 42, "creation_time": "2024-10-09T18:32:10.795279Z" }
+        ]
+    }
+))]
+pub struct ProductListResponse {
+    pub total_page: u64,
+    pub current_page: u64,
+    pub products: Vec<ProductResponse>,
+}

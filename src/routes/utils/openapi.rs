@@ -47,7 +47,8 @@ use crate::routes::utils::upload::{FileSchema, __path_post_upload_files};
         schemas(FileSchema),
         schemas(NewProduct),
         schemas(EditProduct),
-        schemas(ProductResponse)
+        schemas(ProductResponse),
+        schemas(ProductListResponse)
     )
 )]
 struct ApiDoc;
