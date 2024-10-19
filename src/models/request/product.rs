@@ -1,6 +1,6 @@
 #[derive(Debug, Default, Clone, PartialEq, serde::Deserialize, utoipa::ToSchema)]
 pub struct NewProduct {
-    pub image: String,
+    pub image: Option<String>,
     pub name: String,
     pub price: f64,
     pub quantity: u64,

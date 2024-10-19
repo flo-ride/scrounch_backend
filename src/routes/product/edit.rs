@@ -42,15 +42,22 @@ pub async fn edit_product(
     match result {
         Some(existing_product) => {
             let old_image = existing_product.image.clone();
-            let mut image_switch = false;
-            if let Some(new_image) = new_product.image.clone() {
-                image_switch = new_image != old_image;
-                if image_switch {
+            match (new_product.image.clone(), old_image.clone()) {
+                (Some(new_image), Some(old_image)) => {
+                    if new_image != old_image {
+                        // Check if new image exist
+                        let (_result, _code) = s3
+                            .head_object(format!("{}/{}", FileType::Product, new_image))
+                            .await?;
+                    }
+                }
+                (Some(new_image), _) => {
                     // Check if new image exist
                     let (_result, _code) = s3
                         .head_object(format!("{}/{}", FileType::Product, new_image))
                         .await?;
                 }
+                _ => {}
             }
 
             service::Mutation::update_product(
@@ -60,7 +67,7 @@ pub async fn edit_product(
                     id,
                     image: match new_product.image.clone() {
                         None => existing_product.image.clone(),
-                        Some(image) => image,
+                        Some(image) => Some(image),
                     },
                     name: match new_product.name.clone() {
                         None => existing_product.name.clone(),
@@ -135,9 +142,13 @@ pub async fn edit_product(
             )
             .await?;
 
-            if image_switch {
-                s3.delete_object(format!("{}/{}", FileType::Product, old_image))
-                    .await?;
+            if let (Some(new_image), Some(old_image)) =
+                (new_product.image.clone(), old_image.clone())
+            {
+                if new_image != old_image {
+                    s3.delete_object(format!("{}/{}", FileType::Product, old_image))
+                        .await?;
+                }
             }
             tracing::info!(
                 "Admin {} \"{}\" successfully edited product {} \"{}\" - {:?}",

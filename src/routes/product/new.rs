@@ -41,9 +41,11 @@ pub async fn post_new_product(
     Json(product): Json<NewProduct>,
 ) -> Result<impl IntoResponse, AppError> {
     // Check if image exist
-    let (_result, _code) = s3
-        .head_object(format!("{}/{}", FileType::Product, product.image))
-        .await?;
+    if let Some(image) = product.image.clone() {
+        let (_result, _code) = s3
+            .head_object(format!("{}/{}", FileType::Product, image))
+            .await?;
+    }
 
     let id = uuid::Uuid::new_v4();
     service::Mutation::create_product(
