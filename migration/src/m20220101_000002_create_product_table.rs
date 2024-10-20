@@ -23,6 +23,7 @@ impl MigrationTrait for Migration {
                         timestamp_with_time_zone(Product::CreationTime)
                             .default(Expr::current_timestamp()),
                     )
+                    .col(string_null(Product::SmaCode).unique_key())
                     .to_owned(),
             )
             .await
@@ -46,4 +47,5 @@ enum Product {
     MaxQuantityPerCommand,
     Disabled,
     CreationTime,
+    SmaCode,
 }

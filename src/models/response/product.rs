@@ -22,6 +22,9 @@ pub struct ProductResponse {
     creation_time: chrono::DateTime<Utc>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
+    sma_code: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     disabled: Option<bool>,
 }
 
@@ -51,6 +54,7 @@ impl TryFrom<entity::product::Model> for ProductResponse {
                 })?),
                 None => None,
             },
+            sma_code: value.sma_code,
             creation_time: value.creation_time.into(),
             disabled: match value.disabled {
                 true => Some(true),

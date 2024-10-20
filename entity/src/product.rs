@@ -15,6 +15,8 @@ pub struct Model {
     pub max_quantity_per_command: Option<i16>,
     pub disabled: bool,
     pub creation_time: DateTimeWithTimeZone,
+    #[sea_orm(unique)]
+    pub sma_code: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

@@ -52,8 +52,9 @@ pub async fn delete_product(
                     price: product.price,
                     quantity: product.quantity,
                     max_quantity_per_command: product.max_quantity_per_command,
-                    disabled: true,
+                    sma_code: product.sma_code.clone(),
                     creation_time: chrono::offset::Local::now().into(),
+                    disabled: true,
                 },
             )
             .await?;

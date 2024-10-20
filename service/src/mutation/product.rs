@@ -15,6 +15,7 @@ impl Mutation {
             price: Set(form_data.price),
             quantity: Set(form_data.quantity),
             max_quantity_per_command: Set(form_data.max_quantity_per_command),
+            sma_code: Set(form_data.sma_code),
             creation_time: Set(chrono::offset::Local::now().into()),
             disabled: Set(false),
         }
@@ -42,6 +43,7 @@ impl Mutation {
             price: Set(form_data.price),
             quantity: Set(form_data.quantity),
             max_quantity_per_command: Set(form_data.max_quantity_per_command),
+            sma_code: Set(form_data.sma_code),
             creation_time: NotSet,
             disabled: Set(false),
         }

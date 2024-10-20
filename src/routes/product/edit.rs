@@ -136,6 +136,13 @@ pub async fn edit_product(
                             })?)
                         }
                     },
+                    sma_code: match new_product.sma_code {
+                        None => existing_product.sma_code,
+                        Some(ref sma_code) => match sma_code.is_empty() {
+                            true => None,
+                            false => Some(sma_code.to_string()),
+                        },
+                    },
                     disabled: new_product.disabled.unwrap_or(false),
                     creation_time: chrono::offset::Local::now().into(),
                 },
