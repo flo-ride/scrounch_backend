@@ -1,0 +1,103 @@
+services:
+  database:
+    image: postgres:16.2
+    restart: unless-stopped
+    hostname: $POSTGRES_HOST
+    ports:
+      - 5432:5432
+    healthcheck:
+      test:
+        ["CMD", "sh", "-c", "pg_isready -U $$POSTGRES_USER -h $$(hostname -i)"]
+      interval: 10s
+      timeout: 15s
+      retries: 30
+    env_file:
+      - .env
+    volumes:
+      - database:/var/lib/postgresql/data
+    networks:
+      - db-network
+
+  pgadmin:
+    image: dpage/pgadmin4:7.7
+    restart: unless-stopped
+    ports:
+      - 15432:15432
+    env_file:
+      - .env
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    depends_on:
+      - database
+    networks:
+      - pgadmin-network
+      - db-network
+
+  redis:
+    image: redis:7.0
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+    networks:
+      - redis-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: docker.io/bitnami/minio:2022
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    networks:
+      - minio-network
+    env_file:
+      - .env
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:22.0
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - 8080:8080
+    depends_on:
+      - keycloak-db
+    networks:
+      - keycloak-network
+      - db-network
+    command:
+      - start-dev
+
+  keycloak-db:
+    image: postgres:16.2
+    restart: unless-stopped
+    healthcheck:
+      test:
+        ["CMD", "sh", "-c", "pg_isready -U $$POSTGRES_USER -h $$(hostname -i)"]
+      interval: 10s
+      timeout: 15s
+      retries: 30
+    env_file:
+      - .env
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+    networks:
+      - db-network
+
+volumes:
+  database:
+    driver: local
+  pgadmin:
+    driver: local
+  keycloak-db-data:
+    driver: local
+
+networks:
+  db-network:
+  pgadmin-network:
+  redis-network:
+  minio-network:
+  keycloak-network:
