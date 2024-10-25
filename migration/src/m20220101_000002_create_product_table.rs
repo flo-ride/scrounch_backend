@@ -16,7 +16,7 @@ impl MigrationTrait for Migration {
                     .col(string_null(Product::Image))
                     .col(string(Product::Name))
                     .col(decimal(Product::Price)) // If you ask: why not money ? here is the answer: https://wiki.postgresql.org/wiki/Don't_Do_This#Don.27t_use_money
-                    .col(small_unsigned(Product::Quantity))
+                    .col(small_unsigned_null(Product::Quantity))
                     .col(small_unsigned_null(Product::MaxQuantityPerCommand))
                     .col(boolean(Product::Disabled).default(false))
                     .col(

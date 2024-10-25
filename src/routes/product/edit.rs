@@ -112,11 +112,11 @@ pub async fn edit_product(
                                 )));
                             }
 
-                            quantity.try_into().map_err(|err| {
+                            Some(quantity.try_into().map_err(|err| {
                                 AppError::Unknow(format!(
                                     "Quantity cannot be converted: {quantity} - {err}",
                                 ))
-                            })?
+                            })?)
                         }
                     },
                     max_quantity_per_command: match new_product.max_quantity_per_command {

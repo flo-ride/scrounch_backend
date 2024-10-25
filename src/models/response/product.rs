@@ -14,7 +14,8 @@ pub struct ProductResponse {
 
     price: f64,
 
-    quantity: u64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    quantity: Option<u64>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     max_quantity_per_command: Option<u64>,
@@ -40,12 +41,14 @@ impl TryFrom<entity::product::Model> for ProductResponse {
                 AppError::Unknow(format!("Cannot convert price {} - {err}", value.price))
             })?,
 
-            quantity: value.quantity.try_into().map_err(|err| {
-                AppError::Unknow(format!(
-                    "Cannot convert quantity from i16 to u64: {} - {err}",
-                    value.quantity
-                ))
-            })?,
+            quantity: match value.quantity {
+                Some(x) => Some(x.try_into().map_err(|err| {
+                    AppError::Unknow(format!(
+                        "Cannot convert quantity from i16 to u64: {x} - {err}",
+                    ))
+                })?),
+                None => None,
+            },
             max_quantity_per_command: match value.max_quantity_per_command {
                 Some(x) => Some(x.try_into().map_err(|err| {
                     AppError::Unknow(format!(
