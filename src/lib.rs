@@ -101,7 +101,7 @@ pub async fn app(arguments: Arguments) -> axum::Router {
     ];
 
     let cors_layer = tower_http::cors::CorsLayer::new()
-        .allow_methods([Method::GET, Method::POST])
+        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
         .allow_headers([
             axum::http::header::AUTHORIZATION,
             axum::http::header::ACCEPT,
