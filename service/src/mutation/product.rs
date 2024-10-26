@@ -45,7 +45,7 @@ impl Mutation {
             max_quantity_per_command: Set(form_data.max_quantity_per_command),
             sma_code: Set(form_data.sma_code),
             creation_time: NotSet,
-            disabled: Set(false),
+            disabled: Set(form_data.disabled),
         }
         .update(&conn.db_connection)
         .await;
