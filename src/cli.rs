@@ -91,4 +91,18 @@ pub struct Arguments {
     /// This bucket must already exist.
     #[arg(env, long)]
     pub aws_s3_bucket: String,
+
+    /// The base URL of the Sma beverage website, used for importing existing products.
+    /// Example: https://api.sma.example.com
+    #[arg(env, long)]
+    pub sma_url: Option<String>,
+
+    /// The API key required for authenticating requests to the Sma API.
+    #[arg(env, long)]
+    pub sma_api_key: Option<String>,
+
+    /// A list of categories id to filter products when importing from the Sma API.
+    /// If not provided, all product categories will be imported.
+    #[arg(env, long, value_delimiter = ' ', num_args = 1..)]
+    pub sma_categories: Option<Vec<String>>,
 }
