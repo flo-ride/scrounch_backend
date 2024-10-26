@@ -2,7 +2,8 @@ use chrono::Utc;
 
 use crate::models::profile::user::User;
 
-#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, utoipa::ToSchema)]
+#[schema(example = json!({ "id": "l8F0ZoHb5TwYgNvXkJqV7SsP9gQfKzR4UmA1VrCwIxE", "name": "John Doe", "username": "JDoe", "email": "john.doe@example.com", "is_admin": false, "creation_time": "2024-10-09T17:55:30.795279Z", "last_access_time": "2024-10-09T17:55:30.795279Z" }))]
 pub struct UserResponse {
     pub id: uuid::Uuid,
     pub email: String,
@@ -39,4 +40,44 @@ impl From<User> for UserResponse {
             creation_time: value.creation_time,
         }
     }
+}
+
+#[derive(Debug, Clone, PartialEq, serde::Serialize, utoipa::ToSchema)]
+#[schema(example = json!(
+    {
+        "total_page": 1, 
+        "current_page": 0, 
+        "users": [{ 
+                "id": "l8F0ZoHb5TwYgNvXkJqV7SsP9gQfKzR4UmA1VrCwIxE", 
+                "name": "John Doe", 
+                "username": "JDoe", 
+                "email": "john.doe@example.com", 
+                "is_admin": false, 
+                "creation_time": "2024-10-09T17:55:30.795279Z", 
+                "last_access_time": "2024-10-09T17:55:30.795279Z" 
+            },
+            {
+                "id": "a1B2c3D4e5F6g7H8i9J0kL1M2N3o4P5Q6R7s8t9U0",
+                "name": "Alice Smith",
+                "username": "ASmith",
+                "email": "alice.smith@example.com",
+                "is_admin": false,
+                "creation_time": "2024-09-15T12:30:45.123456Z",
+                "last_access_time": "2024-10-10T09:15:20.654321Z"
+            },
+            {
+                "id": "Z9Y8x7W6v5U4t3S2r1Q0pO9n8M7l6K5j4I3h2G1f0",
+                "name": "Bob Johnson",
+                "username": "BJohnson",
+                "email": "bob.johnson@example.com",
+                "is_admin": true,
+                "creation_time": "2024-08-20T14:45:10.987654Z",
+                "last_access_time": "2024-10-09T17:55:30.795279Z"
+            }]
+    }
+))]
+pub struct UserListResponse {
+    pub total_page: u64,
+    pub current_page: u64,
+    pub users: Vec<UserResponse>,
 }
