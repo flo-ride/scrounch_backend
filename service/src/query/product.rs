@@ -24,6 +24,23 @@ impl Query {
         Ok(result)
     }
 
+    pub async fn find_product_by_sma_code(
+        conn: &Connection,
+        sma_code: String,
+    ) -> Result<Option<product::Model>, DbErr> {
+        let result = Product::find()
+            .filter(product::Column::SmaCode.eq(sma_code))
+            .one(&conn.db_connection)
+            .await?;
+
+        #[cfg(feature = "cache")]
+        if let Some(model) = &result {
+            cache_set!(conn, format!("product:{}", model.id), model, 60 * 60 * 3);
+        }
+
+        Ok(result)
+    }
+
     pub async fn list_products_with_condition<
         F: sea_query::IntoCondition + std::fmt::Debug + Clone,
         A: Into<u64> + Copy,
