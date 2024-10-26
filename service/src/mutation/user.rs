@@ -5,7 +5,11 @@
 //! These services provide a layer of abstraction over database mutations, ensuring that changes
 //! to user data are handled efficiently and consistently.
 
-use crate::{mutation::Mutation, r#macro::cache_set, Connection};
+use crate::{
+    mutation::Mutation,
+    r#macro::{cache_mdel, cache_set},
+    Connection,
+};
 use ::entity::{user, user::Entity as User};
 use sea_orm::*;
 use sqlx::types::Uuid;
@@ -31,6 +35,7 @@ impl Mutation {
         if let Ok(model) = &result {
             let id = form_data.id.to_string();
             cache_set!(conn, format!("user:{id}"), model, 60 * 15);
+            cache_mdel!(conn, "users");
         }
 
         result
@@ -56,6 +61,7 @@ impl Mutation {
         #[cfg(feature = "cache")]
         if let Ok(model) = &result {
             cache_set!(conn, format!("user:{id}"), model, 60 * 15);
+            cache_mdel!(conn, "users");
         }
 
         result
@@ -107,6 +113,7 @@ impl Mutation {
             if let Some(cache) = &conn.cache_connection {
                 let _ = cache.del::<Bytes, _>(format!("user:{id}")).await;
             }
+            cache_mdel!(conn, "users");
         }
 
         result

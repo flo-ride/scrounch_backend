@@ -1,4 +1,8 @@
-use crate::{mutation::Mutation, r#macro::cache_set, Connection};
+use crate::{
+    mutation::Mutation,
+    r#macro::{cache_mdel, cache_set},
+    Connection,
+};
 use ::entity::{product, product::Entity as Product};
 use sea_orm::*;
 use sqlx::types::Uuid;
@@ -26,6 +30,7 @@ impl Mutation {
         if let Ok(model) = &result {
             let id = form_data.id.to_string();
             cache_set!(conn, format!("product:{id}"), model, 60 * 15);
+            cache_mdel!(conn, "products");
         }
 
         result
@@ -53,6 +58,7 @@ impl Mutation {
         #[cfg(feature = "cache")]
         if let Ok(model) = &result {
             cache_set!(conn, format!("product:{id}"), model, 60 * 15);
+            cache_mdel!(conn, "products");
         }
 
         result
@@ -80,6 +86,7 @@ impl Mutation {
             if let Some(cache) = &conn.cache_connection {
                 let _ = cache.del::<Bytes, _>(format!("product:{id}")).await;
             }
+            cache_mdel!(conn, "products");
         }
 
         result
