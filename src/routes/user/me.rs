@@ -3,8 +3,9 @@
 //! This module provides a handler for the `/me` endpoint, which retrieves the
 //! details of the currently authenticated user. It is typically used in contexts
 //! where user-specific information needs to be displayed or updated.
-use axum::{http::StatusCode, response::IntoResponse};
-use serde_json::json;
+use axum::{http::StatusCode, response::IntoResponse, Json};
+
+use crate::models::response::user::UserResponse;
 
 /// Handles the `/me` route, returning the current user's information if authenticated.
 ///
@@ -16,14 +17,16 @@ use serde_json::json;
         get,
         path = "/me",
         responses(
-            (status = 200, description = "You're logged in", body = User),
+            (status = 200, description = "You're logged in", body = UserResponse),
             (status = 204, description = "You're not logged in")
         )
     )]
-pub async fn get_me(user: Option<crate::models::profile::user::User>) -> impl IntoResponse {
+pub async fn get_me(
+    user: Option<crate::models::profile::user::User>,
+) -> Result<Json<UserResponse>, impl IntoResponse> {
     if let Some(user) = user {
-        (StatusCode::OK, json!(user).to_string()).into_response()
+        Ok(Json(user.into()))
     } else {
-        (StatusCode::NO_CONTENT, "You're not logged in").into_response()
+        Err((StatusCode::NO_CONTENT, "You're not logged in").into_response())
     }
 }
