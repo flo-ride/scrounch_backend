@@ -50,4 +50,49 @@ async fn user_test_1() {
     response.assert_json_contains(
         &json!({"id": ids[2], "email": "user_3@example.com" , "username": "user_3", "name": "John Doe", "is_admin": false }),
     );
+
+    let response = server.get("/user").add_cookie(cookies[0].clone()).await;
+    response.assert_status(StatusCode::OK);
+    response.assert_json_contains(
+        &json!({
+            "current_page": 0,
+            "total_page": 1,
+            "users":
+            [
+                {"id": ids[0], "email": "user_1@example.com" , "username": "user_1", "name": "John Doe", "is_admin": true },
+                {"id": ids[1], "email": "user_2@example.com" , "username": "user_2", "name": "John Doe", "is_admin": false },
+                {"id": ids[2], "email": "user_3@example.com" , "username": "user_3", "name": "John Doe", "is_admin": false }
+            ]
+        }),
+    );
+
+    let response = server.get("/user").add_cookie(cookies[1].clone()).await;
+    response.assert_status(StatusCode::FORBIDDEN);
+
+    let response = server.get("/user").add_cookie(cookies[2].clone()).await;
+    response.assert_status(StatusCode::FORBIDDEN);
+
+    let response = server
+        .get(&format!("/user/{}", ids[1]))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status(StatusCode::OK);
+    response.assert_json_contains(
+        &json!({"id": ids[1], "email": "user_2@example.com" , "username": "user_2", "name": "John Doe", "is_admin": false }),
+    );
+
+    let response = server
+        .get(&format!("/user/{}", ids[1]))
+        .add_cookie(cookies[1].clone())
+        .await;
+    response.assert_status(StatusCode::OK);
+    response.assert_json_contains(
+        &json!({"id": ids[1], "email": "user_2@example.com" , "username": "user_2", "name": "John Doe", "is_admin": false }),
+    );
+
+    let response = server
+        .get(&format!("/user/{}", ids[2]))
+        .add_cookie(cookies[1].clone())
+        .await;
+    response.assert_status(StatusCode::FORBIDDEN);
 }
