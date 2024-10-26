@@ -175,15 +175,6 @@ async fn create_or_update_sma_product(
                     .split("/")
                     .last()
                     .ok_or(AppError::Unknow("Cannot find SMA filename".to_string()))?;
-                let normalised_name = product
-                    .name
-                    .to_ascii_lowercase()
-                    .replace(
-                        &['(', ')', ',', '\"', '.', ';', ':', '\'', '\\', '/'][..],
-                        "",
-                    )
-                    .replace("  ", " ")
-                    .replace(" ", "_");
 
                 let extension = std::path::Path::new(&sma_filename)
                     .extension()
@@ -196,7 +187,7 @@ async fn create_or_update_sma_product(
                     AppError::Unknow(format!("Cannot download image from SMA: {err}"))
                 })?;
 
-                let name = format!("{}_{normalised_name}.{extension}", uuid::Uuid::new_v4());
+                let name = format!("{}.{extension}", uuid::Uuid::new_v4());
                 let s3_path = format!("{}/{name}", FileType::Product);
                 let image = image.bytes().await.map_err(|err| {
                     AppError::Unknow(format!("Cannot get bytes of image - {err}"))
