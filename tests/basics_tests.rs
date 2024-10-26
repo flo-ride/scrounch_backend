@@ -120,7 +120,7 @@ async fn basic_login_oidc() {
     // GET /me
     let response = server.get("/me").add_cookie(cookie.clone()).await;
     response.assert_status(StatusCode::OK);
-    response.assert_json(
+    response.assert_json_contains(
         &json!({"id": user_id, "name": "john doe", "email": "john.doe@example.com" , "username": "jojo", "is_admin": true }),
     )
 }

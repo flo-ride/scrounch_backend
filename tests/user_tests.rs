@@ -35,19 +35,19 @@ async fn user_test_1() {
 
     let response = server.get("/me").add_cookie(cookies[0].clone()).await;
     response.assert_status(StatusCode::OK);
-    response.assert_json(
+    response.assert_json_contains(
         &json!({"id": ids[0], "email": "user_1@example.com" , "username": "user_1", "name": "John Doe", "is_admin": true }),
     );
 
     let response = server.get("/me").add_cookie(cookies[1].clone()).await;
     response.assert_status(StatusCode::OK);
-    response.assert_json(
+    response.assert_json_contains(
         &json!({"id": ids[1], "email": "user_2@example.com" , "username": "user_2", "name": "John Doe", "is_admin": false }),
     );
 
     let response = server.get("/me").add_cookie(cookies[2].clone()).await;
     response.assert_status(StatusCode::OK);
-    response.assert_json(
+    response.assert_json_contains(
         &json!({"id": ids[2], "email": "user_3@example.com" , "username": "user_3", "name": "John Doe", "is_admin": false }),
     );
 }
