@@ -8,5 +8,6 @@ pub mod download;
 pub mod login;
 pub mod logout;
 pub mod openapi;
+pub mod sma;
 pub mod status;
 pub mod upload;

@@ -29,6 +29,33 @@ pub struct ProductResponse {
     disabled: Option<bool>,
 }
 
+#[derive(Debug, Clone, PartialEq, Default, serde::Serialize, utoipa::ToSchema)]
+#[schema(example = json!({ "id": "1a731f58-18f1-4c95-8de5-611bde07f4f1", "image": "2fa4c8d3-fd93-4066-a7f3-68a35ab72288_water.png", "name": "water", "price": 0.80, "quantity": 27, "creation_time": "2024-10-09T17:55:30.795279Z" }))]
+pub struct EditedProductResponse {
+    pub id: uuid::Uuid,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub image: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub price: Option<f64>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub quantity: Option<u64>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub max_quantity_per_command: Option<u64>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sma_code: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub disabled: Option<bool>,
+}
+
 impl TryFrom<entity::product::Model> for ProductResponse {
     type Error = AppError;
 
