@@ -23,7 +23,6 @@ testcontainers = "0.22.0"
 testcontainers-modules = { version = "0.10.0", features = ["postgres", "minio"] }
 regex = "1.10.6"
 axum-test = "16.2.0"
-reqwest = { version = "0.12.7", features = ["cookies"] }
 
 [dependencies]
 ## Rest API
@@ -69,6 +68,9 @@ tower-sessions-redis-store = { version = "0.14.0", optional = true }
 
 # S3 / Minio
 rust-s3 = "0.35.1"
+
+# HTTP Client
+reqwest = { version = "0.12.7", features = ["json", "cookies"] }
 
 # Utils
 uuid = { version = "1.10.0", features = ["v4", "fast-rng", "serde"] }
