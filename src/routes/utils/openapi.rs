@@ -13,12 +13,14 @@ use utoipa::OpenApi;
 
 use crate::models::file::FileType;
 use crate::models::request::product::*;
+use crate::models::request::user::EditUser;
 use crate::models::response::product::*;
 use crate::models::response::user::{UserListResponse, UserResponse};
 use crate::routes::product::delete::__path_delete_product;
 use crate::routes::product::edit::__path_edit_product;
 use crate::routes::product::get::{__path_get_all_products, __path_get_product};
 use crate::routes::product::new::__path_post_new_product;
+use crate::routes::user::edit::__path_edit_user;
 use crate::routes::user::get::{__path_get_all_users, __path_get_user};
 use crate::routes::user::me::__path_get_me;
 use crate::routes::utils::download::__path_download_file;
@@ -43,8 +45,10 @@ use crate::routes::utils::upload::{FileSchema, __path_post_upload_files};
         delete_product,
         get_user,
         get_all_users,
+        edit_user,
     ),
     components(
+        schemas(EditUser),
         schemas(UserListResponse),
         schemas(UserResponse),
         schemas(FileType),
