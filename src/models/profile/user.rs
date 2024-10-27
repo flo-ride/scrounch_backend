@@ -15,6 +15,7 @@ pub struct User {
     pub name: String,
     pub username: String,
     pub is_admin: bool,
+    pub is_banned: bool,
     pub creation_time: chrono::DateTime<chrono::Utc>,
     pub last_access_time: chrono::DateTime<chrono::Utc>,
 }
@@ -27,6 +28,7 @@ impl From<entity::user::Model> for User {
             name: value.name,
             username: value.username,
             is_admin: value.is_admin,
+            is_banned: value.is_banned,
             last_access_time: value.last_access_time.into(),
             creation_time: value.creation_time.into(),
         }

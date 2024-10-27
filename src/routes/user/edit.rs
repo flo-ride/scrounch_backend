@@ -45,9 +45,22 @@ pub async fn edit_user(
                     name: existing_user.name.clone(),
                     email: existing_user.email,
                     username: existing_user.username,
-                    is_admin: match new_user.is_admin {
-                        Some(is_admin) => is_admin,
-                        None => existing_user.is_admin,
+                    is_admin: {
+                        let mut is_admin = match new_user.is_admin {
+                            Some(is_admin) => is_admin,
+                            None => existing_user.is_admin,
+                        };
+                        if let Some(true) = new_user.is_banned {
+                            is_admin = false;
+                        }
+                        if new_user.is_banned.is_none() && existing_user.is_banned {
+                            is_admin = false;
+                        }
+                        is_admin
+                    },
+                    is_banned: match new_user.is_banned {
+                        Some(is_banned) => is_banned,
+                        None => existing_user.is_banned,
                     },
                     creation_time: existing_user.creation_time,
                     last_access_time: existing_user.last_access_time,

@@ -35,6 +35,9 @@ where
                 "Can't find user {id} in db but OidcUser exist"
             )))?; // This sould never happen
 
-        Ok(user.into())
+        match user.is_banned {
+            true => Err(AppError::Forbidden),
+            false => Ok(user.into()),
+        }
     }
 }

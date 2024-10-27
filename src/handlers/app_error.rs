@@ -37,6 +37,7 @@ impl IntoResponse for AppError {
                     format!("Some parameter you've given is not correctly formatted: {value}"),
                 )
             }
+            AppError::NoContent(value) => (StatusCode::NO_CONTENT, value),
             _ => {
                 tracing::error!("{self}");
                 (

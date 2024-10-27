@@ -3,10 +3,10 @@
 //! This module provides a handler for the `/me` endpoint, which retrieves the
 //! details of the currently authenticated user. It is typically used in contexts
 //! where user-specific information needs to be displayed or updated.
-use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
+use axum::{extract::State, Json};
 use service::Connection;
 
-use crate::models::response::user::UserResponse;
+use crate::{error::AppError, models::response::user::UserResponse};
 
 /// Handles the `/me` route, returning the current user's information if authenticated.
 ///
@@ -24,12 +24,20 @@ use crate::models::response::user::UserResponse;
     )]
 pub async fn get_me(
     user: Option<crate::models::profile::user::User>,
+    oidc_user: Option<crate::models::profile::oidc_user::OidcUser>,
     State(conn): State<Connection>,
-) -> Result<Json<UserResponse>, impl IntoResponse> {
+) -> Result<Json<UserResponse>, AppError> {
     if let Some(user) = user {
         let _ = service::Mutation::update_user_last_access_time(&conn, user.id).await;
         Ok(Json(user.into()))
+    } else if let Some(oidc_user) = oidc_user {
+        // User is probably banned so the handler failed with Forbidden
+        let user = service::Query::find_user_by_id(&conn, oidc_user.id).await?;
+        match user {
+            Some(user) => Ok(Json(user.into())),
+            None => Err(AppError::NoContent("You're not logged in".to_string())),
+        }
     } else {
-        Err((StatusCode::NO_CONTENT, "You're not logged in").into_response())
+        Err(AppError::NoContent("You're not logged in".to_string()))
     }
 }

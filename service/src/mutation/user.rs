@@ -24,6 +24,7 @@ impl Mutation {
             email: Set(form_data.email),
             name: Set(form_data.name),
             username: Set(form_data.username),
+            is_banned: Set(form_data.is_banned),
             is_admin: Set(form_data.is_admin),
             creation_time: Set(chrono::offset::Local::now().into()),
             last_access_time: Set(chrono::offset::Local::now().into()),
@@ -52,6 +53,7 @@ impl Mutation {
             username: Set(form_data.username),
             name: Set(form_data.name),
             is_admin: Set(form_data.is_admin),
+            is_banned: Set(form_data.is_banned),
             creation_time: NotSet,
             last_access_time: Set(chrono::offset::Local::now().into()),
         }
@@ -78,6 +80,7 @@ impl Mutation {
             name: NotSet,
             is_admin: NotSet,
             creation_time: NotSet,
+            is_banned: NotSet,
             last_access_time: Set(chrono::offset::Local::now().into()),
         }
         .update(&conn.db_connection)

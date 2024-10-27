@@ -14,6 +14,7 @@ pub struct Model {
     pub is_admin: bool,
     pub creation_time: DateTimeWithTimeZone,
     pub last_access_time: DateTimeWithTimeZone,
+    pub is_banned: bool,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

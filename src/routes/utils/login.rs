@@ -54,6 +54,7 @@ pub async fn get_login(
                 name: user.name,
                 email: user.email,
                 is_admin,
+                is_banned: false,
                 creation_time: chrono::offset::Local::now().into(),
                 last_access_time: chrono::offset::Local::now().into(),
             },

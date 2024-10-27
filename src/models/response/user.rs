@@ -10,6 +10,7 @@ pub struct UserResponse {
     pub name: String,
     pub username: String,
     pub is_admin: bool,
+    pub is_banned: bool,
     pub creation_time: chrono::DateTime<Utc>,
     pub last_access_time: chrono::DateTime<Utc>,
 }
@@ -22,6 +23,7 @@ impl From<entity::user::Model> for UserResponse {
             username: value.username,
             email: value.email,
             is_admin: value.is_admin,
+            is_banned: value.is_banned,
             last_access_time: value.last_access_time.into(),
             creation_time: value.creation_time.into(),
         }
@@ -36,6 +38,7 @@ impl From<User> for UserResponse {
             username: value.username,
             email: value.email,
             is_admin: value.is_admin,
+            is_banned: value.is_banned,
             last_access_time: value.last_access_time,
             creation_time: value.creation_time,
         }

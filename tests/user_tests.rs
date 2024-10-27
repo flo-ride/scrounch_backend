@@ -36,19 +36,19 @@ async fn user_test_1() {
     let response = server.get("/me").add_cookie(cookies[0].clone()).await;
     response.assert_status(StatusCode::OK);
     response.assert_json_contains(
-        &json!({"id": ids[0], "email": "user_1@example.com" , "username": "user_1", "name": "John Doe", "is_admin": true }),
+        &json!({"id": ids[0], "email": "user_1@example.com" , "username": "user_1", "name": "John Doe", "is_admin": true, "is_banned": false }),
     );
 
     let response = server.get("/me").add_cookie(cookies[1].clone()).await;
     response.assert_status(StatusCode::OK);
     response.assert_json_contains(
-        &json!({"id": ids[1], "email": "user_2@example.com" , "username": "user_2", "name": "John Doe", "is_admin": false }),
+        &json!({"id": ids[1], "email": "user_2@example.com" , "username": "user_2", "name": "John Doe", "is_admin": false, "is_banned": false }),
     );
 
     let response = server.get("/me").add_cookie(cookies[2].clone()).await;
     response.assert_status(StatusCode::OK);
     response.assert_json_contains(
-        &json!({"id": ids[2], "email": "user_3@example.com" , "username": "user_3", "name": "John Doe", "is_admin": false }),
+        &json!({"id": ids[2], "email": "user_3@example.com" , "username": "user_3", "name": "John Doe", "is_admin": false, "is_banned": false }),
     );
 
     let response = server.get("/user").add_cookie(cookies[0].clone()).await;
@@ -59,9 +59,9 @@ async fn user_test_1() {
             "total_page": 1,
             "users":
             [
-                {"id": ids[0], "email": "user_1@example.com" , "username": "user_1", "name": "John Doe", "is_admin": true },
-                {"id": ids[1], "email": "user_2@example.com" , "username": "user_2", "name": "John Doe", "is_admin": false },
-                {"id": ids[2], "email": "user_3@example.com" , "username": "user_3", "name": "John Doe", "is_admin": false }
+                {"id": ids[0], "email": "user_1@example.com" , "username": "user_1", "name": "John Doe", "is_admin": true, "is_banned": false },
+                {"id": ids[1], "email": "user_2@example.com" , "username": "user_2", "name": "John Doe", "is_admin": false, "is_banned": false },
+                {"id": ids[2], "email": "user_3@example.com" , "username": "user_3", "name": "John Doe", "is_admin": false, "is_banned": false }
             ]
         }),
     );
@@ -78,7 +78,7 @@ async fn user_test_1() {
         .await;
     response.assert_status(StatusCode::OK);
     response.assert_json_contains(
-        &json!({"id": ids[1], "email": "user_2@example.com" , "username": "user_2", "name": "John Doe", "is_admin": false }),
+        &json!({"id": ids[1], "email": "user_2@example.com" , "username": "user_2", "name": "John Doe", "is_admin": false, "is_banned": false }),
     );
 
     let response = server
@@ -87,7 +87,7 @@ async fn user_test_1() {
         .await;
     response.assert_status(StatusCode::OK);
     response.assert_json_contains(
-        &json!({"id": ids[1], "email": "user_2@example.com" , "username": "user_2", "name": "John Doe", "is_admin": false }),
+        &json!({"id": ids[1], "email": "user_2@example.com" , "username": "user_2", "name": "John Doe", "is_admin": false, "is_banned": false }),
     );
 
     let response = server
@@ -116,6 +116,50 @@ async fn user_test_1() {
         .await;
     response.assert_status(StatusCode::OK);
     response.assert_json_contains(
-        &json!({"id": ids[1], "email": "user_2@example.com" , "username": "user_2", "name": "John Doe", "is_admin": false }),
+        &json!({"id": ids[1], "email": "user_2@example.com" , "username": "user_2", "name": "John Doe", "is_admin": false, "is_banned": false }),
+    );
+
+    let response = server.get("/me").add_cookie(cookies[2].clone()).await;
+    response.assert_status(StatusCode::OK);
+    response.assert_json_contains(
+        &json!({"id": ids[2], "email": "user_3@example.com" , "username": "user_3", "name": "John Doe", "is_admin": true, "is_banned": false }),
+    );
+
+    let response = server
+        .put(&format!("/user/{}", ids[1]))
+        .json(&json!({ "is_banned": true }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status(StatusCode::OK);
+
+    let response = server
+        .get(&format!("/user/{}", ids[1]))
+        .add_cookie(cookies[1].clone())
+        .await;
+    response.assert_status_forbidden();
+
+    let response = server.get("/me").add_cookie(cookies[1].clone()).await;
+    response.assert_status(StatusCode::OK);
+    response.assert_json_contains(
+        &json!({"id": ids[1], "email": "user_2@example.com" , "username": "user_2", "name": "John Doe", "is_admin": false, "is_banned": true }),
+    );
+
+    let response = server
+        .put(&format!("/user/{}", ids[2]))
+        .json(&json!({ "is_banned": true }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status(StatusCode::OK);
+
+    let response = server
+        .get(&format!("/user/{}", ids[1]))
+        .add_cookie(cookies[2].clone())
+        .await;
+    response.assert_status_forbidden();
+
+    let response = server.get("/me").add_cookie(cookies[2].clone()).await;
+    response.assert_status(StatusCode::OK);
+    response.assert_json_contains(
+        &json!({"id": ids[2], "email": "user_3@example.com" , "username": "user_3", "name": "John Doe", "is_admin": false, "is_banned": true }),
     );
 }
