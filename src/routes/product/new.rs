@@ -77,22 +77,6 @@ pub async fn post_new_product(
                     AppError::Unknow(format!("Cannot convert price: {price} - {err}"))
                 })?
             },
-            quantity: match product.quantity {
-                Some(quantity) => {
-                    if quantity > 9999 {
-                        return Err(AppError::BadOption(format!(
-                            "Quantity is too big: {quantity}"
-                        )));
-                    }
-
-                    Some(quantity.try_into().map_err(|err| {
-                        AppError::Unknow(format!(
-                            "Quantity cannot be converted: {quantity} - {err}",
-                        ))
-                    })?)
-                }
-                None => None,
-            },
             max_quantity_per_command: match product.max_quantity_per_command {
                 None => None,
                 Some(0) => None,

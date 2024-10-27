@@ -212,8 +212,6 @@ async fn create_or_update_sma_product(
                     },
                 )?,
 
-                quantity: None,
-
                 sma_code: Some(product.code),
 
                 creation_time: chrono::offset::Local::now().into(),

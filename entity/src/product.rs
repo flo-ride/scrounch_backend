@@ -11,7 +11,6 @@ pub struct Model {
     pub image: Option<String>,
     pub name: String,
     pub price: Decimal,
-    pub quantity: Option<i16>,
     pub max_quantity_per_command: Option<i16>,
     pub disabled: bool,
     pub creation_time: DateTimeWithTimeZone,

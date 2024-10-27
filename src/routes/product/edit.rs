@@ -103,22 +103,6 @@ pub async fn edit_product(
                             )?
                         }
                     },
-                    quantity: match new_product.quantity {
-                        None => existing_product.quantity,
-                        Some(quantity) => {
-                            if quantity > 9999 {
-                                return Err(AppError::BadOption(format!(
-                                    "Quantity is too big: {quantity}"
-                                )));
-                            }
-
-                            Some(quantity.try_into().map_err(|err| {
-                                AppError::Unknow(format!(
-                                    "Quantity cannot be converted: {quantity} - {err}",
-                                ))
-                            })?)
-                        }
-                    },
                     max_quantity_per_command: match new_product.max_quantity_per_command {
                         None => existing_product.max_quantity_per_command,
                         Some(0) => None,
