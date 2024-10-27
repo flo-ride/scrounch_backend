@@ -55,7 +55,7 @@ impl Mutation {
             is_admin: Set(form_data.is_admin),
             is_banned: Set(form_data.is_banned),
             creation_time: NotSet,
-            last_access_time: Set(chrono::offset::Local::now().into()),
+            last_access_time: NotSet,
         }
         .update(&conn.db_connection)
         .await;
