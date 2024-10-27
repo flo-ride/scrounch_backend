@@ -95,4 +95,27 @@ async fn user_test_1() {
         .add_cookie(cookies[1].clone())
         .await;
     response.assert_status(StatusCode::FORBIDDEN);
+
+    let response = server
+        .put(&format!("/user/{}", ids[2]))
+        .json(&json!({ "is_admin": true }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status(StatusCode::OK);
+
+    let response = server
+        .put(&format!("/user/{}", ids[1]))
+        .json(&json!({ "is_admin": true }))
+        .add_cookie(cookies[1].clone())
+        .await;
+    response.assert_status(StatusCode::FORBIDDEN);
+
+    let response = server
+        .get(&format!("/user/{}", ids[1]))
+        .add_cookie(cookies[2].clone())
+        .await;
+    response.assert_status(StatusCode::OK);
+    response.assert_json_contains(
+        &json!({"id": ids[1], "email": "user_2@example.com" , "username": "user_2", "name": "John Doe", "is_admin": false }),
+    );
 }
