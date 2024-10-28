@@ -178,12 +178,13 @@ macro_rules! cache_mdel {
             let prefix = $prefix.to_owned();
 
             tokio::spawn(async move {
-                let mut scan_stream = cache_conn.scan(format!("{}*", prefix), Some(10), None);
+                let mut scan_stream = cache_conn.scan(format!("{prefix}*"), Some(10), None);
 
                 while let Some(mut page) = scan_stream.try_next().await.unwrap_or(None) {
                     if let Some(keys) = page.take_results() {
                         let _ = cache_conn.del::<fred::bytes::Bytes, _>(keys).await;
                     }
+                    let _ = page.next();
                 }
             });
         }
