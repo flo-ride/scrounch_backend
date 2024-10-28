@@ -5,6 +5,7 @@
 //! storage systems based on various criteria. They encapsulate the logic for constructing and
 //! executing queries, ensuring that data retrieval is handled efficiently and consistently.
 
+mod location;
 mod product;
 mod user;
 

@@ -5,6 +5,7 @@
 //! updating, and deleting records in the database. They encapsulate the logic for applying changes
 //! to the data, ensuring that mutations are executed correctly and consistently across the application.
 
+mod location;
 mod product;
 mod user;
 
