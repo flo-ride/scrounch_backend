@@ -154,6 +154,34 @@ macro_rules! cache_mset {
     }};
 }
 
+/// A macro for one key in Redis.
+///
+/// This macro retrieves all keys matching the specified prefix from Redis and deletes them.
+/// It is useful for clearing a specific group of cached items, such as all users or products.
+///
+/// # Features
+/// - Requires the `cache` feature to be enabled.
+/// - Uses Redis to delete key
+///
+/// # Parameters
+/// - `$conn`: The cache connection, expected to be an instance with a Redis connection.
+/// - `$key`: The key to delete.
+#[cfg(feature = "cache")]
+macro_rules! cache_del {
+    ($conn:expr, $key:expr) => {{
+        use fred::interfaces::KeysInterface;
+
+        if let Some(conn) = &$conn.cache_connection {
+            let cache_conn = conn.clone();
+            let key = $key.to_owned();
+
+            tokio::spawn(async move {
+                let _ = cache_conn.del::<fred::bytes::Bytes, _>(key).await;
+            });
+        }
+    }};
+}
+
 /// A macro for deleting multiple keys in Redis that start with a given prefix.
 ///
 /// This macro retrieves all keys matching the specified prefix from Redis and deletes them.
@@ -191,6 +219,7 @@ macro_rules! cache_mdel {
     }};
 }
 
+pub(crate) use cache_del;
 pub(crate) use cache_get;
 pub(crate) use cache_mdel;
 pub(crate) use cache_mget;

@@ -1,6 +1,6 @@
 use crate::{
     mutation::Mutation,
-    r#macro::{cache_mdel, cache_set},
+    r#macro::{cache_del, cache_mdel, cache_set},
     Connection,
 };
 use ::entity::{location, location::Entity as Location};
@@ -74,10 +74,7 @@ impl Mutation {
 
         #[cfg(feature = "cache")]
         if result.is_ok() {
-            use fred::{bytes::Bytes, interfaces::KeysInterface};
-            if let Some(cache) = &conn.cache_connection {
-                let _ = cache.del::<Bytes, _>(format!("location:{id}")).await;
-            }
+            cache_del!(conn, format!("location:{id}"));
             cache_mdel!(conn, "locations");
         }
 
