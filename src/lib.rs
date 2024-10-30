@@ -176,7 +176,8 @@ fn auth_optional_routes(path: &str) -> axum::Router<state::AppState> {
             .route("/status", get(routes::utils::status::get_status))
             .route("/sma", post(routes::utils::sma::post_update_from_sma))
             .nest("/product", routes::product::router())
-            .nest("/user", routes::user::router()),
+            .nest("/user", routes::user::router())
+            .nest("/location", routes::location::router()),
     )
 }
 
