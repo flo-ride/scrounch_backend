@@ -3,6 +3,8 @@
 //! This module defines the `User` model used by the `scrounch_backend` application
 //! to represent user-related data.
 
+use entity::response::user::UserResponse;
+
 /// Represents a user within the `scrounch_backend` application.
 ///
 /// This struct is used to encapsulate user information such as their
@@ -31,6 +33,21 @@ impl From<entity::models::user::Model> for User {
             is_banned: value.is_banned,
             last_access_time: value.last_access_time.into(),
             creation_time: value.creation_time.into(),
+        }
+    }
+}
+
+impl From<User> for UserResponse {
+    fn from(value: User) -> Self {
+        Self {
+            id: value.id,
+            name: value.name,
+            username: value.username,
+            email: value.email,
+            is_admin: value.is_admin,
+            is_banned: value.is_banned,
+            last_access_time: value.last_access_time,
+            creation_time: value.creation_time,
         }
     }
 }

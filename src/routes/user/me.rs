@@ -4,9 +4,10 @@
 //! details of the currently authenticated user. It is typically used in contexts
 //! where user-specific information needs to be displayed or updated.
 use axum::{extract::State, Json};
+use entity::response::user::UserResponse;
 use service::Connection;
 
-use crate::{error::AppError, models::response::user::UserResponse};
+use crate::error::AppError;
 
 /// Handles the `/me` route, returning the current user's information if authenticated.
 ///

@@ -4,7 +4,6 @@ use crate::{
     error::AppError,
     models::{
         profile::{admin::Admin, user::User},
-        response::user::{UserListResponse, UserResponse},
         utils::pagination::Pagination,
     },
 };
@@ -12,6 +11,7 @@ use axum::{
     extract::{Path, Query, State},
     Json,
 };
+use entity::response::user::{UserListResponse, UserResponse};
 use migration::IntoCondition;
 use service::Connection;
 
