@@ -1,16 +1,13 @@
 //! Route for editing an existing location
 
-use crate::{
-    error::AppError,
-    models::{profile::admin::Admin, request::location::EditLocation},
-};
+use crate::{error::AppError, models::profile::admin::Admin};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
     Json,
 };
-use entity::models::location::Model as Location;
+use entity::{models::location::ActiveModel, request::location::EditLocationRequest};
 use service::Connection;
 
 /// Edit an existing location by ID.
@@ -31,43 +28,15 @@ pub async fn edit_location(
     admin: Admin,
     Path(id): Path<uuid::Uuid>,
     State(conn): State<Connection>,
-    Json(new_location): Json<EditLocation>,
+    Json(edit_location): Json<EditLocationRequest>,
 ) -> Result<impl IntoResponse, AppError> {
     let result = service::Query::find_location_by_id(&conn, id).await?;
 
     match result {
         Some(existing_location) => {
-            service::Mutation::update_location(
-                &conn,
-                id,
-                Location {
-                    id,
-                    name: match new_location.name.clone() {
-                        None => existing_location.name.clone(),
-                        Some(name) => {
-                            let max_length = 32;
-                            if name.is_empty() {
-                                return Err(AppError::BadOption(
-                                    "Name cannot be empty".to_string(),
-                                ));
-                            }
-                            if name.len() > max_length {
-                                return Err(AppError::BadOption(format!(
-                                    "Name cannot be longer than {max_length}: {name}",
-                                )));
-                            }
-                            name
-                        }
-                    },
-                    category: new_location.category.map(Into::into),
-                    creation_time: existing_location.creation_time,
-                    disabled: match new_location.disabled {
-                        Some(disabled) => disabled,
-                        None => existing_location.disabled,
-                    },
-                },
-            )
-            .await?;
+            let location_model: ActiveModel = edit_location.try_into()?;
+
+            let result = service::Mutation::update_location(&conn, id, location_model).await?;
 
             tracing::info!(
                 "Admin {} \"{}\" successfully edited location {} \"{}\" - {:?}",
@@ -75,7 +44,7 @@ pub async fn edit_location(
                 admin.id,
                 existing_location.name,
                 id,
-                new_location
+                result
             );
 
             Ok((StatusCode::OK, ""))

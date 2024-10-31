@@ -26,20 +26,15 @@ impl Mutation {
         result
     }
 
-    pub async fn update_location(
+    pub async fn update_location<M: IntoActiveModel<location::ActiveModel>>(
         conn: &Connection,
         id: uuid::Uuid,
-        form_data: location::Model,
+        form_data: M,
     ) -> Result<location::Model, DbErr> {
-        let result = location::ActiveModel {
-            id: Set(id),
-            name: Set(form_data.name),
-            category: Set(form_data.category),
-            creation_time: NotSet,
-            disabled: Set(form_data.disabled),
-        }
-        .update(&conn.db_connection)
-        .await;
+        let mut form_data = form_data.into_active_model();
+        form_data.id = Set(id);
+
+        let result = form_data.update(&conn.db_connection).await;
 
         #[cfg(feature = "cache")]
         if let Ok(model) = &result {

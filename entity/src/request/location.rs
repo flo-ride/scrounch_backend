@@ -101,3 +101,53 @@ impl TryFrom<NewLocationRequest> for ActiveModel {
         })
     }
 }
+
+/// Represents a request to editing an existing location, including necessary
+/// validation for name length and optional category.
+#[derive(Debug, Default, Clone, PartialEq, serde::Deserialize, utoipa::ToSchema)]
+pub struct EditLocationRequest {
+    /// The name of the location, subject to length validation.
+    pub name: Option<String>,
+    /// The category of the location, which may be optional.
+    pub category: Option<Option<LocationCategoryRequest>>,
+    /// Optional field to disable or enable the product.
+    pub disabled: Option<bool>,
+}
+
+impl TryFrom<EditLocationRequest> for ActiveModel {
+    type Error = LocationRequestError;
+
+    /// Converts a `EditLocationRequest` into an `ActiveModel`, performing validation on fields.
+    fn try_from(value: EditLocationRequest) -> Result<Self, Self::Error> {
+        Ok(ActiveModel {
+            id: NotSet,
+            name: match value.name {
+                Some(name) => {
+                    if name.is_empty() {
+                        return Err(Self::Error::NameCannotBeEmpty);
+                    }
+                    if name.len() > LOCATION_NAME_MAX_LENGTH {
+                        return Err(Self::Error::NameCannotBeLongerThan(
+                            name,
+                            LOCATION_NAME_MAX_LENGTH,
+                        ));
+                    }
+                    Set(name)
+                }
+                None => NotSet,
+            },
+            category: match value.category {
+                Some(category_opt) => match category_opt {
+                    Some(category) => Set(Some(category.into())),
+                    None => Set(None),
+                },
+                None => NotSet,
+            },
+            disabled: match value.disabled {
+                Some(disabled) => Set(disabled),
+                None => NotSet,
+            },
+            creation_time: NotSet,
+        })
+    }
+}

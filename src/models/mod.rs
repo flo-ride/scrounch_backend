@@ -6,6 +6,5 @@
 pub mod r#enum;
 pub mod file;
 pub mod profile;
-pub mod request;
 pub mod response;
 pub mod utils;
