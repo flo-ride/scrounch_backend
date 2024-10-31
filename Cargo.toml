@@ -61,6 +61,7 @@ tower-sessions = "0.13.0"
 # Serialisation + Deserialisation 
 serde = { version = "1.0.210", features = ["derive"] }
 serde_json = { version = "1.0.114" }
+serde_with = { version ="3.11.0", features = ["macros"] }
 
 # Cache (Redis/Valkey)
 fred = { version = "9.2.1", optional = true, features = ["partial-tracing", "serde-json"] }

@@ -12,6 +12,7 @@ path = "src/lib.rs"
 # Serialisation + Deserialisation 
 serde = { version = "1.0.210", features = ["derive"] }
 serde_json = { version = "1.0.114" }
+serde_with = { version ="3.11.0", features = ["macros"] }
 
 # OpenAPI
 utoipa = { version = "4.2.0", features = ["axum_extras", "uuid", "chrono", "time", "decimal"] }
