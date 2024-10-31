@@ -9,25 +9,36 @@
 //! - Serving the OpenAPI schema in JSON format.
 //! - Providing documentation for the API endpoints as specified by the OpenAPI standard.
 
-use entity::request::product::{EditProductRequest, NewProductRequest};
+use entity::request::{
+    location::{EditLocationRequest, NewLocationRequest},
+    product::{EditProductRequest, NewProductRequest},
+    user::EditUserRequest,
+};
 use utoipa::OpenApi;
 
 use crate::models::file::FileType;
 use crate::models::response::product::*;
 use crate::models::response::user::{UserListResponse, UserResponse};
+
 use crate::routes::product::delete::__path_delete_product;
 use crate::routes::product::edit::__path_edit_product;
 use crate::routes::product::get::{__path_get_all_products, __path_get_product};
 use crate::routes::product::new::__path_post_new_product;
+
+use crate::routes::location::delete::__path_delete_location;
+use crate::routes::location::edit::__path_edit_location;
+use crate::routes::location::get::{__path_get_all_locations, __path_get_location};
+use crate::routes::location::new::__path_post_new_location;
+
 use crate::routes::user::edit::__path_edit_user;
 use crate::routes::user::get::{__path_get_all_users, __path_get_user};
 use crate::routes::user::me::__path_get_me;
+
 use crate::routes::utils::download::__path_download_file;
 use crate::routes::utils::login::__path_get_login;
 use crate::routes::utils::logout::__path_get_logout;
 use crate::routes::utils::status::__path_get_status;
 use crate::routes::utils::upload::{FileSchema, __path_post_upload_files};
-use entity::request::user::EditUserRequest;
 
 #[derive(OpenApi)]
 #[openapi(
@@ -46,6 +57,11 @@ use entity::request::user::EditUserRequest;
         get_user,
         get_all_users,
         edit_user,
+        post_new_location,
+        get_location,
+        get_all_locations,
+        edit_location,
+        delete_location
     ),
     components(
         schemas(EditUserRequest),
@@ -55,6 +71,8 @@ use entity::request::user::EditUserRequest;
         schemas(FileSchema),
         schemas(NewProductRequest),
         schemas(EditProductRequest),
+        schemas(NewLocationRequest),
+        schemas(EditLocationRequest),
         schemas(ProductResponse),
         schemas(ProductListResponse)
     )
