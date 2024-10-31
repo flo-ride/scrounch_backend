@@ -1,8 +1,6 @@
-use entity::models::product::Model as Product;
+use entity::{models::product::Model as Product, response::product::EditedProductResponse};
 use serde::Deserialize;
 use serde_json::Value;
-
-use crate::models::response::product::EditedProductResponse;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum SmaChange {

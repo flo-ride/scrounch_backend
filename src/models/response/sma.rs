@@ -1,6 +1,6 @@
-use crate::{error::AppError, models::utils::sma::SmaChange};
+use entity::response::product::{EditedProductResponse, ProductResponse, ProductResponseError};
 
-use super::product::{EditedProductResponse, ProductResponse};
+use crate::{error::AppError, models::utils::sma::SmaChange};
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct SmaResponse {
@@ -30,7 +30,7 @@ impl TryFrom<Vec<SmaChange>> for SmaResponse {
                     _ => None,
                 })
                 .map(TryInto::<ProductResponse>::try_into)
-                .collect::<Result<_, AppError>>()?,
+                .collect::<Result<_, ProductResponseError>>()?,
         })
     }
 }

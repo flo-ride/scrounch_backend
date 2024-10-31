@@ -4,10 +4,10 @@
 
 use axum::extract::{Query, State};
 use axum::Json;
+use entity::response::product::EditedProductResponse;
 use futures::future::join_all;
 use service::Connection;
 
-use crate::models::response::product::EditedProductResponse;
 use crate::models::utils::sma::SmaChangeTypeMatrix;
 use crate::{
     error::AppError,

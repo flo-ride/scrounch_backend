@@ -15,12 +15,14 @@ use entity::{
         product::{EditProductRequest, NewProductRequest},
         user::EditUserRequest,
     },
-    response::user::{UserListResponse, UserResponse},
+    response::{
+        product::{ProductListResponse, ProductResponse},
+        user::{UserListResponse, UserResponse},
+    },
 };
 use utoipa::OpenApi;
 
 use crate::models::file::FileType;
-use crate::models::response::product::*;
 
 use crate::routes::product::delete::__path_delete_product;
 use crate::routes::product::edit::__path_edit_product;

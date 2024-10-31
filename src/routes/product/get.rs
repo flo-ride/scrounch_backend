@@ -2,16 +2,13 @@
 
 use crate::{
     error::AppError,
-    models::{
-        profile::admin::Admin,
-        response::product::{ProductListResponse, ProductResponse},
-        utils::pagination::Pagination,
-    },
+    models::{profile::admin::Admin, utils::pagination::Pagination},
 };
 use axum::{
     extract::{Path, Query, State},
     Json,
 };
+use entity::response::product::{ProductListResponse, ProductResponse, ProductResponseError};
 use migration::IntoCondition;
 use sea_orm::ColumnTrait;
 use service::Connection;
@@ -111,7 +108,7 @@ pub async fn get_all_products(
     let products = result
         .into_iter()
         .map(|x| x.try_into())
-        .collect::<Result<_, AppError>>()?;
+        .collect::<Result<_, ProductResponseError>>()?;
     Ok(Json(ProductListResponse {
         current_page: page,
         total_page,

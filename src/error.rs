@@ -74,3 +74,9 @@ impl From<entity::request::location::LocationRequestError> for AppError {
         Self::BadOption(value.to_string())
     }
 }
+
+impl From<entity::response::product::ProductResponseError> for AppError {
+    fn from(value: entity::response::product::ProductResponseError) -> Self {
+        Self::Unknow(value.to_string())
+    }
+}
