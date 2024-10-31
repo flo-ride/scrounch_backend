@@ -20,8 +20,8 @@ pub struct User {
     pub last_access_time: chrono::DateTime<chrono::Utc>,
 }
 
-impl From<entity::user::Model> for User {
-    fn from(value: entity::user::Model) -> Self {
+impl From<entity::models::user::Model> for User {
+    fn from(value: entity::models::user::Model) -> Self {
         Self {
             id: value.id,
             email: value.email,

@@ -8,7 +8,7 @@ use axum::{
     http::StatusCode,
     response::IntoResponse,
 };
-use entity::product::Model as Product;
+use entity::models::product::Model as Product;
 use service::Connection;
 
 /// Deletes a product by its database ID.

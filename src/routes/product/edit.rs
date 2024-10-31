@@ -10,7 +10,7 @@ use axum::{
     response::IntoResponse,
     Json,
 };
-use entity::product::Model as Product;
+use entity::models::product::Model as Product;
 use service::Connection;
 
 /// Edit an existing product by ID in the store.

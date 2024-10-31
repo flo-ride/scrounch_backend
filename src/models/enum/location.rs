@@ -1,4 +1,4 @@
-use entity::sea_orm_active_enums::LocationCategory as ModelLocationCategory;
+use entity::models::sea_orm_active_enums::LocationCategory as ModelLocationCategory;
 
 #[derive(Debug, PartialEq, Clone, Copy, serde::Deserialize, serde::Serialize, utoipa::ToSchema)]
 #[serde(rename_all = "lowercase")]

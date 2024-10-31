@@ -10,7 +10,7 @@ use crate::{
     r#macro::{cache_get, cache_mget, cache_mset, cache_set},
     Connection,
 };
-use ::entity::{user, user::Entity as User};
+use ::entity::models::{user, user::Entity as User};
 use sea_orm::*;
 
 impl Query {

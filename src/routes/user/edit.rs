@@ -10,7 +10,7 @@ use axum::{
     response::IntoResponse,
     Json,
 };
-use entity::user::Model as User;
+use entity::models::user::Model as User;
 use service::Connection;
 
 /// Edit an existing user by ID.

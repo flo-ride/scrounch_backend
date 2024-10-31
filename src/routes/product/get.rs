@@ -98,7 +98,7 @@ pub async fn get_all_products(
     let condition = if admin.is_some() {
         service::every_condition().into_condition()
     } else {
-        sea_orm::Condition::any().add(entity::product::Column::Disabled.eq(false))
+        sea_orm::Condition::any().add(entity::models::product::Column::Disabled.eq(false))
     };
 
     let result =

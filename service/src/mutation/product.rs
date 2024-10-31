@@ -3,7 +3,7 @@ use crate::{
     r#macro::{cache_del, cache_mdel, cache_set},
     Connection,
 };
-use ::entity::{product, product::Entity as Product};
+use ::entity::models::{product, product::Entity as Product};
 use sea_orm::*;
 use sqlx::types::Uuid;
 

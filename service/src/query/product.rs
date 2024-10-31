@@ -3,7 +3,7 @@ use crate::{
     r#macro::{cache_get, cache_mget, cache_mset, cache_set},
     Connection,
 };
-use ::entity::{product, product::Entity as Product};
+use ::entity::models::{product, product::Entity as Product};
 use sea_orm::*;
 
 impl Query {

@@ -1,4 +1,4 @@
-use entity::product::Model as Product;
+use entity::models::product::Model as Product;
 use serde::Deserialize;
 use serde_json::Value;
 

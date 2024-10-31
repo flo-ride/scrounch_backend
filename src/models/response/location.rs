@@ -11,8 +11,8 @@ pub struct LocationResponse {
     pub disabled: bool,
 }
 
-impl From<entity::location::Model> for LocationResponse {
-    fn from(value: entity::location::Model) -> Self {
+impl From<entity::models::location::Model> for LocationResponse {
+    fn from(value: entity::models::location::Model) -> Self {
         Self {
             id: value.id,
             name: value.name,

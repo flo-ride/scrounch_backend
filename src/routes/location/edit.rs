@@ -10,7 +10,7 @@ use axum::{
     response::IntoResponse,
     Json,
 };
-use entity::location::Model as Location;
+use entity::models::location::Model as Location;
 use service::Connection;
 
 /// Edit an existing location by ID.

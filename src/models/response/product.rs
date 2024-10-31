@@ -50,10 +50,10 @@ pub struct EditedProductResponse {
     pub disabled: Option<bool>,
 }
 
-impl TryFrom<entity::product::Model> for ProductResponse {
+impl TryFrom<entity::models::product::Model> for ProductResponse {
     type Error = AppError;
 
-    fn try_from(value: entity::product::Model) -> Result<Self, Self::Error> {
+    fn try_from(value: entity::models::product::Model) -> Result<Self, Self::Error> {
         Ok(Self {
             image: value.image,
             id: value.id,

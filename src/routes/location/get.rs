@@ -97,7 +97,7 @@ pub async fn get_all_locations(
     let condition = if admin.is_some() {
         service::every_condition().into_condition()
     } else {
-        sea_orm::Condition::any().add(entity::location::Column::Disabled.eq(false))
+        sea_orm::Condition::any().add(entity::models::location::Column::Disabled.eq(false))
     };
 
     let result =

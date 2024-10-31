@@ -8,7 +8,7 @@ use crate::models::file::FileType;
 use crate::models::profile::admin::Admin;
 use crate::{error::AppError, models::request::product::NewProduct};
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
-use entity::product::Model as Product;
+use entity::models::product::Model as Product;
 use service::Connection;
 
 /// Handler for creating a new product.

@@ -199,7 +199,7 @@ async fn create_or_update_sma_product(
                 tracing::info!("Adding new product Image from SMA: {name}");
             }
 
-            let form_data = entity::product::Model {
+            let form_data = entity::models::product::Model {
                 id: uuid::Uuid::new_v4(),
 
                 name: product.name,

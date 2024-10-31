@@ -7,7 +7,7 @@
 use crate::models::profile::admin::Admin;
 use crate::{error::AppError, models::request::location::NewLocation};
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
-use entity::location::Model as Location;
+use entity::models::location::Model as Location;
 use service::Connection;
 
 /// Handler for creating a new location.
