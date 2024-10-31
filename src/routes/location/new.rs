@@ -4,10 +4,9 @@
 //! It allows for the creation of new location entries in the database.
 //! Admin privileges are required to access this route.
 
-use crate::models::profile::admin::Admin;
-use crate::{error::AppError, models::request::location::NewLocation};
+use crate::{error::AppError, models::profile::admin::Admin};
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
-use entity::models::location::Model as Location;
+use entity::{models::location::ActiveModel, request::location::NewLocationRequest};
 use service::Connection;
 
 /// Handler for creating a new location.
@@ -36,40 +35,21 @@ use service::Connection;
 pub async fn post_new_location(
     admin: Admin,
     State(conn): State<Connection>,
-    Json(location): Json<NewLocation>,
+    Json(location): Json<NewLocationRequest>,
 ) -> Result<impl IntoResponse, AppError> {
-    let id = uuid::Uuid::new_v4();
-    service::Mutation::create_location(
-        &conn,
-        Location {
-            id,
-            name: {
-                let name = location.name.clone();
-                let max_length = 32;
-                if name.is_empty() {
-                    return Err(AppError::BadOption("Name cannot be empty".to_string()));
-                }
-                if name.len() > max_length {
-                    return Err(AppError::BadOption(format!(
-                        "Name cannot be longer than {max_length}: {name}",
-                    )));
-                }
-                name
-            },
-            category: location.category.map(Into::into),
-            disabled: false,
-            creation_time: chrono::offset::Local::now().into(),
-        },
-    )
-    .await?;
+    let location_model: ActiveModel = location.try_into()?;
+
+    let result = service::Mutation::create_location(&conn, location_model).await?;
+
+    let id = result.id;
 
     tracing::info!(
         "Admin {} \"{}\" added a new location {} \"{}\" - {:?}",
         admin.name,
         admin.id,
-        location.name,
         id,
-        location
+        result.name,
+        result
     );
 
     Ok((StatusCode::CREATED, id.to_string()).into_response())

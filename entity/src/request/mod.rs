@@ -9,5 +9,6 @@
 //! records related to different entities in the system, like products, users,
 //! or locations, depending on the application's functionality.
 
+pub mod location;
 pub mod product;
 pub mod user;

@@ -8,23 +8,17 @@ use sea_orm::*;
 use sqlx::types::Uuid;
 
 impl Mutation {
-    pub async fn create_location(
+    pub async fn create_location<M: IntoActiveModel<location::ActiveModel>>(
         conn: &Connection,
-        form_data: location::Model,
+        form_data: M,
     ) -> Result<location::Model, DbErr> {
-        let result = location::ActiveModel {
-            id: Set(form_data.id),
-            name: Set(form_data.name),
-            category: Set(form_data.category),
-            creation_time: Set(chrono::offset::Local::now().into()),
-            disabled: Set(false),
-        }
-        .insert(&conn.db_connection)
-        .await;
+        let form_data = form_data.into_active_model();
+
+        let result = form_data.insert(&conn.db_connection).await;
 
         #[cfg(feature = "cache")]
         if let Ok(model) = &result {
-            let id = form_data.id.to_string();
+            let id = model.id.to_string();
             cache_set!(conn, format!("location:{id}"), model, 60 * 15);
             cache_mdel!(conn, "locations");
         }
