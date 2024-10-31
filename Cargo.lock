@@ -1255,6 +1255,7 @@ name = "entity"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "rust_decimal",
  "sea-orm",
  "serde",
  "utoipa",
@@ -3525,6 +3526,7 @@ dependencies = [
  "regex",
  "reqwest 0.12.7",
  "rust-s3",
+ "rust_decimal",
  "sea-orm",
  "serde",
  "serde_json",

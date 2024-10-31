@@ -18,6 +18,7 @@ utoipa = { version = "4.2.0", features = ["axum_extras", "uuid", "chrono", "time
 # Utils
 uuid = { version = "1.10.0", features = ["v4", "fast-rng", "serde"] }
 chrono = "0.4.38"
+rust_decimal = "1.36.0"
 
 [dependencies.sea-orm]
 version = "1.0.1"
