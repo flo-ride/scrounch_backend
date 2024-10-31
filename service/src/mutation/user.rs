@@ -15,26 +15,17 @@ use sea_orm::*;
 use sqlx::types::Uuid;
 
 impl Mutation {
-    pub async fn create_user(
+    pub async fn create_user<M: IntoActiveModel<user::ActiveModel>>(
         conn: &Connection,
-        form_data: user::Model,
+        form_data: M,
     ) -> Result<user::Model, DbErr> {
-        let result = user::ActiveModel {
-            id: Set(form_data.id),
-            email: Set(form_data.email),
-            name: Set(form_data.name),
-            username: Set(form_data.username),
-            is_banned: Set(form_data.is_banned),
-            is_admin: Set(form_data.is_admin),
-            creation_time: Set(chrono::offset::Local::now().into()),
-            last_access_time: Set(chrono::offset::Local::now().into()),
-        }
-        .insert(&conn.db_connection)
-        .await;
+        let form_data = form_data.into_active_model();
+
+        let result = form_data.insert(&conn.db_connection).await;
 
         #[cfg(feature = "cache")]
         if let Ok(model) = &result {
-            let id = form_data.id.to_string();
+            let id = model.id.to_string();
             cache_set!(conn, format!("user:{id}"), model, 60 * 15);
             cache_mdel!(conn, "users");
         }

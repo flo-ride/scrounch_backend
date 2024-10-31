@@ -9,7 +9,8 @@
 use crate::error::AppError;
 use crate::{models::profile::oidc_user::OidcUser, state::AppState};
 use axum::{extract::State, response::IntoResponse};
-use entity::models::user::Model as User;
+use entity::models::user::{self};
+use sea_orm::ActiveValue::Set;
 use service::Connection;
 
 /// Handles the login route by redirecting the user to the frontend.
@@ -48,15 +49,13 @@ pub async fn get_login(
 
         service::Mutation::create_user(
             &conn,
-            User {
-                id,
-                username: user.username,
-                name: user.name,
-                email: user.email,
-                is_admin,
-                is_banned: false,
-                creation_time: chrono::offset::Local::now().into(),
-                last_access_time: chrono::offset::Local::now().into(),
+            user::ActiveModel {
+                id: Set(id),
+                username: Set(user.username),
+                name: Set(user.name),
+                email: Set(user.email),
+                is_admin: Set(is_admin),
+                ..Default::default()
             },
         )
         .await?;
