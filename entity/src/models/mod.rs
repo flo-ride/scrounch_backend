@@ -1,3 +1,6 @@
+//! Module containing SeaORM database entities representing the database schema.
+//! Each entity corresponds to a table in the database.
+
 pub mod location;
 pub mod prelude;
 pub mod product;
