@@ -42,23 +42,17 @@ impl Mutation {
         result
     }
 
-    pub async fn update_user(
+    pub async fn update_user<M: IntoActiveModel<user::ActiveModel>>(
         conn: &Connection,
         id: uuid::Uuid,
-        form_data: user::Model,
+        form_data: M,
     ) -> Result<user::Model, DbErr> {
-        let result = user::ActiveModel {
-            id: Set(id),
-            email: Set(form_data.email),
-            username: Set(form_data.username),
-            name: Set(form_data.name),
-            is_admin: Set(form_data.is_admin),
-            is_banned: Set(form_data.is_banned),
-            creation_time: NotSet,
-            last_access_time: NotSet,
-        }
-        .update(&conn.db_connection)
-        .await;
+        let mut form_data = form_data.into_active_model();
+
+        form_data.id = Set(id);
+        form_data.creation_time = NotSet;
+
+        let result = form_data.update(&conn.db_connection).await;
 
         #[cfg(feature = "cache")]
         if let Ok(model) = &result {

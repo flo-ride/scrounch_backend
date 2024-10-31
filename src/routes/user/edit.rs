@@ -1,16 +1,13 @@
 //! Route for editing an existing user
 
-use crate::{
-    error::AppError,
-    models::{profile::admin::Admin, request::user::EditUser},
-};
+use crate::{error::AppError, models::profile::admin::Admin};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
     Json,
 };
-use entity::models::user::Model as User;
+use entity::request::user::EditUserRequest;
 use service::Connection;
 
 /// Edit an existing user by ID.
@@ -31,42 +28,13 @@ pub async fn edit_user(
     admin: Admin,
     Path(id): Path<uuid::Uuid>,
     State(conn): State<Connection>,
-    Json(new_user): Json<EditUser>,
+    Json(edit_user): Json<EditUserRequest>,
 ) -> Result<impl IntoResponse, AppError> {
     let result = service::Query::find_user_by_id(&conn, id).await?;
 
     match result {
         Some(existing_user) => {
-            service::Mutation::update_user(
-                &conn,
-                id,
-                User {
-                    id,
-                    name: existing_user.name.clone(),
-                    email: existing_user.email,
-                    username: existing_user.username,
-                    is_admin: {
-                        let mut is_admin = match new_user.is_admin {
-                            Some(is_admin) => is_admin,
-                            None => existing_user.is_admin,
-                        };
-                        if let Some(true) = new_user.is_banned {
-                            is_admin = false;
-                        }
-                        if new_user.is_banned.is_none() && existing_user.is_banned {
-                            is_admin = false;
-                        }
-                        is_admin
-                    },
-                    is_banned: match new_user.is_banned {
-                        Some(is_banned) => is_banned,
-                        None => existing_user.is_banned,
-                    },
-                    creation_time: existing_user.creation_time,
-                    last_access_time: existing_user.last_access_time,
-                },
-            )
-            .await?;
+            let result = service::Mutation::update_user(&conn, id, edit_user).await?;
 
             tracing::info!(
                 "Admin {} \"{}\" successfully edited user {} \"{}\" - {:?}",
@@ -74,7 +42,7 @@ pub async fn edit_user(
                 admin.id,
                 existing_user.name,
                 id,
-                new_user
+                result
             );
 
             Ok((StatusCode::OK, ""))

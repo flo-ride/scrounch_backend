@@ -13,7 +13,6 @@ use utoipa::OpenApi;
 
 use crate::models::file::FileType;
 use crate::models::request::product::*;
-use crate::models::request::user::EditUser;
 use crate::models::response::product::*;
 use crate::models::response::user::{UserListResponse, UserResponse};
 use crate::routes::product::delete::__path_delete_product;
@@ -28,6 +27,7 @@ use crate::routes::utils::login::__path_get_login;
 use crate::routes::utils::logout::__path_get_logout;
 use crate::routes::utils::status::__path_get_status;
 use crate::routes::utils::upload::{FileSchema, __path_post_upload_files};
+use entity::request::user::EditUserRequest;
 
 #[derive(OpenApi)]
 #[openapi(
@@ -48,7 +48,7 @@ use crate::routes::utils::upload::{FileSchema, __path_post_upload_files};
         edit_user,
     ),
     components(
-        schemas(EditUser),
+        schemas(EditUserRequest),
         schemas(UserListResponse),
         schemas(UserResponse),
         schemas(FileType),
