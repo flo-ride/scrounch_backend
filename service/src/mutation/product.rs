@@ -3,12 +3,11 @@ use crate::{
     r#macro::{cache_del, cache_mdel, cache_set},
     Connection,
 };
-use ::entity::models::product::{self, ActiveModel, Entity as Product};
+use ::entity::models::product::{self, Entity as Product};
 use sea_orm::*;
-use sqlx::types::Uuid;
 
 impl Mutation {
-    pub async fn create_product<M: IntoActiveModel<ActiveModel>>(
+    pub async fn create_product<M: IntoActiveModel<product::ActiveModel>>(
         conn: &Connection,
         form_data: M,
     ) -> Result<product::Model, DbErr> {
@@ -25,23 +24,15 @@ impl Mutation {
         result
     }
 
-    pub async fn update_product(
+    pub async fn update_product<M: IntoActiveModel<product::ActiveModel>>(
         conn: &Connection,
         id: uuid::Uuid,
-        form_data: product::Model,
+        form_data: M,
     ) -> Result<product::Model, DbErr> {
-        let result = product::ActiveModel {
-            id: Set(id),
-            image: Set(form_data.image),
-            name: Set(form_data.name),
-            price: Set(form_data.price),
-            max_quantity_per_command: Set(form_data.max_quantity_per_command),
-            sma_code: Set(form_data.sma_code),
-            creation_time: NotSet,
-            disabled: Set(form_data.disabled),
-        }
-        .update(&conn.db_connection)
-        .await;
+        let mut form_data = form_data.into_active_model();
+        form_data.id = Set(id);
+
+        let result = form_data.update(&conn.db_connection).await;
 
         #[cfg(feature = "cache")]
         if let Ok(model) = &result {
@@ -52,15 +43,8 @@ impl Mutation {
         result
     }
 
-    pub async fn delete_product<S: Into<String>>(
-        conn: &Connection,
-        id: S,
-    ) -> Result<DeleteResult, DbErr> {
-        let id = id.into();
-        let uuid = Uuid::try_parse(&id)
-            .map_err(|e| DbErr::Custom(format!("Could not Serialise given id: \"{id}\" - {e}")))?;
-
-        let product: product::ActiveModel = Product::find_by_id(uuid)
+    pub async fn delete_product(conn: &Connection, id: uuid::Uuid) -> Result<DeleteResult, DbErr> {
+        let product: product::ActiveModel = Product::find_by_id(id)
             .one(&conn.db_connection)
             .await?
             .ok_or(DbErr::Custom(format!("Cannot find product: \"{id}\"")))

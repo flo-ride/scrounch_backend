@@ -2,7 +2,7 @@
 
 use crate::{
     error::AppError,
-    models::{file::FileType, profile::admin::Admin, request::product::EditProduct},
+    models::{file::FileType, profile::admin::Admin},
 };
 use axum::{
     extract::{Path, State},
@@ -10,7 +10,7 @@ use axum::{
     response::IntoResponse,
     Json,
 };
-use entity::models::product::Model as Product;
+use entity::{models::product::ActiveModel, request::product::EditProductRequest};
 use service::Connection;
 
 /// Edit an existing product by ID in the store.
@@ -35,119 +35,58 @@ pub async fn edit_product(
     Path(id): Path<uuid::Uuid>,
     State(conn): State<Connection>,
     State(s3): State<s3::Bucket>,
-    Json(new_product): Json<EditProduct>,
+    Json(edit_product): Json<EditProductRequest>,
 ) -> Result<impl IntoResponse, AppError> {
     let result = service::Query::find_product_by_id(&conn, id).await?;
 
     match result {
         Some(existing_product) => {
-            let old_image = existing_product.image.clone();
-            match (new_product.image.clone(), old_image.clone()) {
-                (Some(new_image), Some(old_image)) => {
-                    if new_image != old_image {
-                        // Check if new image exist
-                        let (_result, _code) = s3
-                            .head_object(format!("{}/{}", FileType::Product, new_image))
-                            .await?;
+            let edit_product: ActiveModel = edit_product.try_into()?;
+
+            let mut check_image = None;
+            let mut delete_image = None;
+            if let sea_orm::ActiveValue::Set(image_change) = edit_product.image.clone() {
+                match image_change {
+                    Some(new_image) => match existing_product.image {
+                        Some(existing_image) => {
+                            if new_image != existing_image {
+                                check_image = Some(new_image);
+                                delete_image = Some(existing_image);
+                            }
+                        }
+                        None => check_image = Some(new_image),
+                    },
+                    None => {
+                        if let Some(image) = existing_product.image {
+                            delete_image = Some(image);
+                        }
                     }
                 }
-                (Some(new_image), _) => {
-                    // Check if new image exist
-                    let (_result, _code) = s3
-                        .head_object(format!("{}/{}", FileType::Product, new_image))
-                        .await?;
-                }
-                _ => {}
             }
 
-            service::Mutation::update_product(
-                &conn,
-                id,
-                Product {
-                    id,
-                    image: match new_product.image.clone() {
-                        None => existing_product.image.clone(),
-                        Some(image) => Some(image),
-                    },
-                    name: match new_product.name.clone() {
-                        None => existing_product.name.clone(),
-                        Some(name) => {
-                            let max_length = 32;
-                            if name.is_empty() {
-                                return Err(AppError::BadOption(
-                                    "Name cannot be empty".to_string(),
-                                ));
-                            }
-                            if name.len() > max_length {
-                                return Err(AppError::BadOption(format!(
-                                    "Name cannot be longer than {max_length}: {name}",
-                                )));
-                            }
-                            name
-                        }
-                    },
-                    price: match new_product.price {
-                        None => existing_product.price,
-                        Some(price) => {
-                            if price <= 0.0 {
-                                return Err(AppError::BadOption(format!(
-                                    "You cannot put a null / negative price: {price}",
-                                )));
-                            }
-                            sea_orm::prelude::Decimal::from_str_exact(&price.to_string()).map_err(
-                                |err| {
-                                    AppError::Unknow(format!(
-                                        "Cannot convert price: {price} - {err}",
-                                    ))
-                                },
-                            )?
-                        }
-                    },
-                    max_quantity_per_command: match new_product.max_quantity_per_command {
-                        None => existing_product.max_quantity_per_command,
-                        Some(0) => None,
-                        Some(x) => {
-                            if x > 10 {
-                                return Err(AppError::BadOption(format!(
-                                    "Max Quantity Per Commmand is too big: {x}"
-                                )));
-                            }
-
-                            Some(x.try_into().map_err(|err| {
-                                AppError::Unknow(format!(
-                                    "Max Quantity Per Commmand is cannot be converted: {x} - {err}"
-                                ))
-                            })?)
-                        }
-                    },
-                    sma_code: match new_product.sma_code {
-                        None => existing_product.sma_code,
-                        Some(ref sma_code) => match sma_code.is_empty() {
-                            true => None,
-                            false => Some(sma_code.to_string()),
-                        },
-                    },
-                    disabled: new_product.disabled.unwrap_or(false),
-                    creation_time: chrono::offset::Local::now().into(),
-                },
-            )
-            .await?;
-
-            if let (Some(new_image), Some(old_image)) =
-                (new_product.image.clone(), old_image.clone())
-            {
-                if new_image != old_image {
-                    s3.delete_object(format!("{}/{}", FileType::Product, old_image))
-                        .await?;
-                }
+            if let Some(image) = check_image {
+                let (_result, _code) = s3
+                    .head_object(format!("{}/{}", FileType::Product, image))
+                    .await
+                    .map_err(|_| {
+                        entity::request::product::ProductRequestError::ImageDoesNotExist(image)
+                    })?;
             }
+
+            let result = service::Mutation::update_product(&conn, id, edit_product).await?;
+
+            if let Some(image) = delete_image {
+                s3.delete_object(format!("{}/{}", FileType::Product, image))
+                    .await?;
+            }
+
             tracing::info!(
                 "Admin {} \"{}\" successfully edited product {} \"{}\" - {:?}",
                 admin.name,
                 admin.id,
                 existing_product.name,
                 id,
-                new_product
+                result
             );
 
             Ok((StatusCode::OK, ""))

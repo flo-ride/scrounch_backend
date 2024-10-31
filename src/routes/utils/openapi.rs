@@ -9,10 +9,10 @@
 //! - Serving the OpenAPI schema in JSON format.
 //! - Providing documentation for the API endpoints as specified by the OpenAPI standard.
 
+use entity::request::product::{EditProductRequest, NewProductRequest};
 use utoipa::OpenApi;
 
 use crate::models::file::FileType;
-use crate::models::request::product::*;
 use crate::models::response::product::*;
 use crate::models::response::user::{UserListResponse, UserResponse};
 use crate::routes::product::delete::__path_delete_product;
@@ -53,8 +53,8 @@ use entity::request::user::EditUserRequest;
         schemas(UserResponse),
         schemas(FileType),
         schemas(FileSchema),
-        schemas(NewProduct),
-        schemas(EditProduct),
+        schemas(NewProductRequest),
+        schemas(EditProductRequest),
         schemas(ProductResponse),
         schemas(ProductListResponse)
     )
