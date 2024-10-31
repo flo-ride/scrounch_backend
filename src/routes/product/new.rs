@@ -4,11 +4,11 @@
 //! It allows for the creation of new product entries in the database.
 //! Admin privileges are required to access this route.
 
+use crate::error::AppError;
 use crate::models::file::FileType;
 use crate::models::profile::admin::Admin;
-use crate::{error::AppError, models::request::product::NewProduct};
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
-use entity::models::product::Model as Product;
+use entity::{models::product::ActiveModel, request::product::NewProductRequest};
 use service::Connection;
 
 /// Handler for creating a new product.
@@ -38,7 +38,7 @@ pub async fn post_new_product(
     admin: Admin,
     State(conn): State<Connection>,
     State(s3): State<s3::Bucket>,
-    Json(product): Json<NewProduct>,
+    Json(product): Json<NewProductRequest>,
 ) -> Result<impl IntoResponse, AppError> {
     // Check if image exist
     if let Some(image) = product.image.clone() {
@@ -47,67 +47,18 @@ pub async fn post_new_product(
             .await?;
     }
 
-    let id = uuid::Uuid::new_v4();
-    service::Mutation::create_product(
-        &conn,
-        Product {
-            id,
-            image: product.image.clone(),
-            name: {
-                let name = product.name.clone();
-                let max_length = 32;
-                if name.is_empty() {
-                    return Err(AppError::BadOption("Name cannot be empty".to_string()));
-                }
-                if name.len() > max_length {
-                    return Err(AppError::BadOption(format!(
-                        "Name cannot be longer than {max_length}: {name}",
-                    )));
-                }
-                name
-            },
-            price: {
-                let price = product.price;
-                if price <= 0.0 {
-                    return Err(AppError::BadOption(format!(
-                        "You cannot put a null / negative price: {price}",
-                    )));
-                }
-                sea_orm::prelude::Decimal::from_str_exact(&price.to_string()).map_err(|err| {
-                    AppError::Unknow(format!("Cannot convert price: {price} - {err}"))
-                })?
-            },
-            max_quantity_per_command: match product.max_quantity_per_command {
-                None => None,
-                Some(0) => None,
-                Some(x) => {
-                    if x > 10 {
-                        return Err(AppError::BadOption(format!(
-                            "Max Quantity Per Commmand is too big: {x}"
-                        )));
-                    }
+    let product_model: ActiveModel = product.try_into()?;
+    let result = service::Mutation::create_product(&conn, product_model).await?;
 
-                    Some(x.try_into().map_err(|err| {
-                        AppError::Unknow(format!(
-                            "Max Quantity Per Commmand is cannot be converted: {x} - {err}"
-                        ))
-                    })?)
-                }
-            },
-            sma_code: product.sma_code.clone(),
-            disabled: false,
-            creation_time: chrono::offset::Local::now().into(),
-        },
-    )
-    .await?;
+    let id = result.id;
 
     tracing::info!(
         "Admin {} \"{}\" added a new product {} \"{}\" - {:?}",
         admin.name,
         admin.id,
-        product.name,
+        result.name,
         id,
-        product
+        result
     );
 
     Ok((StatusCode::CREATED, id.to_string()).into_response())

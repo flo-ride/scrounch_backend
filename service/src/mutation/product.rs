@@ -3,31 +3,21 @@ use crate::{
     r#macro::{cache_del, cache_mdel, cache_set},
     Connection,
 };
-use ::entity::models::{product, product::Entity as Product};
+use ::entity::models::product::{self, ActiveModel, Entity as Product};
 use sea_orm::*;
 use sqlx::types::Uuid;
 
 impl Mutation {
-    pub async fn create_product(
+    pub async fn create_product<M: IntoActiveModel<ActiveModel>>(
         conn: &Connection,
-        form_data: product::Model,
+        form_data: M,
     ) -> Result<product::Model, DbErr> {
-        let result = product::ActiveModel {
-            id: Set(form_data.id),
-            image: Set(form_data.image),
-            name: Set(form_data.name),
-            price: Set(form_data.price),
-            max_quantity_per_command: Set(form_data.max_quantity_per_command),
-            sma_code: Set(form_data.sma_code),
-            creation_time: Set(chrono::offset::Local::now().into()),
-            disabled: Set(false),
-        }
-        .insert(&conn.db_connection)
-        .await;
+        let form_data = form_data.into_active_model();
+        let result = form_data.insert(&conn.db_connection).await;
 
         #[cfg(feature = "cache")]
         if let Ok(model) = &result {
-            let id = form_data.id.to_string();
+            let id = model.id;
             cache_set!(conn, format!("product:{id}"), model, 60 * 15);
             cache_mdel!(conn, "products");
         }

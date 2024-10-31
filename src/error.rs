@@ -62,3 +62,9 @@ impl From<s3::error::S3Error> for AppError {
         Self::S3Error(value)
     }
 }
+
+impl From<entity::request::product::ProductRequestError> for AppError {
+    fn from(value: entity::request::product::ProductRequestError) -> Self {
+        Self::BadOption(value.to_string())
+    }
+}
