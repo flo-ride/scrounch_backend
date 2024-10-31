@@ -9,7 +9,15 @@ name = "entity"
 path = "src/lib.rs"
 
 [dependencies]
+# Serialisation + Deserialisation 
 serde = { version = "1.0.210", features = ["derive"] }
+
+# OpenAPI
+utoipa = { version = "4.2.0", features = ["axum_extras", "uuid", "chrono", "time", "decimal"] }
+
+# Utils
+uuid = { version = "1.10.0", features = ["v4", "fast-rng", "serde"] }
+chrono = "0.4.38"
 
 [dependencies.sea-orm]
 version = "1.0.1"
