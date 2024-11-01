@@ -10,5 +10,6 @@
 //! - Each submodule is responsible for a specific section of the API
 pub mod location;
 pub mod product;
+pub mod refill;
 pub mod user;
 pub mod utils;
