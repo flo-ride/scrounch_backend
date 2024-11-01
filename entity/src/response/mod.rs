@@ -3,5 +3,6 @@
 //! after processing requests.
 pub mod location;
 pub mod product;
+pub mod refill;
 pub mod sma;
 pub mod user;
