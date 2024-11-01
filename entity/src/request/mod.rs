@@ -11,4 +11,5 @@
 
 pub mod location;
 pub mod product;
+pub mod refill;
 pub mod user;
