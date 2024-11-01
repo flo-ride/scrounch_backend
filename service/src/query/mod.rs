@@ -7,6 +7,7 @@
 
 mod location;
 mod product;
+mod refill;
 mod user;
 
 pub struct Query;
