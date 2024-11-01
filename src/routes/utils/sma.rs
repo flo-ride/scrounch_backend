@@ -4,7 +4,8 @@
 
 use axum::extract::{Query, State};
 use axum::Json;
-use entity::response::product::EditedProductResponse;
+use entity::response::product::{EditedProductResponse, ProductResponse, ProductResponseError};
+use entity::response::sma::SmaResponse;
 use futures::future::join_all;
 use service::Connection;
 
@@ -14,7 +15,6 @@ use crate::{
     models::{
         file::FileType,
         profile::admin::Admin,
-        response::sma::SmaResponse,
         utils::sma::{SmaChange, SmaProduct, SmaProducts},
     },
     Arguments,
@@ -113,7 +113,31 @@ pub async fn post_update_from_sma(
                 // This is just the rust idiomatic way of a do_while
             }
 
-            Ok(Json(products.try_into()?))
+            let iter = products.into_iter();
+            Ok(Json(SmaResponse {
+                unchanged: iter
+                    .clone()
+                    .filter_map(|x| match x {
+                        SmaChange::Unchanged(x) => Some(x),
+                        _ => None,
+                    })
+                    .map(|x| x.id)
+                    .collect(),
+                changed: iter
+                    .clone()
+                    .filter_map(|x| match x {
+                        SmaChange::Edited(x) => Some(x),
+                        _ => None,
+                    })
+                    .collect(),
+                created: iter
+                    .filter_map(|x| match x {
+                        SmaChange::Created(x) => Some(x),
+                        _ => None,
+                    })
+                    .map(TryInto::<ProductResponse>::try_into)
+                    .collect::<Result<_, ProductResponseError>>()?,
+            }))
         }
         _ => {
             tracing::error!("Sorry but it seems all SMA variables are not filled");
