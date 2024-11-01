@@ -2,16 +2,13 @@
 
 use crate::{
     error::AppError,
-    models::{
-        profile::admin::Admin,
-        response::location::{LocationListResponse, LocationResponse},
-        utils::pagination::Pagination,
-    },
+    models::{profile::admin::Admin, utils::pagination::Pagination},
 };
 use axum::{
     extract::{Path, Query, State},
     Json,
 };
+use entity::response::location::{LocationListResponse, LocationResponse};
 use migration::IntoCondition;
 use sea_orm::ColumnTrait;
 use service::Connection;

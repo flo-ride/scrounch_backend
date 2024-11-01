@@ -43,15 +43,6 @@ pub enum LocationCategoryRequest {
     Room,
 }
 
-impl From<ModelLocationCategory> for LocationCategoryRequest {
-    fn from(value: ModelLocationCategory) -> Self {
-        match value {
-            ModelLocationCategory::Dispenser => Self::Dispenser,
-            ModelLocationCategory::Room => Self::Room,
-        }
-    }
-}
-
 impl From<LocationCategoryRequest> for ModelLocationCategory {
     fn from(value: LocationCategoryRequest) -> Self {
         match value {
