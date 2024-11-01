@@ -75,8 +75,20 @@ impl From<entity::request::location::LocationRequestError> for AppError {
     }
 }
 
+impl From<entity::request::refill::RefillRequestError> for AppError {
+    fn from(value: entity::request::refill::RefillRequestError) -> Self {
+        Self::BadOption(value.to_string())
+    }
+}
+
 impl From<entity::response::product::ProductResponseError> for AppError {
     fn from(value: entity::response::product::ProductResponseError) -> Self {
+        Self::Unknow(value.to_string())
+    }
+}
+
+impl From<entity::response::refill::RefillResponseError> for AppError {
+    fn from(value: entity::response::refill::RefillResponseError) -> Self {
         Self::Unknow(value.to_string())
     }
 }
