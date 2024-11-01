@@ -2,4 +2,5 @@
 
 pub use super::location::Entity as Location;
 pub use super::product::Entity as Product;
+pub use super::refill::Entity as Refill;
 pub use super::user::Entity as User;
