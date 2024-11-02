@@ -88,7 +88,7 @@ impl TryFrom<NewLocationRequest> for ActiveModel {
                 None => NotSet,
             },
             disabled: Set(false),
-            creation_time: Set(chrono::offset::Local::now().into()),
+            created_at: Set(chrono::offset::Local::now().into()),
         })
     }
 }
@@ -138,7 +138,7 @@ impl TryFrom<EditLocationRequest> for ActiveModel {
                 Some(disabled) => Set(disabled),
                 None => NotSet,
             },
-            creation_time: NotSet,
+            created_at: NotSet,
         })
     }
 }

@@ -11,6 +11,8 @@ use rust_decimal::{Decimal, Error as DecimalError};
 use sea_orm::ActiveValue::{NotSet, Set};
 use std::num::TryFromIntError;
 
+use super::r#enum::CurrencyRequest;
+
 /// The maximum allowed length for a product name.
 /// This constraint ensures that names remain concise and standardized in the database.
 pub const PRODUCT_NAME_MAX_LENGTH: usize = 32;
@@ -72,7 +74,7 @@ impl std::fmt::Display for ProductRequestError {
 }
 
 /// Request structure for creating a new product, including validation rules.
-#[derive(Debug, Default, Clone, PartialEq, serde::Deserialize, utoipa::ToSchema)]
+#[derive(Debug, Clone, PartialEq, serde::Deserialize, utoipa::ToSchema)]
 pub struct NewProductRequest {
     /// Optional image URL or path.
     pub image: Option<String>,
@@ -80,6 +82,8 @@ pub struct NewProductRequest {
     pub name: String,
     /// Price of the product, required and must be positive.
     pub price: f64,
+    /// Currency of the product.
+    pub currency: CurrencyRequest,
     /// Optional maximum quantity per command, limited to a certain maximum.
     pub max_quantity_per_command: Option<u64>,
     /// Optional SMA code for product identification.
@@ -119,6 +123,7 @@ impl TryFrom<NewProductRequest> for ActiveModel {
                     }
                 }
             },
+            price_currency: Set(value.currency.into()),
             max_quantity_per_command: match value.max_quantity_per_command {
                 Some(max) => {
                     if max > PRODUCT_MAX_QUANTITY_PER_COMMAND {
@@ -140,7 +145,7 @@ impl TryFrom<NewProductRequest> for ActiveModel {
             },
             sma_code: Set(value.sma_code),
             disabled: Set(false),
-            creation_time: Set(chrono::offset::Local::now().into()),
+            created_at: Set(chrono::offset::Local::now().into()),
         })
     }
 }
@@ -154,6 +159,8 @@ pub struct EditProductRequest {
     pub name: Option<String>,
     /// Optional price of the product, required to be positive if present.
     pub price: Option<f64>,
+    /// Optional price of the product, required to be positive if present.
+    pub currency: Option<CurrencyRequest>,
     /// Optional maximum quantity per command with conversion and size limits.
     pub max_quantity_per_command: Option<Option<u64>>,
     /// Optional SMA code for product identification, can be `None` if specified.
@@ -205,6 +212,10 @@ impl TryFrom<EditProductRequest> for ActiveModel {
                 }
                 None => NotSet,
             },
+            price_currency: match value.currency {
+                Some(currency) => Set(currency.into()),
+                None => NotSet,
+            },
             max_quantity_per_command: match value.max_quantity_per_command {
                 Some(max_opt) => match max_opt {
                     Some(max) => {
@@ -240,7 +251,7 @@ impl TryFrom<EditProductRequest> for ActiveModel {
                 Some(disabled) => Set(disabled),
                 None => NotSet,
             },
-            creation_time: NotSet,
+            ..Default::default()
         })
     }
 }
