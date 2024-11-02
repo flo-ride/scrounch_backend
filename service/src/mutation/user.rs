@@ -39,9 +39,7 @@ impl Mutation {
         form_data: M,
     ) -> Result<user::Model, DbErr> {
         let mut form_data = form_data.into_active_model();
-
         form_data.id = Set(id);
-        form_data.creation_time = NotSet;
 
         let result = form_data.update(&conn.db_connection).await;
 
@@ -60,13 +58,8 @@ impl Mutation {
     ) -> Result<user::Model, DbErr> {
         let result = user::ActiveModel {
             id: Set(id),
-            email: NotSet,
-            username: NotSet,
-            name: NotSet,
-            is_admin: NotSet,
-            creation_time: NotSet,
-            is_banned: NotSet,
-            last_access_time: Set(chrono::offset::Local::now().into()),
+            last_access_at: Set(chrono::offset::Local::now().into()),
+            ..Default::default()
         }
         .update(&conn.db_connection)
         .await;
