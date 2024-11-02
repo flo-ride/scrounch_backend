@@ -29,7 +29,7 @@ pub struct Model {
 
     /// Timestamp of when the location was created.
     /// This field stores the creation time with timezone information.
-    pub creation_time: DateTimeWithTimeZone,
+    pub created_at: DateTimeWithTimeZone,
 
     /// Optional category for the location.
     /// This field can be used to classify the location into different categories.

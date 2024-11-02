@@ -8,6 +8,21 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
+/// Represents a currency type used in the application.
+/// This enum is serialized and deserialized for compatibility with external
+/// systems and stored in the database as an enumerated type.
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "currency")]
+pub enum Currency {
+    /// The custom currency "epicoin" used within the system.
+    #[sea_orm(string_value = "epicoin")]
+    Epicoin,
+
+    /// The standard currency "euro."
+    #[sea_orm(string_value = "euro")]
+    Euro,
+}
+
 /// Enum representing categories for various locations.
 ///
 /// This enum is used to classify locations into specific categories, such as

@@ -5,29 +5,40 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-/// Main struct representing a refill entry in the database.
+use super::sea_orm_active_enums::Currency;
+
+/// Represents the `refill` entity in the database, detailing refill transactions
+/// including pricing, credit amount, and currency information.
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
-#[sea_orm(table_name = "refill")] // Associates this struct with the "refill" table.
+#[sea_orm(table_name = "refill")]
 pub struct Model {
-    /// Unique identifier for the refill, not auto-incremented.
+    /// Unique identifier for the refill transaction. Primary key, non-auto-incrementing.
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
 
-    /// Optional name associated with the refill entry.
+    /// Optional name or label for the refill transaction.
     pub name: Option<String>,
 
-    /// Timestamp indicating when the refill was created.
-    pub creation_time: DateTimeWithTimeZone,
+    /// Timestamp indicating when the refill transaction was created.
+    pub created_at: DateTimeWithTimeZone,
 
-    /// Amount in euros, with a precision of 10 digits and 2 decimal places.
+    /// Price of the refill transaction, stored as a decimal with up to 10 digits
+    /// and 2 decimal places.
     #[sea_orm(column_type = "Decimal(Some((10, 2)))")]
-    pub amount_in_euro: Decimal,
+    pub price: Decimal,
 
-    /// Amount in "epicoin", with a precision of 10 digits and no decimal places.
-    #[sea_orm(column_type = "Decimal(Some((10, 0)))")]
-    pub amount_in_epicoin: Decimal,
+    /// Currency type for the refill transaction price.
+    pub price_currency: Currency,
 
-    /// Boolean flag indicating whether the refill entry is disabled.
+    /// Credit amount awarded in this refill transaction, stored as a decimal
+    /// with up to 10 digits and 2 decimal places.
+    #[sea_orm(column_type = "Decimal(Some((10, 2)))")]
+    pub credit: Decimal,
+
+    /// Currency type for the refill transaction credit.
+    pub credit_currency: Currency,
+
+    /// Indicates if the refill transaction is disabled.
     pub disabled: bool,
 }
 
