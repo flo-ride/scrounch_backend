@@ -13,13 +13,13 @@ use entity::response::user::UserResponse;
 #[schema(example = json!({ "id": "l8F0ZoHb5TwYgNvXkJqV7SsP9gQfKzR4UmA1VrCwIxE", "name": "John Doe", "username": "JDoe", "email": "john.doe@example.com", "is_admin": false }))]
 pub struct User {
     pub id: uuid::Uuid,
-    pub email: String,
-    pub name: String,
-    pub username: String,
+    pub email: Option<String>,
+    pub name: Option<String>,
+    pub username: Option<String>,
     pub is_admin: bool,
     pub is_banned: bool,
-    pub creation_time: chrono::DateTime<chrono::Utc>,
-    pub last_access_time: chrono::DateTime<chrono::Utc>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub last_access_at: chrono::DateTime<chrono::Utc>,
 }
 
 impl From<entity::models::user::Model> for User {
@@ -31,8 +31,8 @@ impl From<entity::models::user::Model> for User {
             username: value.username,
             is_admin: value.is_admin,
             is_banned: value.is_banned,
-            last_access_time: value.last_access_time.into(),
-            creation_time: value.creation_time.into(),
+            last_access_at: value.last_access_at.into(),
+            created_at: value.created_at.into(),
         }
     }
 }
@@ -46,8 +46,22 @@ impl From<User> for UserResponse {
             email: value.email,
             is_admin: value.is_admin,
             is_banned: value.is_banned,
-            last_access_time: value.last_access_time,
-            creation_time: value.creation_time,
+            last_access_at: value.last_access_at,
+            created_at: value.created_at,
+        }
+    }
+}
+
+impl std::fmt::Display for User {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Some(name) = &self.name {
+            write!(f, "User {} \"{name}\"", self.id)
+        } else if let Some(email) = &self.email {
+            write!(f, "User {} \"{email}\"", self.id)
+        } else if let Some(username) = &self.username {
+            write!(f, "User {} \"{username}\"", self.id)
+        } else {
+            write!(f, "User {}", self.id)
         }
     }
 }

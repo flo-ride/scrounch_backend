@@ -34,28 +34,14 @@ where
                     Self::Rejection::Unknow(format!("Could not Serialise given id: \"{id}\" - {e}"))
                 })?;
 
-                let username = extractor
-                    .preferred_username()
-                    .ok_or(Self::Rejection::MissingOption(
-                        "Oidc Extractor is missing username".to_string(),
-                    ))?
-                    .to_string();
+                let username = extractor.preferred_username().map(|x| x.to_string());
+
                 let name = extractor
                     .name()
-                    .ok_or(Self::Rejection::MissingOption(
-                        "Oidc Extractor is missing name".to_string(),
-                    ))?
-                    .get(None)
-                    .ok_or(AppError::Unknow(
-                        "Name is not in correct Langage".to_string(),
-                    ))?
-                    .to_string();
-                let email = extractor
-                    .email()
-                    .ok_or(AppError::MissingOption(
-                        "Oidc Extractor is missing email".to_string(),
-                    ))?
-                    .to_string();
+                    .map(|x| x.get(None))
+                    .and_then(|x| x.map(|x| x.to_string()));
+
+                let email = extractor.email().map(|x| x.to_string());
 
                 let user = OidcUser {
                     id: uuid,
