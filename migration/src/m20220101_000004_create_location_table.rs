@@ -33,12 +33,12 @@ impl MigrationTrait for Migration {
                     .col(uuid(Location::Id).primary_key())
                     .col(string_uniq(Location::Name))
                     .col(
-                        timestamp_with_time_zone(Location::CreationTime)
+                        timestamp_with_time_zone(Location::CreatedAt)
                             .default(Expr::current_timestamp()),
                     )
                     .col(enumeration_null(
                         Location::Category,
-                        Alias::new("location_category"),
+                        LocationCategory,
                         LocationCategoryVariant::iter(),
                     ))
                     .col(boolean(Location::Disabled).default(false))
@@ -66,17 +66,17 @@ impl MigrationTrait for Migration {
 }
 
 #[derive(DeriveIden)]
-enum Location {
+pub enum Location {
     Table,
     Id,
     Name,
-    CreationTime,
+    CreatedAt,
     Category,
     Disabled,
 }
 
 #[derive(DeriveIden)]
-struct LocationCategory;
+pub struct LocationCategory;
 
 #[derive(DeriveIden, EnumIter)]
 pub enum LocationCategoryVariant {
