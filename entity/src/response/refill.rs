@@ -4,6 +4,8 @@
 use rust_decimal::{Decimal, Error as DecimalError};
 use serde_with::skip_serializing_none;
 
+use super::r#enum::CurrencyResponse;
+
 /// Enum representing errors that can occur during refill response construction.
 #[derive(Debug, PartialEq, Clone)]
 pub enum RefillResponseError {
@@ -46,14 +48,20 @@ pub struct RefillResponse {
     /// The full name of the refill.
     pub name: Option<String>,
 
-    /// Amount of the refill in euros, stored as a floating-point number.
-    pub amount_in_euro: f64,
+    /// Price of the refill.
+    pub price: f64,
 
-    /// Amount of the refill in epicoin, stored as an unsigned integer.
-    pub amount_in_epicoin: u64,
+    /// Currency type for the refill price.
+    pub price_currency: CurrencyResponse,
+
+    /// Credit of the refill.
+    pub credit: f64,
+
+    /// Currency type for the refill credit.
+    pub credit_currency: CurrencyResponse,
 
     /// The timestamp indicating when the refill was created.
-    pub creation_time: chrono::DateTime<chrono::Utc>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
 
     /// Indicates whether the refill is currently disabled.
     pub disabled: bool,
@@ -67,26 +75,25 @@ impl TryFrom<crate::models::refill::Model> for RefillResponse {
         Ok(Self {
             id: value.id,
             name: value.name,
-            amount_in_euro: match value.amount_in_euro.try_into() {
+            price: match value.price.try_into() {
                 Ok(price) => price,
                 Err(err) => {
-                    return Err(Self::Error::AmountInEuroCannotBeConverted(
-                        value.amount_in_euro,
-                        err,
-                    ))
+                    return Err(Self::Error::AmountInEuroCannotBeConverted(value.price, err))
                 }
             },
-            amount_in_epicoin: match value.amount_in_epicoin.try_into() {
+            price_currency: value.price_currency.into(),
+            credit: match value.credit.try_into() {
                 Ok(price) => price,
                 Err(err) => {
                     return Err(Self::Error::AmountInEpicoinCannotBeConverted(
-                        value.amount_in_epicoin,
+                        value.credit,
                         err,
                     ))
                 }
             },
+            credit_currency: value.credit_currency.into(),
             disabled: value.disabled,
-            creation_time: value.creation_time.into(),
+            created_at: value.created_at.into(),
         })
     }
 }

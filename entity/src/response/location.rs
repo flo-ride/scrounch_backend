@@ -45,7 +45,7 @@ pub struct LocationResponse {
     pub category: Option<LocationCategoryResponse>,
 
     /// The timestamp indicating when the location was created.
-    pub creation_time: chrono::DateTime<chrono::Utc>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
 
     /// Indicates whether the location is disabled.
     pub disabled: bool,
@@ -57,7 +57,7 @@ impl From<crate::models::location::Model> for LocationResponse {
             id: value.id,
             name: value.name,
             category: value.category.map(Into::into),
-            creation_time: value.creation_time.into(),
+            created_at: value.created_at.into(),
             disabled: value.disabled,
         }
     }

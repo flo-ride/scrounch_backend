@@ -1,7 +1,10 @@
 //! This module contains response structures for user-related API responses.
 //! It defines the format of data returned to clients regarding users.
 
+use serde_with::skip_serializing_none;
+
 /// Represents a response containing user information returned by the API.
+#[skip_serializing_none]
 #[derive(Debug, Clone, PartialEq, serde::Serialize, utoipa::ToSchema)]
 #[schema(example = json!({
     "id": "l8F0ZoHb5TwYgNvXkJqV7SsP9gQfKzR4UmA1VrCwIxE",
@@ -17,13 +20,13 @@ pub struct UserResponse {
     pub id: uuid::Uuid,
 
     /// The email address of the user.
-    pub email: String,
+    pub email: Option<String>,
 
     /// The full name of the user.
-    pub name: String,
+    pub name: Option<String>,
 
     /// The username chosen by the user.
-    pub username: String,
+    pub username: Option<String>,
 
     /// Indicates whether the user has admin privileges.
     pub is_admin: bool,
@@ -32,10 +35,10 @@ pub struct UserResponse {
     pub is_banned: bool,
 
     /// The timestamp of when the user was created.
-    pub creation_time: chrono::DateTime<chrono::Utc>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
 
     /// The timestamp of the user's last access.
-    pub last_access_time: chrono::DateTime<chrono::Utc>,
+    pub last_access_at: chrono::DateTime<chrono::Utc>,
 }
 
 /// Converts a `Model` from the user module to a `UserResponse`.
@@ -48,8 +51,8 @@ impl From<crate::models::user::Model> for UserResponse {
             email: value.email,
             is_admin: value.is_admin,
             is_banned: value.is_banned,
-            last_access_time: value.last_access_time.into(),
-            creation_time: value.creation_time.into(),
+            last_access_at: value.last_access_at.into(),
+            created_at: value.created_at.into(),
         }
     }
 }

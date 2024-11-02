@@ -2,6 +2,7 @@
 //! The module also defines the `ProductResponseError` enum for error handling during
 //! product response construction, particularly for price and quantity conversions.
 
+use super::r#enum::CurrencyResponse;
 use rust_decimal::{Decimal, Error as DecimalError};
 use serde_with::skip_serializing_none;
 use std::num::TryFromIntError;
@@ -52,6 +53,9 @@ pub struct ProductResponse {
     /// Price of the product.
     price: f64,
 
+    /// Currency of the product price.
+    currency: CurrencyResponse,
+
     /// Optional maximum quantity allowed per command.
     max_quantity_per_command: Option<u64>,
 
@@ -59,7 +63,7 @@ pub struct ProductResponse {
     sma_code: Option<String>,
 
     /// Creation timestamp of the product.
-    creation_time: chrono::DateTime<chrono::Utc>,
+    created_at: chrono::DateTime<chrono::Utc>,
 
     /// Optional flag indicating if the product is disabled.
     disabled: Option<bool>,
@@ -78,6 +82,7 @@ impl TryFrom<crate::models::product::Model> for ProductResponse {
                 .price
                 .try_into()
                 .map_err(|err| Self::Error::PriceCannotBeConverted(value.price, err))?,
+            currency: value.price_currency.into(),
             max_quantity_per_command: match value.max_quantity_per_command {
                 Some(x) => Some(
                     x.try_into()
@@ -86,7 +91,7 @@ impl TryFrom<crate::models::product::Model> for ProductResponse {
                 None => None,
             },
             sma_code: value.sma_code,
-            creation_time: value.creation_time.into(),
+            created_at: value.created_at.into(),
             disabled: match value.disabled {
                 true => Some(true),
                 false => None,
