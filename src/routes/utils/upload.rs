@@ -99,11 +99,7 @@ pub async fn post_upload_files(
         )
         .await?;
 
-        tracing::info!(
-            "\"{}\" ({}) just uploaded a new file: \"{filename}\" -> \"{s3_path}\"",
-            user.name,
-            user.id
-        );
+        tracing::info!("{user} just uploaded a new file: \"{filename}\" -> \"{s3_path}\"",);
         result.push((filename, new_filename));
     }
     Ok(Json(result))

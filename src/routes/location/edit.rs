@@ -39,9 +39,7 @@ pub async fn edit_location(
             let result = service::Mutation::update_location(&conn, id, location_model).await?;
 
             tracing::info!(
-                "Admin {} \"{}\" successfully edited location {} \"{}\" - {:?}",
-                admin.name,
-                admin.id,
+                "{admin} successfully edited location {} \"{}\" - {:?}",
                 existing_location.name,
                 id,
                 result

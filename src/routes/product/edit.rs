@@ -81,9 +81,7 @@ pub async fn edit_product(
             }
 
             tracing::info!(
-                "Admin {} \"{}\" successfully edited product {} \"{}\" - {:?}",
-                admin.name,
-                admin.id,
+                "{admin} successfully edited product {} \"{}\" - {:?}",
                 existing_product.name,
                 id,
                 result

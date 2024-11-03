@@ -8,7 +8,8 @@ use axum::{
     http::StatusCode,
     response::IntoResponse,
 };
-use entity::models::product::Model as Product;
+use entity::models::product;
+use sea_orm::ActiveValue::Set;
 use service::Connection;
 
 /// Deletes a product by its database ID.
@@ -45,23 +46,16 @@ pub async fn delete_product(
             service::Mutation::update_product(
                 &conn,
                 id,
-                Product {
-                    id,
-                    image: product.image.clone(),
-                    name: product.name.clone(),
-                    price: product.price,
-                    max_quantity_per_command: product.max_quantity_per_command,
-                    sma_code: product.sma_code.clone(),
-                    creation_time: chrono::offset::Local::now().into(),
-                    disabled: true,
+                product::ActiveModel {
+                    id: Set(id),
+                    disabled: Set(true),
+                    ..Default::default()
                 },
             )
             .await?;
 
             tracing::info!(
-                "Admin {} \"{}\" just disabled the product {} \"{}\" - {:?}",
-                admin.name,
-                admin.id,
+                "{admin} just disabled the product {} \"{}\" - {:?}",
                 product.name,
                 id,
                 product

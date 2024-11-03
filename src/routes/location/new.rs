@@ -44,9 +44,7 @@ pub async fn post_new_location(
     let id = result.id;
 
     tracing::info!(
-        "Admin {} \"{}\" added a new location {} \"{}\" - {:?}",
-        admin.name,
-        admin.id,
+        "{admin} added a new location {} \"{}\" - {:?}",
         id,
         result.name,
         result

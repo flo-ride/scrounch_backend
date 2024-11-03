@@ -44,9 +44,7 @@ pub async fn delete_location(
             service::Mutation::delete_location(&conn, id).await?;
 
             tracing::info!(
-                "Admin {} \"{}\" just deleted the location {} \"{}\" - {:?}",
-                admin.name,
-                admin.id,
+                "{admin} just deleted the location {} \"{}\" - {:?}",
                 location.name,
                 id,
                 location

@@ -43,13 +43,7 @@ pub async fn delete_refill(
         Some(refill) => {
             service::Mutation::delete_refill(&conn, id).await?;
 
-            tracing::info!(
-                "Admin {} \"{}\" just deleted the refill \"{}\" - {:?}",
-                admin.name,
-                admin.id,
-                id,
-                refill
-            );
+            tracing::info!("{admin} just deleted the refill \"{}\" - {:?}", id, refill);
 
             Ok((StatusCode::OK, ""))
         }

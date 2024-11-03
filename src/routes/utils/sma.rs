@@ -4,9 +4,11 @@
 
 use axum::extract::{Query, State};
 use axum::Json;
+use entity::models::product;
 use entity::response::product::{EditedProductResponse, ProductResponse, ProductResponseError};
 use entity::response::sma::SmaResponse;
 use futures::future::join_all;
+use sea_orm::ActiveValue::Set;
 use service::Connection;
 
 use crate::models::utils::sma::SmaChangeTypeMatrix;
@@ -37,11 +39,7 @@ pub async fn post_update_from_sma(
     State(s3): State<s3::Bucket>,
     Query(params): Query<SmaChangeTypeMatrix>,
 ) -> Result<Json<SmaResponse>, AppError> {
-    tracing::info!(
-        "{} \"{}\" just asked for an SMA update",
-        admin.name,
-        admin.id
-    );
+    tracing::info!("{admin} just asked for an SMA update",);
 
     match (arguments.sma_api_key, arguments.sma_url) {
         (Some(api_key), Some(url)) => {
@@ -223,26 +221,23 @@ async fn create_or_update_sma_product(
                 tracing::info!("Adding new product Image from SMA: {name}");
             }
 
-            let form_data = entity::models::product::Model {
-                id: uuid::Uuid::new_v4(),
+            let form_data = product::ActiveModel {
+                id: Set(uuid::Uuid::new_v4()),
 
-                name: product.name,
+                name: Set(product.name),
 
-                image: filename,
+                image: Set(filename),
 
-                price: sea_orm::prelude::Decimal::from_str_exact(&product.price).map_err(
-                    |err| {
+                price: Set(
+                    sea_orm::prelude::Decimal::from_str_exact(&product.price).map_err(|err| {
                         AppError::Unknow(format!("Cannot convert price: {} - {err}", product.price))
-                    },
-                )?,
+                    })?,
+                ),
 
-                sma_code: Some(product.code),
+                price_currency: Set(entity::models::sea_orm_active_enums::Currency::Euro),
 
-                creation_time: chrono::offset::Local::now().into(),
-
-                max_quantity_per_command: None,
-
-                disabled: false,
+                sma_code: Set(Some(product.code)),
+                ..Default::default()
             };
             let result = service::Mutation::create_product(conn, form_data).await?;
             tracing::info!(

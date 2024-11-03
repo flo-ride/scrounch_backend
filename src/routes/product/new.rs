@@ -53,9 +53,7 @@ pub async fn post_new_product(
     let id = result.id;
 
     tracing::info!(
-        "Admin {} \"{}\" added a new product {} \"{}\" - {:?}",
-        admin.name,
-        admin.id,
+        "{admin} added a new product {} \"{}\" - {:?}",
         result.name,
         id,
         result

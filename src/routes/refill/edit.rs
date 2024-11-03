@@ -41,9 +41,7 @@ pub async fn edit_refill(
             let result = service::Mutation::update_refill(&conn, id, edit_refill).await?;
 
             tracing::info!(
-                "Admin {} \"{}\" successfully edited refill \"{}\" - {:?}",
-                admin.name,
-                admin.id,
+                "{admin} successfully edited refill \"{}\" - {:?}",
                 id,
                 result
             );

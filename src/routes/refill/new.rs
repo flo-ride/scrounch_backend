@@ -45,12 +45,10 @@ pub async fn post_new_refill(
 
     let id = result.id;
     tracing::info!(
-        "Admin {} \"{}\" added a new refill \"{}\" - ({} -> {})",
-        admin.name,
-        admin.id,
+        "{admin} added a new refill \"{}\" - ({} -> {})",
         id,
-        result.amount_in_euro,
-        result.amount_in_epicoin
+        result.price,
+        result.credit
     );
 
     Ok((StatusCode::CREATED, id.to_string()).into_response())

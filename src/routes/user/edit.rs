@@ -1,6 +1,9 @@
 //! Route for editing an existing user
 
-use crate::{error::AppError, models::profile::admin::Admin};
+use crate::{
+    error::AppError,
+    models::profile::{admin::Admin, user::User},
+};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -37,11 +40,8 @@ pub async fn edit_user(
             let result = service::Mutation::update_user(&conn, id, edit_user).await?;
 
             tracing::info!(
-                "Admin {} \"{}\" successfully edited user {} \"{}\" - {:?}",
-                admin.name,
-                admin.id,
-                existing_user.name,
-                id,
+                "{admin} successfully edited {} - {:?}",
+                Into::<User>::into(existing_user),
                 result
             );
 
