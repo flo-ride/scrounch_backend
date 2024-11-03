@@ -38,9 +38,10 @@ async fn refill_test_1() {
         .post("/refill")
         .json(&json!({
             "name": "Formule Rat",
-            "amount_in_euro": 10.0,
-            "amount_in_epicoin": 100
-
+            "price": 10.0,
+            "price_currency": "euro",
+            "credit": 100.0,
+            "credit_currency": "epicoin",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -52,8 +53,8 @@ async fn refill_test_1() {
     response.assert_json_contains(&json!({
         "id":  new_refill_id,
         "name": "Formule Rat",
-        "amount_in_euro": 10.0,
-        "amount_in_epicoin": 100,
+        "price": 10.0,
+        "credit": 100.0,
         "disabled": false,
     }));
 
@@ -66,8 +67,10 @@ async fn refill_test_1() {
             {
                 "id":  new_refill_id,
                 "name": "Formule Rat",
-                "amount_in_euro": 10.0,
-                "amount_in_epicoin": 100,
+                "price": 10.0,
+                "price_currency": "euro",
+                "credit": 100.0,
+                "credit_currency": "epicoin",
                 "disabled": false,
             }
         ]
@@ -77,7 +80,7 @@ async fn refill_test_1() {
         .put(&format!("/refill/{new_refill_id}"))
         .json(&json!({
             "name": "Formule Gros Rat",
-            "amount_in_euro": 5.0,
+            "price": 5.0,
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -88,8 +91,10 @@ async fn refill_test_1() {
     response.assert_json_contains(&json!({
         "id":  new_refill_id,
         "name": "Formule Gros Rat",
-        "amount_in_euro": 5.0,
-        "amount_in_epicoin": 100,
+        "price": 5.0,
+        "price_currency": "euro",
+        "credit": 100.0,
+        "credit_currency": "epicoin",
         "disabled": false,
     }));
 
@@ -102,8 +107,10 @@ async fn refill_test_1() {
             {
                 "id":  new_refill_id,
                 "name": "Formule Gros Rat",
-                "amount_in_euro": 5.0,
-                "amount_in_epicoin": 100,
+                "price": 5.0,
+                "price_currency": "euro",
+                "credit": 100.0,
+                "credit_currency": "epicoin",
                 "disabled": false,
             }
         ]
