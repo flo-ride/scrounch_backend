@@ -11,12 +11,18 @@
 
 use entity::{
     request::{
-        location::{EditLocationRequest, NewLocationRequest},
+        location::{EditLocationRequest, LocationCategoryRequest, NewLocationRequest},
         product::{EditProductRequest, NewProductRequest},
+        r#enum::CurrencyRequest,
+        refill::{EditRefillRequest, NewRefillRequest},
         user::EditUserRequest,
     },
     response::{
-        product::{ProductListResponse, ProductResponse},
+        location::{LocationCategoryResponse, LocationListResponse, LocationResponse},
+        product::{EditedProductResponse, ProductListResponse, ProductResponse},
+        r#enum::CurrencyResponse,
+        refill::{RefillListResponse, RefillResponse},
+        sma::SmaResponse,
         user::{UserListResponse, UserResponse},
     },
 };
@@ -38,11 +44,18 @@ use crate::routes::user::edit::__path_edit_user;
 use crate::routes::user::get::{__path_get_all_users, __path_get_user};
 use crate::routes::user::me::__path_get_me;
 
+use crate::routes::refill::delete::__path_delete_refill;
+use crate::routes::refill::edit::__path_edit_refill;
+use crate::routes::refill::get::{__path_get_all_refills, __path_get_refill};
+use crate::routes::refill::new::__path_post_new_refill;
+
 use crate::routes::utils::download::__path_download_file;
 use crate::routes::utils::login::__path_get_login;
 use crate::routes::utils::logout::__path_get_logout;
 use crate::routes::utils::status::__path_get_status;
 use crate::routes::utils::upload::{FileSchema, __path_post_upload_files};
+
+use crate::routes::utils::sma::__path_post_update_from_sma;
 
 #[derive(OpenApi)]
 #[openapi(
@@ -50,14 +63,15 @@ use crate::routes::utils::upload::{FileSchema, __path_post_upload_files};
         get_status,
         get_login,
         get_logout,
-        get_me,
         post_upload_files,
         download_file,
+        post_update_from_sma,
         get_product,
         get_all_products,
         post_new_product,
         edit_product,
         delete_product,
+        get_me,
         get_user,
         get_all_users,
         edit_user,
@@ -65,20 +79,37 @@ use crate::routes::utils::upload::{FileSchema, __path_post_upload_files};
         get_location,
         get_all_locations,
         edit_location,
-        delete_location
+        delete_location,
+        post_new_refill,
+        get_refill,
+        get_all_refills,
+        edit_refill,
+        delete_refill,
     ),
     components(
+        schemas(SmaResponse),
+        schemas(CurrencyRequest),
+        schemas(CurrencyResponse),
+        schemas(FileType),
+        schemas(FileSchema),
         schemas(EditUserRequest),
         schemas(UserListResponse),
         schemas(UserResponse),
-        schemas(FileType),
-        schemas(FileSchema),
         schemas(NewProductRequest),
         schemas(EditProductRequest),
+        schemas(ProductResponse),
+        schemas(EditedProductResponse),
+        schemas(ProductListResponse),
         schemas(NewLocationRequest),
         schemas(EditLocationRequest),
-        schemas(ProductResponse),
-        schemas(ProductListResponse)
+        schemas(LocationResponse),
+        schemas(LocationListResponse),
+        schemas(LocationCategoryRequest),
+        schemas(LocationCategoryResponse),
+        schemas(NewRefillRequest),
+        schemas(EditRefillRequest),
+        schemas(RefillResponse),
+        schemas(RefillListResponse),
     )
 )]
 struct ApiDoc;

@@ -19,7 +19,7 @@ use service::Connection;
                params(
                    ("id" = uuid::Uuid, Path, description = "refill database id to edit refill for"),
                 ),
-               request_body(content = Editrefill, content_type = "application/json"), 
+               request_body(content = EditRefillRequest, content_type = "application/json"), 
                responses(
                    (status = 500, description = "An internal error occured, probably database related"), 
                    (status = 400, description = "Your request is not correctly formatted"), 

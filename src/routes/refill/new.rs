@@ -27,7 +27,7 @@ use service::Connection;
 ///     - 400: Bad request (invalid input data).
 ///     - 201: Successfully created a new refill, returns the new refill's ID as a string.
 #[utoipa::path(post, path = "/refill", 
-               request_body(content = NewRefill, content_type = "application/json"), 
+               request_body(content = NewRefillRequest, content_type = "application/json"), 
                responses(
                    (status = 500, description = "An internal error, most likely related to the database, occurred."), 
                    (status = 400, description = "The request is improperly formatted."), 

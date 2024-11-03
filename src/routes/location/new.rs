@@ -25,7 +25,7 @@ use service::Connection;
 ///     - 400: Bad request (invalid input data).
 ///     - 201: Successfully created a new location, returns the new location's ID as a string.
 #[utoipa::path(post, path = "/location", 
-               request_body(content = NewLocation, content_type = "application/json"), 
+               request_body(content = NewLocationRequest, content_type = "application/json"), 
                responses(
                    (status = 500, description = "An internal error, most likely related to the database, occurred."), 
                    (status = 400, description = "The request is improperly formatted."), 

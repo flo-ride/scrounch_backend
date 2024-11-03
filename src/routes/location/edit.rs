@@ -17,7 +17,7 @@ use service::Connection;
                params(
                    ("id" = uuid::Uuid, Path, description = "location database id to edit location for"),
                 ),
-               request_body(content = EditLocation, content_type = "application/json"), 
+               request_body(content = EditLocationRequest, content_type = "application/json"), 
                responses(
                    (status = 500, description = "An internal error occured, probably database related"), 
                    (status = 400, description = "Your request is not correctly formatted"), 

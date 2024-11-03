@@ -32,6 +32,14 @@ use crate::{
 ///
 /// # Responses
 /// - 200: The products have been successfully updated.
+#[utoipa::path(post, path = "/sma", 
+        responses(
+            (status = 500, description = "An internal error, most likely related to the database, occurred."), 
+            (status = 400, description = "The request is improperly formatted."), 
+            (status = 201, description = "Successfully updated every Sma Products", body = SmaResponse)
+        )
+    )
+]
 pub async fn post_update_from_sma(
     admin: Admin,
     State(arguments): State<Arguments>,

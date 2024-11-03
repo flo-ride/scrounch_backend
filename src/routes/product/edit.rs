@@ -23,7 +23,7 @@ use service::Connection;
                params(
                    ("id" = uuid::Uuid, Path, description = "Product database id to edit product for"),
                 ),
-               request_body(content = EditProduct, content_type = "application/json"), 
+               request_body(content = EditProductRequest, content_type = "application/json"), 
                responses(
                    (status = 500, description = "An internal error occured, probably database related"), 
                    (status = 400, description = "Your request is not correctly formatted"), 

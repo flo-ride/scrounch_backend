@@ -34,7 +34,7 @@ use service::Connection;
                    (status = 500, description = "An internal error, most likely related to the database, occurred."), 
                    (status = 400, description = "The request is improperly formatted."), 
                    (status = 404, description = "The refill doesn't exist, or is disabled and the requester is not an admin."), 
-                   (status = 200, description = "The refill was successfully retrieved.", body = refillResponse)
+                   (status = 200, description = "The refill was successfully retrieved.", body = RefillResponse)
                 )
             )]
 pub async fn get_refill(
@@ -80,7 +80,7 @@ pub async fn get_refill(
                 responses(
                    (status = 500, description = "An internal error, most likely related to the database, occurred."), 
                    (status = 400, description = "The request is improperly formatted."), 
-                   (status = 200, description = "Successfully retrieved a list of refills.", body = refillListResponse)
+                   (status = 200, description = "Successfully retrieved a list of refills.", body = RefillListResponse)
                 )
             )]
 pub async fn get_all_refills(

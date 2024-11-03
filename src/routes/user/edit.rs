@@ -20,7 +20,7 @@ use service::Connection;
                params(
                    ("id" = uuid::Uuid, Path, description = "user database id to edit user for"),
                 ),
-               request_body(content = EditUser, content_type = "application/json"), 
+               request_body(content = EditUserRequest, content_type = "application/json"), 
                responses(
                    (status = 500, description = "An internal error occured, probably database related"), 
                    (status = 400, description = "Your request is not correctly formatted"), 

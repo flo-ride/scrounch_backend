@@ -27,7 +27,7 @@ use service::Connection;
 ///     - 400: Bad request (invalid input data).
 ///     - 201: Successfully created a new product, returns the new product's ID as a string.
 #[utoipa::path(post, path = "/product", 
-               request_body(content = NewProduct, content_type = "application/json"), 
+               request_body(content = NewProductRequest, content_type = "application/json"), 
                responses(
                    (status = 500, description = "An internal error, most likely related to the database, occurred."), 
                    (status = 400, description = "The request is improperly formatted."), 
