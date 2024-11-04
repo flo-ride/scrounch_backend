@@ -51,8 +51,8 @@ tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 log = "0.4.22"
 
 # OpenAPI
-utoipa = { version = "4.2.0", features = ["axum_extras", "uuid", "chrono", "time", "decimal"] }
-utoipa-swagger-ui = { version = "6.0.0", features = ["axum"] }
+utoipa = { version = "5.2.0", features = ["axum_extras", "uuid", "chrono", "time", "decimal", "non_strict_integers"] }
+utoipa-swagger-ui = { version = "8.0.3", features = ["axum"] }
 
 # Auth + OIDC
 axum-oidc = "0.5.0"
@@ -78,6 +78,7 @@ uuid = { version = "1.10.0", features = ["v4", "fast-rng", "serde"] }
 chrono = "0.4.38"
 url = "2.5.2"
 rust_decimal = "1.36.0"
+utoipa-axum = "0.1.2"
 
 [features]
 default = ["cache"]
