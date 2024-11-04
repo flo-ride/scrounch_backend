@@ -3,16 +3,13 @@
 //! This module provides functionality for handling file uploads, typically used
 //! for processing user-uploaded content such as images, documents, or other assets.
 
+use crate::{error::AppError, models::file::FileParams};
 use axum::{
     extract::{Multipart, Query, State},
     Json,
 };
+use extractor::profile::admin::Admin;
 use futures::stream::TryStreamExt;
-
-use crate::{
-    error::AppError,
-    models::{file::FileParams, profile::admin::Admin},
-};
 
 use super::openapi::MISC_TAG;
 #[derive(utoipa::ToSchema)]

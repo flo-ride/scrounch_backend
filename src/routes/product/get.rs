@@ -1,15 +1,14 @@
 //! This module contains the route handler for retrieving product information.
 
 use crate::{
-    error::AppError,
-    models::{profile::admin::Admin, utils::pagination::Pagination},
-    routes::utils::openapi::PRODUCT_TAG,
+    error::AppError, models::utils::pagination::Pagination, routes::utils::openapi::PRODUCT_TAG,
 };
 use axum::{
     extract::{Path, Query, State},
     Json,
 };
 use entity::response::product::{ProductListResponse, ProductResponse, ProductResponseError};
+use extractor::profile::admin::Admin;
 use migration::IntoCondition;
 use sea_orm::ColumnTrait;
 use service::Connection;

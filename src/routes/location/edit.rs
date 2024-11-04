@@ -1,6 +1,6 @@
 //! Route for editing an existing location
 
-use crate::{error::AppError, models::profile::admin::Admin, routes::utils::openapi::LOCATION_TAG};
+use crate::{error::AppError, routes::utils::openapi::LOCATION_TAG};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -8,6 +8,7 @@ use axum::{
     Json,
 };
 use entity::{models::location::ActiveModel, request::location::EditLocationRequest};
+use extractor::profile::admin::Admin;
 use service::Connection;
 
 /// Edit an existing location by ID.

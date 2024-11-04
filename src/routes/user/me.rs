@@ -5,6 +5,7 @@
 //! where user-specific information needs to be displayed or updated.
 use axum::{extract::State, Json};
 use entity::response::user::UserResponse;
+use extractor::profile::{oidc_user::OidcUser, user::User};
 use service::Connection;
 
 use crate::{error::AppError, routes::utils::openapi::USER_TAG};
@@ -29,8 +30,8 @@ use crate::{error::AppError, routes::utils::openapi::USER_TAG};
     )
 )]
 pub async fn get_me(
-    user: Option<crate::models::profile::user::User>,
-    oidc_user: Option<crate::models::profile::oidc_user::OidcUser>,
+    user: Option<User>,
+    oidc_user: Option<OidcUser>,
     State(conn): State<Connection>,
 ) -> Result<Json<UserResponse>, AppError> {
     if let Some(user) = user {

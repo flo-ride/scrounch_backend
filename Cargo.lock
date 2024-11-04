@@ -1370,6 +1370,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "extractor"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "axum-oidc",
+ "chrono",
+ "entity",
+ "log",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "service",
+ "tower 0.5.1",
+ "utoipa",
+ "uuid",
+]
+
+[[package]]
 name = "fastrand"
 version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3557,6 +3575,7 @@ dependencies = [
  "clap 4.5.17",
  "dotenvy",
  "entity",
+ "extractor",
  "fred",
  "futures",
  "http-body-util",

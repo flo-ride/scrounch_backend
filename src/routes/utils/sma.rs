@@ -3,21 +3,26 @@
 //! processing the data, and updating the local database with imported products.
 
 use super::openapi::MISC_TAG;
-use crate::models::utils::sma::SmaChangeTypeMatrix;
 use crate::{
     error::AppError,
     models::{
         file::FileType,
-        profile::admin::Admin,
-        utils::sma::{SmaChange, SmaProduct, SmaProducts},
+        utils::sma::{SmaChange, SmaChangeTypeMatrix, SmaProduct, SmaProducts},
     },
     Arguments,
 };
-use axum::extract::{Query, State};
-use axum::Json;
-use entity::models::product;
-use entity::response::product::{EditedProductResponse, ProductResponse, ProductResponseError};
-use entity::response::sma::SmaResponse;
+use axum::{
+    extract::{Query, State},
+    Json,
+};
+use entity::{
+    models::product,
+    response::{
+        product::{EditedProductResponse, ProductResponse, ProductResponseError},
+        sma::SmaResponse,
+    },
+};
+use extractor::profile::admin::Admin;
 use futures::future::join_all;
 use sea_orm::ActiveValue::Set;
 use service::Connection;

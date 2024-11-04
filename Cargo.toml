@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [workspace]
-members = [".", "migration", "entity", "service"]
+members = [".", "migration", "entity", "service", "extractor"]
 
 # Enable high optimizations for dependencies:
 [profile.dev.package."*"]
@@ -36,9 +36,12 @@ futures = "0.3.30"
 
 # Database
 sea-orm = { version = "1.0.1", features = ["sqlx-postgres", "runtime-tokio-rustls", "with-chrono"] }
+
+# Internal
 migration = { path = "migration" }
 entity = { path = "entity" }
 service = { path = "service" }
+extractor = { path = "extractor" }
 
 # CLI + Env + Config
 clap = { version = "4.5.17", features = ["derive", "env"] }
@@ -52,6 +55,7 @@ log = "0.4.22"
 
 # OpenAPI
 utoipa = { version = "5.2.0", features = ["axum_extras", "uuid", "chrono", "time", "decimal", "non_strict_integers"] }
+utoipa-axum = "0.1.2"
 utoipa-swagger-ui = { version = "8.0.3", features = ["axum"] }
 
 # Auth + OIDC
@@ -78,7 +82,6 @@ uuid = { version = "1.10.0", features = ["v4", "fast-rng", "serde"] }
 chrono = "0.4.38"
 url = "2.5.2"
 rust_decimal = "1.36.0"
-utoipa-axum = "0.1.2"
 
 [features]
 default = ["cache"]

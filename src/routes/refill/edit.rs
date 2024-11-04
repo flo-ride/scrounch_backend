@@ -1,6 +1,6 @@
 //! Route for editing an existing refill in the store.
 
-use crate::{error::AppError, models::profile::admin::Admin, routes::utils::openapi::REFILL_TAG};
+use crate::{error::AppError, routes::utils::openapi::REFILL_TAG};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -8,6 +8,7 @@ use axum::{
     Json,
 };
 use entity::{models::refill::ActiveModel, request::refill::EditRefillRequest};
+use extractor::profile::admin::Admin;
 use service::Connection;
 
 /// Edit an existing refill by ID in the store.

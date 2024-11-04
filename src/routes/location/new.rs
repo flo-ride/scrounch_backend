@@ -4,9 +4,10 @@
 //! It allows for the creation of new location entries in the database.
 //! Admin privileges are required to access this route.
 
-use crate::{error::AppError, models::profile::admin::Admin, routes::utils::openapi::LOCATION_TAG};
+use crate::{error::AppError, routes::utils::openapi::LOCATION_TAG};
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use entity::{models::location::ActiveModel, request::location::NewLocationRequest};
+use extractor::profile::admin::Admin;
 use service::Connection;
 
 /// Handler for creating a new location.

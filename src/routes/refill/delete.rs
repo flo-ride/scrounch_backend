@@ -2,12 +2,13 @@
 //!
 //! Only an admin can delete a refill.
 
-use crate::{error::AppError, models::profile::admin::Admin, routes::utils::openapi::REFILL_TAG};
+use crate::{error::AppError, routes::utils::openapi::REFILL_TAG};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
 };
+use extractor::profile::admin::Admin;
 use service::Connection;
 
 /// Deletes a refill by its database ID.

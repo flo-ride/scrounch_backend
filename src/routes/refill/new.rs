@@ -5,11 +5,11 @@
 //! Admin privileges are required to access this route.
 
 use crate::error::AppError;
-use crate::models::profile::admin::Admin;
 use crate::routes::utils::openapi::REFILL_TAG;
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use entity::models::refill::ActiveModel;
 use entity::request::refill::NewRefillRequest;
+use extractor::profile::admin::Admin;
 use service::Connection;
 
 /// Handler for creating a new refill.

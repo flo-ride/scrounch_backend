@@ -7,11 +7,11 @@
 //!
 
 use super::openapi::USER_TAG;
-use crate::error::AppError;
-use crate::{models::profile::oidc_user::OidcUser, state::AppState};
+use crate::{error::AppError, state::AppState};
 use axum::{extract::State, response::IntoResponse};
 use entity::models::sea_orm_active_enums::Currency;
 use entity::models::user::{self};
+use extractor::profile::oidc_user::OidcUser;
 use sea_orm::ActiveValue::Set;
 use service::Connection;
 

@@ -2,12 +2,13 @@
 //!
 //! Only an admin can delete a location.
 
-use crate::{error::AppError, models::profile::admin::Admin, routes::utils::openapi::LOCATION_TAG};
+use crate::{error::AppError, routes::utils::openapi::LOCATION_TAG};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
 };
+use extractor::profile::admin::Admin;
 use service::Connection;
 
 /// Deletes a location by its database ID.

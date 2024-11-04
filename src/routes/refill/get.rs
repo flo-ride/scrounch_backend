@@ -1,15 +1,14 @@
 //! This module contains the route handler for retrieving refill information.
 
 use crate::{
-    error::AppError,
-    models::{profile::admin::Admin, utils::pagination::Pagination},
-    routes::utils::openapi::REFILL_TAG,
+    error::AppError, models::utils::pagination::Pagination, routes::utils::openapi::REFILL_TAG,
 };
 use axum::{
     extract::{Path, Query, State},
     Json,
 };
 use entity::response::refill::{RefillListResponse, RefillResponse, RefillResponseError};
+use extractor::profile::admin::Admin;
 use migration::IntoCondition;
 use sea_orm::ColumnTrait;
 use service::Connection;
