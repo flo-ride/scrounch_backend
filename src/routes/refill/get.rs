@@ -3,6 +3,7 @@
 use crate::{
     error::AppError,
     models::{profile::admin::Admin, utils::pagination::Pagination},
+    routes::utils::openapi::REFILL_TAG,
 };
 use axum::{
     extract::{Path, Query, State},
@@ -26,17 +27,24 @@ use service::Connection;
 ///
 /// - **Permissions**:  
 ///   If the refill is disabled, only an admin can retrieve it.
-#[utoipa::path(get, path = "/refill/{id}", 
-               params(
-                   ("id" = uuid::Uuid, Path, description = "The database ID of the refill to retrieve."),
-                ),
-                responses(
-                   (status = 500, description = "An internal error, most likely related to the database, occurred."), 
-                   (status = 400, description = "The request is improperly formatted."), 
-                   (status = 404, description = "The refill doesn't exist, or is disabled and the requester is not an admin."), 
-                   (status = 200, description = "The refill was successfully retrieved.", body = RefillResponse)
-                )
-            )]
+#[utoipa::path(
+    get,
+    path = "/{id}", 
+    tag = REFILL_TAG,
+    params(
+        ("id" = uuid::Uuid, Path, description = "The database ID of the refill to retrieve."),
+    ),
+    responses(
+        (status = 500, description = "An internal error, most likely related to the database, occurred."), 
+        (status = 400, description = "The request is improperly formatted."), 
+        (status = 404, description = "The refill doesn't exist, or is disabled and the requester is not an admin."), 
+        (status = 200, description = "The refill was successfully retrieved.", body = RefillResponse)
+    ),
+    security(
+        (),
+        ("axum-oidc" = [])
+    )
+)]
 pub async fn get_refill(
     admin: Option<Admin>,
     Path(id): Path<uuid::Uuid>,
@@ -72,17 +80,23 @@ pub async fn get_refill(
 ///
 /// - **Permissions**:  
 ///   Only Admin can view disabled refill
-#[utoipa::path(get, path = "/refill",
-               params(
-                   ("page" = Option<u64>, Query, description = "The page index, default is 0"),
-                   ("per_page" = Option<u64>, Query, description = "The number of refill per page, default is 20"),
-                ),
-                responses(
-                   (status = 500, description = "An internal error, most likely related to the database, occurred."), 
-                   (status = 400, description = "The request is improperly formatted."), 
-                   (status = 200, description = "Successfully retrieved a list of refills.", body = RefillListResponse)
-                )
-            )]
+#[utoipa::path(
+    get,
+    path = "",
+    tag = REFILL_TAG,
+    params(
+        Pagination
+    ),
+    responses(
+        (status = 500, description = "An internal error, most likely related to the database, occurred."), 
+        (status = 400, description = "The request is improperly formatted."), 
+        (status = 200, description = "Successfully retrieved a list of refills.", body = RefillListResponse)
+    ),
+    security(
+        (),
+        ("axum-oidc" = [])
+    )
+)]
 pub async fn get_all_refills(
     admin: Option<Admin>,
     Query(pagination): Query<Pagination>,

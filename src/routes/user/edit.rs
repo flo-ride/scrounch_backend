@@ -3,6 +3,7 @@
 use crate::{
     error::AppError,
     models::profile::{admin::Admin, user::User},
+    routes::utils::openapi::USER_TAG,
 };
 use axum::{
     extract::{Path, State},
@@ -16,17 +17,23 @@ use service::Connection;
 /// Edit an existing user by ID.
 ///
 /// Returns an error if the user doesn't exist, if there is a validation issue, or if a database.
-#[utoipa::path(put, path = "/user/{id}",
-               params(
-                   ("id" = uuid::Uuid, Path, description = "user database id to edit user for"),
-                ),
-               request_body(content = EditUserRequest, content_type = "application/json"), 
-               responses(
-                   (status = 500, description = "An internal error occured, probably database related"), 
-                   (status = 400, description = "Your request is not correctly formatted"), 
-                   (status = 200, description = "The user is correctly edited")
-                )
-               )]
+#[utoipa::path(
+    put,
+    path = "/{id}",
+    tag = USER_TAG,
+    params(
+        ("id" = uuid::Uuid, Path, description = "user database id to edit user for"),
+    ),
+    request_body(content = EditUserRequest, content_type = "application/json"), 
+    responses(
+        (status = 500, description = "An internal error occured, probably database related"), 
+        (status = 400, description = "Your request is not correctly formatted"), 
+        (status = 200, description = "The user is correctly edited")
+    ),
+    security(
+        ("axum-oidc" = [])
+    )
+)]
 pub async fn edit_user(
     admin: Admin,
     Path(id): Path<uuid::Uuid>,

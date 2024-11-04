@@ -5,6 +5,8 @@
 //! file content to the client. It aims to simplify the process of
 //! serving files in a web application.
 
+use super::openapi::MISC_TAG;
+use crate::{error::AppError, models::file::FileParams};
 use axum::{
     body::Body,
     extract::{Path, Query, State},
@@ -12,8 +14,6 @@ use axum::{
     response::IntoResponse,
 };
 use s3::error::S3Error;
-
-use crate::{error::AppError, models::file::FileParams};
 
 /// Downloads files from the server's storage.
 ///
@@ -33,17 +33,20 @@ use crate::{error::AppError, models::file::FileParams};
 /// # Errors
 /// Returns an error if the file does not exist or if there is an issue
 /// with the S3 storage.
-#[utoipa::path(get, path = "/download/{filename}", 
-        params(
-            ("filename" = String, Path, description = "The filename"),
-            ("type" = FileType, Query, description = "The type of downloaded file")
-        ),
-        responses(
-            (status = 200, description = "Successfully retrieved the file", body = String),
-            (status = 400, description = "You're missing some field"),
-            (status = 500, description = "An internal error, most likely related to s3, occurred."), 
-        ),
-    )]
+#[utoipa::path(
+    get,
+    path = "/download/{filename}", 
+    tag = MISC_TAG,
+    params(
+        ("filename" = String, Path, description = "The filename"),
+        FileParams,
+    ),
+    responses(
+        (status = 200, description = "Successfully retrieved the file", body = String),
+        (status = 400, description = "You're missing some field"),
+        (status = 500, description = "An internal error, most likely related to s3, occurred."), 
+    ),
+)]
 pub async fn download_file(
     Path(filename): Path<String>,
     State(conn): State<s3::Bucket>,

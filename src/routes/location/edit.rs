@@ -1,6 +1,6 @@
 //! Route for editing an existing location
 
-use crate::{error::AppError, models::profile::admin::Admin};
+use crate::{error::AppError, models::profile::admin::Admin, routes::utils::openapi::LOCATION_TAG};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -13,17 +13,23 @@ use service::Connection;
 /// Edit an existing location by ID.
 ///
 /// Returns an error if the location doesn't exist, if there is a validation issue, or if a database.
-#[utoipa::path(put, path = "/location/{id}",
-               params(
-                   ("id" = uuid::Uuid, Path, description = "location database id to edit location for"),
-                ),
-               request_body(content = EditLocationRequest, content_type = "application/json"), 
-               responses(
-                   (status = 500, description = "An internal error occured, probably database related"), 
-                   (status = 400, description = "Your request is not correctly formatted"), 
-                   (status = 200, description = "The location is correctly edited")
-                )
-               )]
+#[utoipa::path(
+    put,
+    path = "/{id}",
+    tag = LOCATION_TAG,
+    params(
+        ("id" = uuid::Uuid, Path, description = "location database id to edit location for"),
+    ),
+    request_body(content = EditLocationRequest, content_type = "application/json"), 
+    responses(
+        (status = 500, description = "An internal error occured, probably database related"), 
+        (status = 400, description = "Your request is not correctly formatted"), 
+        (status = 200, description = "The location is correctly edited")
+    ),
+    security(
+        ("axum-oidc" = [])
+    )
+)]
 pub async fn edit_location(
     admin: Admin,
     Path(id): Path<uuid::Uuid>,

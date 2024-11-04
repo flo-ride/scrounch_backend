@@ -1,15 +1,15 @@
-use axum::routing::{delete, get, post, put};
+use utoipa_axum::{router::OpenApiRouter, routes};
 
 pub mod delete;
 pub mod edit;
 pub mod get;
 pub mod new;
 
-pub fn router() -> axum::Router<crate::state::AppState> {
-    axum::Router::new()
-        .route("/:id", get(get::get_refill))
-        .route("/", get(get::get_all_refills))
-        .route("/", post(new::post_new_refill))
-        .route("/:id", put(edit::edit_refill))
-        .route("/:id", delete(delete::delete_refill))
+pub fn router() -> OpenApiRouter<crate::state::AppState> {
+    OpenApiRouter::new()
+        .routes(routes!(get::get_refill))
+        .routes(routes!(get::get_all_refills))
+        .routes(routes!(new::post_new_refill))
+        .routes(routes!(edit::edit_refill))
+        .routes(routes!(delete::delete_refill))
 }

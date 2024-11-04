@@ -4,9 +4,9 @@
 //! It allows for the creation of new product entries in the database.
 //! Admin privileges are required to access this route.
 
-use crate::error::AppError;
 use crate::models::file::FileType;
 use crate::models::profile::admin::Admin;
+use crate::{error::AppError, routes::utils::openapi::PRODUCT_TAG};
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use entity::{models::product::ActiveModel, request::product::NewProductRequest};
 use service::Connection;
@@ -26,9 +26,10 @@ use service::Connection;
 ///     - 500: Internal server error (likely database related).
 ///     - 400: Bad request (invalid input data).
 ///     - 201: Successfully created a new product, returns the new product's ID as a string.
-#[utoipa::path(post, path = "/product", 
-               request_body(content = NewProductRequest, content_type = "application/json"), 
-               responses(
+#[utoipa::path(post, path = "", 
+                tag = PRODUCT_TAG,
+                request_body(content = NewProductRequest, content_type = "application/json"), 
+                responses(
                    (status = 500, description = "An internal error, most likely related to the database, occurred."), 
                    (status = 400, description = "The request is improperly formatted."), 
                    (status = 201, description = "Successfully created a new product, returns the new product's ID as a string.", body = uuid::Uuid)

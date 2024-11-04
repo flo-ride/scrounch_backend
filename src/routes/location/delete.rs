@@ -2,7 +2,7 @@
 //!
 //! Only an admin can delete a location.
 
-use crate::{error::AppError, models::profile::admin::Admin};
+use crate::{error::AppError, models::profile::admin::Admin, routes::utils::openapi::LOCATION_TAG};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -22,16 +22,22 @@ use service::Connection;
 ///   - `500`: Internal error, likely related to the database.
 ///   - `400`: The request format is invalid.
 ///   - `200`: The location has been successfully disabled.
-#[utoipa::path(delete, path = "/location/{id}",
-               params(
-                   ("id" = uuid::Uuid, Path, description = "Location database id to delete location for"),
-                ),
-               responses(
-                   (status = 500, description = "An internal error occured, probably databse related"), 
-                   (status = 400, description = "Your request is not correctly formatted"), 
-                   (status = 200, description = "The location is disabled")
-                )
-               )]
+#[utoipa::path(
+    delete,
+    path = "/{id}",
+    tag = LOCATION_TAG,
+    params(
+        ("id" = uuid::Uuid, Path, description = "Location database id to delete location for"),
+    ),
+    responses(
+        (status = 500, description = "An internal error occured, probably databse related"), 
+        (status = 400, description = "Your request is not correctly formatted"), 
+        (status = 200, description = "The location is disabled")
+    ),
+    security(
+        ("axum-oidc" = [""])
+    )
+)]
 pub async fn delete_location(
     admin: Admin,
     Path(id): Path<uuid::Uuid>,

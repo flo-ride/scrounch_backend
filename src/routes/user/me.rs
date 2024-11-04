@@ -7,7 +7,7 @@ use axum::{extract::State, Json};
 use entity::response::user::UserResponse;
 use service::Connection;
 
-use crate::error::AppError;
+use crate::{error::AppError, routes::utils::openapi::USER_TAG};
 
 /// Handles the `/me` route, returning the current user's information if authenticated.
 ///
@@ -16,13 +16,18 @@ use crate::error::AppError;
 /// JSON response. If not logged in, it returns a `204 No Content` response, indicating
 /// the user is not authenticated.
 #[utoipa::path(
-        get,
-        path = "/me",
-        responses(
-            (status = 200, description = "You're logged in", body = UserResponse),
-            (status = 204, description = "You're not logged in")
-        )
-    )]
+    get,
+    path = "/me",
+    tag = USER_TAG,
+    responses(
+        (status = 200, description = "You're logged in", body = UserResponse),
+        (status = 204, description = "You're not logged in")
+    ),
+    security(
+        (),
+        ("axum-oidc" = [])
+    )
+)]
 pub async fn get_me(
     user: Option<crate::models::profile::user::User>,
     oidc_user: Option<crate::models::profile::oidc_user::OidcUser>,

@@ -1,6 +1,6 @@
 //! File related models
 
-#[derive(Debug, PartialEq, Clone, Copy, serde::Deserialize)]
+#[derive(Debug, PartialEq, Clone, Copy, serde::Deserialize, utoipa::IntoParams)]
 pub struct FileParams {
     #[serde(alias = "type")]
     pub file_type: FileType,

@@ -6,6 +6,7 @@
 
 use crate::error::AppError;
 use crate::models::profile::admin::Admin;
+use crate::routes::utils::openapi::REFILL_TAG;
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use entity::models::refill::ActiveModel;
 use entity::request::refill::NewRefillRequest;
@@ -26,14 +27,20 @@ use service::Connection;
 ///     - 500: Internal server error (likely database related).
 ///     - 400: Bad request (invalid input data).
 ///     - 201: Successfully created a new refill, returns the new refill's ID as a string.
-#[utoipa::path(post, path = "/refill", 
-               request_body(content = NewRefillRequest, content_type = "application/json"), 
-               responses(
-                   (status = 500, description = "An internal error, most likely related to the database, occurred."), 
-                   (status = 400, description = "The request is improperly formatted."), 
-                   (status = 201, description = "Successfully created a new refill, returns the new refill's ID as a string.", body = uuid::Uuid)
-                )
-               )]
+#[utoipa::path(
+    post,
+    path = "", 
+    tag = REFILL_TAG,
+    request_body(content = NewRefillRequest, content_type = "application/json"), 
+    responses(
+        (status = 500, description = "An internal error, most likely related to the database, occurred."), 
+        (status = 400, description = "The request is improperly formatted."), 
+        (status = 201, description = "Successfully created a new refill, returns the new refill's ID as a string.", body = uuid::Uuid)
+    ),
+    security(
+        ("axum-oidc" = [])
+    )
+)]
 pub async fn post_new_refill(
     admin: Admin,
     State(conn): State<Connection>,

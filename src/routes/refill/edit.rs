@@ -1,6 +1,6 @@
 //! Route for editing an existing refill in the store.
 
-use crate::{error::AppError, models::profile::admin::Admin};
+use crate::{error::AppError, models::profile::admin::Admin, routes::utils::openapi::REFILL_TAG};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -15,17 +15,23 @@ use service::Connection;
 /// The admin can change attributes such as the name, amont_in_euro, amont_in_epicoin of the refill.
 ///
 /// Returns an error if the refill doesn't exist, if there is a validation issue, or if a database or S3 operation fails.
-#[utoipa::path(put, path = "/refill/{id}",
-               params(
-                   ("id" = uuid::Uuid, Path, description = "refill database id to edit refill for"),
-                ),
-               request_body(content = EditRefillRequest, content_type = "application/json"), 
-               responses(
-                   (status = 500, description = "An internal error occured, probably database related"), 
-                   (status = 400, description = "Your request is not correctly formatted"), 
-                   (status = 200, description = "The refill is correctly edited")
-                )
-               )]
+#[utoipa::path(
+    put,
+    path = "/{id}",
+    tag = REFILL_TAG,
+    params(
+        ("id" = uuid::Uuid, Path, description = "refill database id to edit refill for"),
+    ),
+    request_body(content = EditRefillRequest, content_type = "application/json"), 
+    responses(
+       (status = 500, description = "An internal error occured, probably database related"), 
+       (status = 400, description = "Your request is not correctly formatted"), 
+       (status = 200, description = "The refill is correctly edited")
+    ),
+    security(
+        ("axum-oidc" = [])
+    )
+)]
 pub async fn edit_refill(
     admin: Admin,
     Path(id): Path<uuid::Uuid>,

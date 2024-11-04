@@ -2,7 +2,7 @@
 //!
 //! Only an admin can delete a product.
 
-use crate::{error::AppError, models::profile::admin::Admin};
+use crate::{error::AppError, models::profile::admin::Admin, routes::utils::openapi::PRODUCT_TAG};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -24,16 +24,22 @@ use service::Connection;
 ///   - `500`: Internal error, likely related to the database.
 ///   - `400`: The request format is invalid.
 ///   - `200`: The product has been successfully disabled.
-#[utoipa::path(delete, path = "/product/{id}",
-               params(
-                   ("id" = uuid::Uuid, Path, description = "Product database id to delete product for"),
-                ),
-               responses(
-                   (status = 500, description = "An internal error occured, probably databse related"), 
-                   (status = 400, description = "Your request is not correctly formatted"), 
-                   (status = 200, description = "The product is disabled")
-                )
-               )]
+#[utoipa::path(
+    delete,
+    path = "/{id}",
+    tag = PRODUCT_TAG,
+    params(
+        ("id" = uuid::Uuid, Path, description = "Product database id to delete product for"),
+    ),
+    responses(
+        (status = 500, description = "An internal error occured, probably databse related"), 
+        (status = 400, description = "Your request is not correctly formatted"), 
+        (status = 200, description = "The product is disabled")
+    ),
+    security(
+        ("axum-oidc" = [])
+    )
+)]
 pub async fn delete_product(
     admin: Admin,
     Path(id): Path<uuid::Uuid>,

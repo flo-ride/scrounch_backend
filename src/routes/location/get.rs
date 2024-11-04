@@ -3,6 +3,7 @@
 use crate::{
     error::AppError,
     models::{profile::admin::Admin, utils::pagination::Pagination},
+    routes::utils::openapi::LOCATION_TAG,
 };
 use axum::{
     extract::{Path, Query, State},
@@ -26,17 +27,24 @@ use service::Connection;
 ///
 /// - **Permissions**:  
 ///   If the location is disabled, only an admin can retrieve it.
-#[utoipa::path(get, path = "/location/{id}", 
-               params(
-                   ("id" = uuid::Uuid, Path, description = "The database ID of the location to retrieve."),
-                ),
-                responses(
-                   (status = 500, description = "An internal error, most likely related to the database, occurred."), 
-                   (status = 400, description = "The request is improperly formatted."), 
-                   (status = 404, description = "The location doesn't exist, or is disabled and the requester is not an admin."), 
-                   (status = 200, description = "The location was successfully retrieved.", body = LocationResponse)
-                )
-            )]
+#[utoipa::path(
+    get,
+    path = "/{id}", 
+    tag = LOCATION_TAG,
+    params(
+        ("id" = uuid::Uuid, Path, description = "The database ID of the location to retrieve."),
+    ),
+    responses(
+        (status = 500, description = "An internal error, most likely related to the database, occurred."), 
+        (status = 400, description = "The request is improperly formatted."), 
+        (status = 404, description = "The location doesn't exist, or is disabled and the requester is not an admin."), 
+        (status = 200, description = "The location was successfully retrieved.", body = LocationResponse)
+    ),
+    security(
+        (),
+        ("axum-oidc" = [])
+    )
+)]
 pub async fn get_location(
     admin: Option<Admin>,
     Path(id): Path<uuid::Uuid>,
@@ -72,17 +80,23 @@ pub async fn get_location(
 ///
 /// - **Permissions**:  
 ///   Only Admin can view disabled location
-#[utoipa::path(get, path = "/location",
-               params(
-                   ("page" = Option<u64>, Query, description = "The page index, default is 0"),
-                   ("per_page" = Option<u64>, Query, description = "The number of location per page, default is 20"),
-                ),
-                responses(
-                   (status = 500, description = "An internal error, most likely related to the database, occurred."), 
-                   (status = 400, description = "The request is improperly formatted."), 
-                   (status = 200, description = "Successfully retrieved a list of locations.", body = LocationListResponse)
-                )
-            )]
+#[utoipa::path(
+    get,
+    path = "",
+    tag = LOCATION_TAG,
+    params(
+        Pagination
+    ),
+    responses(
+        (status = 500, description = "An internal error, most likely related to the database, occurred."), 
+        (status = 400, description = "The request is improperly formatted."), 
+        (status = 200, description = "Successfully retrieved a list of locations.", body = LocationListResponse)
+    ),
+    security(
+        (),
+        ("axum-oidc" = [])
+    )
+)]
 pub async fn get_all_locations(
     admin: Option<Admin>,
     Query(pagination): Query<Pagination>,

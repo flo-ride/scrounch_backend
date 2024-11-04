@@ -4,7 +4,7 @@
 //! It allows for the creation of new location entries in the database.
 //! Admin privileges are required to access this route.
 
-use crate::{error::AppError, models::profile::admin::Admin};
+use crate::{error::AppError, models::profile::admin::Admin, routes::utils::openapi::LOCATION_TAG};
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use entity::{models::location::ActiveModel, request::location::NewLocationRequest};
 use service::Connection;
@@ -24,14 +24,20 @@ use service::Connection;
 ///     - 500: Internal server error (likely database related).
 ///     - 400: Bad request (invalid input data).
 ///     - 201: Successfully created a new location, returns the new location's ID as a string.
-#[utoipa::path(post, path = "/location", 
-               request_body(content = NewLocationRequest, content_type = "application/json"), 
-               responses(
-                   (status = 500, description = "An internal error, most likely related to the database, occurred."), 
-                   (status = 400, description = "The request is improperly formatted."), 
-                   (status = 201, description = "Successfully created a new location, returns the new location's ID as a string.", body = uuid::Uuid)
-                )
-               )]
+#[utoipa::path(
+    post,
+    path = "", 
+    tag = LOCATION_TAG,
+    request_body(content = NewLocationRequest, content_type = "application/json"), 
+    responses(
+       (status = 500, description = "An internal error, most likely related to the database, occurred."), 
+       (status = 400, description = "The request is improperly formatted."), 
+       (status = 201, description = "Successfully created a new location, returns the new location's ID as a string.", body = uuid::Uuid)
+    ),
+    security(
+        ("axum-oidc" = [])
+    )
+)]
 pub async fn post_new_location(
     admin: Admin,
     State(conn): State<Connection>,

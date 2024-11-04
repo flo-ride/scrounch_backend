@@ -14,30 +14,35 @@ use crate::{
     models::{file::FileParams, profile::admin::Admin},
 };
 
+use super::openapi::MISC_TAG;
 #[derive(utoipa::ToSchema)]
 pub struct FileSchema {
-    #[schema(format = Binary, value_type = String)]
     #[allow(dead_code)]
-    image_bytes: Vec<u8>,
+    #[schema(content_media_type = "application/octet-stream")]
+    file_bytes: Vec<u8>,
 }
 
 /// Upload files
 ///
 /// This endpoint allows an admin user to upload files to a specified S3 bucket.
 /// It uses multipart form data to handle file uploads and stores them in a temporary S3 directory.
-#[utoipa::path(post, path = "/upload", 
-        params(
-            ("type" = FileType, Query, description = "The type of uploaded file")
-        ),
-        responses(
-            (status = 200, description = "The file is correctly uploaded", body = String),
-            (status = 400, description = "You're missing some field"),
-            (status = 500, description = "An internal error, most likely related to s3, occurred."), 
-
-        ),
-        request_body(content = FileSchema, content_type = "multipart/form-data")
-
-        )]
+#[utoipa::path(
+    post,
+    path = "/upload", 
+    tag = MISC_TAG,
+    params(
+        FileParams
+    ),
+    request_body(content = inline(FileSchema), content_type = "multipart/form-data"),
+    responses(
+        (status = 200, description = "The file is correctly uploaded", body = String),
+        (status = 400, description = "You're missing some field"),
+        (status = 500, description = "An internal error, most likely related to s3, occurred."), 
+    ),
+    security(
+        ("axum-oidc" = [])
+    )
+)]
 pub async fn post_upload_files(
     user: Admin,
     State(conn): State<s3::Bucket>,

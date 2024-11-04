@@ -16,15 +16,13 @@ mod state;
 
 use std::time::Duration;
 
-use axum::{
-    error_handling::HandleErrorLayer,
-    http::Method,
-    routing::{get, post},
-};
+use axum::{error_handling::HandleErrorLayer, http::Method};
 use axum_oidc::EmptyAdditionalClaims;
 pub use cli::Arguments;
 use migration::MigratorTrait;
 use oidc::handle_axum_oidc_middleware_error;
+use utoipa::OpenApi;
+use utoipa_axum::{router::OpenApiRouter, routes};
 
 /// Creates and configures the Axum application.
 ///
@@ -115,30 +113,34 @@ pub async fn app(arguments: Arguments) -> axum::Router {
         .path()
         .to_string();
 
-    if path != "/" {
-        tracing::info!("Server with use path: {path}");
-    }
+    let path = match path.as_str() {
+        "/" => "".to_string(),
+        _ => {
+            tracing::info!("Server use path: {path}");
+            path
+        }
+    };
+
+    let (router, api) = OpenApiRouter::with_openapi(routes::utils::openapi::ApiDoc::openapi())
+        .merge(auth_required_routes(&path))
+        .layer(login_service)
+        .merge(auth_optional_routes(&path))
+        .split_for_parts();
 
     #[cfg(feature = "cache")]
     if let Some(pool) = state.cache_pool.clone() {
-        return axum::Router::new()
-            .merge(auth_required_routes(&path))
-            .layer(login_service)
-            .merge(auth_optional_routes(&path))
+        return router
             .layer(auth_service)
             .layer(oidc::cache_session_layer(pool))
-            .merge(routes::utils::openapi::openapi(&path))
+            .merge(routes::utils::openapi::openapi(&path, api))
             .layer(cors_layer)
             .with_state(state);
     }
 
-    axum::Router::new()
-        .merge(auth_required_routes(&path))
-        .layer(login_service)
-        .merge(auth_optional_routes(&path))
+    router
         .layer(auth_service)
         .layer(oidc::memory_session_layer())
-        .merge(routes::utils::openapi::openapi(&path))
+        .merge(routes::utils::openapi::openapi(&path, api))
         .layer(cors_layer)
         .with_state(state)
 }
@@ -149,12 +151,12 @@ pub async fn app(arguments: Arguments) -> axum::Router {
 /// protected by authentication. These routes require the user to be logged in
 /// and authenticated via OpenID Connect (OIDC) to access, otherwise it redirect them to the OIDC
 /// login page.
-fn auth_required_routes(path: &str) -> axum::Router<state::AppState> {
-    axum::Router::new().nest(
+fn auth_required_routes(path: &str) -> OpenApiRouter<state::AppState> {
+    OpenApiRouter::new().nest(
         path,
-        axum::Router::new()
-            .route("/login", get(routes::utils::login::get_login))
-            .route("/logout", get(routes::utils::logout::get_logout)),
+        OpenApiRouter::new()
+            .routes(routes!(routes::utils::login::get_login))
+            .routes(routes!(routes::utils::logout::get_logout)),
     )
 }
 
@@ -163,18 +165,15 @@ fn auth_required_routes(path: &str) -> axum::Router<state::AppState> {
 /// This function creates an `axum::Router` for routes that can be accessed
 /// without user authentication. These routes are publicly accessible and do not
 /// require OpenID Connect (OIDC) login.
-fn auth_optional_routes(path: &str) -> axum::Router<state::AppState> {
-    axum::Router::new().nest(
+fn auth_optional_routes(path: &str) -> OpenApiRouter<state::AppState> {
+    OpenApiRouter::new().nest(
         path,
-        axum::Router::new()
-            .route("/me", get(routes::user::me::get_me))
-            .route("/upload", post(routes::utils::upload::post_upload_files))
-            .route(
-                "/download/:filename",
-                get(routes::utils::download::download_file),
-            )
-            .route("/status", get(routes::utils::status::get_status))
-            .route("/sma", post(routes::utils::sma::post_update_from_sma))
+        OpenApiRouter::new()
+            .routes(routes!(routes::user::me::get_me))
+            .routes(routes!(routes::utils::upload::post_upload_files))
+            .routes(routes!(routes::utils::download::download_file))
+            .routes(routes!(routes::utils::status::get_status))
+            .routes(routes!(routes::utils::sma::post_update_from_sma))
             .nest("/product", routes::product::router())
             .nest("/user", routes::user::router())
             .nest("/location", routes::location::router())

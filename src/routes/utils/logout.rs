@@ -5,17 +5,24 @@
 //! session invalidation, redirection after logout, and any other logout-related
 //! tasks.
 
-use std::str::FromStr;
-
+use super::openapi::USER_TAG;
 use axum::{extract::State, http::Uri, response::IntoResponse};
 use axum_oidc::OidcRpInitiatedLogout;
+use std::str::FromStr;
 
 /// Handles the logout process by initiating a logout request with the OIDC provider
 ///
 /// This function manages user logout by initiating an OIDC provider-initiated logout
 /// and then redirecting the user to the frontend base URL.
 //TODO:: Add utoipa responses
-#[utoipa::path(get, path = "/logout")]
+#[utoipa::path(
+    get,
+    path = "/logout", 
+    tag = USER_TAG,
+    security(
+        ("axum-oidc" = [])
+    )
+)]
 pub async fn get_logout(
     State(arguments): State<crate::cli::Arguments>,
     logout: OidcRpInitiatedLogout,

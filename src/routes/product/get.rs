@@ -3,6 +3,7 @@
 use crate::{
     error::AppError,
     models::{profile::admin::Admin, utils::pagination::Pagination},
+    routes::utils::openapi::PRODUCT_TAG,
 };
 use axum::{
     extract::{Path, Query, State},
@@ -26,17 +27,22 @@ use service::Connection;
 ///
 /// - **Permissions**:  
 ///   If the product is disabled, only an admin can retrieve it.
-#[utoipa::path(get, path = "/product/{id}", 
-               params(
-                   ("id" = uuid::Uuid, Path, description = "The database ID of the product to retrieve."),
-                ),
-                responses(
-                   (status = 500, description = "An internal error, most likely related to the database, occurred."), 
-                   (status = 400, description = "The request is improperly formatted."), 
-                   (status = 404, description = "The product doesn't exist, or is disabled and the requester is not an admin."), 
-                   (status = 200, description = "The product was successfully retrieved.", body = ProductResponse)
-                )
-            )]
+#[utoipa::path(get, path = "/{id}", 
+    tag = PRODUCT_TAG,
+    params(
+        ("id" = uuid::Uuid, Path, description = "The database ID of the product to retrieve."),
+    ),
+    responses(
+        (status = 500, description = "An internal error, most likely related to the database, occurred."), 
+        (status = 400, description = "The request is improperly formatted."), 
+        (status = 404, description = "The product doesn't exist, or is disabled and the requester is not an admin."), 
+        (status = 200, description = "The product was successfully retrieved.", body = ProductResponse)
+    ),
+    security(
+        (),
+        ("axum-oidc" = [])
+    )
+)]
 pub async fn get_product(
     admin: Option<Admin>,
     Path(id): Path<uuid::Uuid>,
@@ -73,17 +79,19 @@ pub async fn get_product(
 ///
 /// - **Permissions**:  
 ///   Non-admin users will only see products that are not disabled.
-#[utoipa::path(get, path = "/product",
-               params(
-                   ("page" = Option<u64>, Query, description = "The page index, default is 0"),
-                   ("per_page" = Option<u64>, Query, description = "The number of products per page, default is 20"),
-                ),
-                responses(
-                   (status = 500, description = "An internal error, most likely related to the database, occurred."), 
-                   (status = 400, description = "The request is improperly formatted."), 
-                   (status = 200, description = "Successfully retrieved a list of products.", body = ProductListResponse)
-                )
-            )]
+#[utoipa::path(
+    get,
+    path = "",
+    tag = PRODUCT_TAG,
+    params(
+        Pagination
+    ),
+    responses(
+       (status = 500, description = "An internal error, most likely related to the database, occurred."), 
+       (status = 400, description = "The request is improperly formatted."), 
+       (status = 200, description = "Successfully retrieved a list of products.", body = ProductListResponse)
+    )
+)]
 pub async fn get_all_products(
     admin: Option<Admin>,
     Query(pagination): Query<Pagination>,

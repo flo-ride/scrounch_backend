@@ -2,15 +2,7 @@
 //! existing products into the system. It handles communication with the Sma API,
 //! processing the data, and updating the local database with imported products.
 
-use axum::extract::{Query, State};
-use axum::Json;
-use entity::models::product;
-use entity::response::product::{EditedProductResponse, ProductResponse, ProductResponseError};
-use entity::response::sma::SmaResponse;
-use futures::future::join_all;
-use sea_orm::ActiveValue::Set;
-use service::Connection;
-
+use super::openapi::MISC_TAG;
 use crate::models::utils::sma::SmaChangeTypeMatrix;
 use crate::{
     error::AppError,
@@ -21,6 +13,14 @@ use crate::{
     },
     Arguments,
 };
+use axum::extract::{Query, State};
+use axum::Json;
+use entity::models::product;
+use entity::response::product::{EditedProductResponse, ProductResponse, ProductResponseError};
+use entity::response::sma::SmaResponse;
+use futures::future::join_all;
+use sea_orm::ActiveValue::Set;
+use service::Connection;
 
 /// Updates the local product database by importing products from the Sma API.
 /// This function retrieves the latest products from Sma, processes the data,
@@ -32,14 +32,19 @@ use crate::{
 ///
 /// # Responses
 /// - 200: The products have been successfully updated.
-#[utoipa::path(post, path = "/sma", 
-        responses(
-            (status = 500, description = "An internal error, most likely related to the database, occurred."), 
-            (status = 400, description = "The request is improperly formatted."), 
-            (status = 201, description = "Successfully updated every Sma Products", body = SmaResponse)
-        )
+#[utoipa::path(
+    post,
+    path = "/sma", 
+    tag = MISC_TAG,
+    responses(
+        (status = 500, description = "An internal error, most likely related to the database, occurred."), 
+        (status = 400, description = "The request is improperly formatted."), 
+        (status = 201, description = "Successfully updated every Sma Products", body = SmaResponse)
+    ),
+    security(
+        ("axum-oidc" = [])
     )
-]
+)]
 pub async fn post_update_from_sma(
     admin: Admin,
     State(arguments): State<Arguments>,

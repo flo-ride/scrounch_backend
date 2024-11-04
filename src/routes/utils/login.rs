@@ -6,6 +6,7 @@
 //! redirections after successful authentication.
 //!
 
+use super::openapi::USER_TAG;
 use crate::error::AppError;
 use crate::{models::profile::oidc_user::OidcUser, state::AppState};
 use axum::{extract::State, response::IntoResponse};
@@ -21,13 +22,14 @@ use service::Connection;
 /// the application's configuration (command-line arguments or environment variables).
 ///
 #[utoipa::path(
-        get,
-        path = "/login",
-        responses(
-            (status = 307, description = "You're not logged in and you should be"),
-            (status = 303, description = "You're logged in, now go back to frontend_base_url")
-        )
-    )]
+    get,
+    path = "/login",
+    tag = USER_TAG,
+    responses(
+        (status = 307, description = "You're not logged in and you should be"),
+        (status = 303, description = "You're logged in, now go back to frontend_base_url")
+    )
+)]
 pub async fn get_login(
     user: OidcUser,
     State(conn): State<Connection>,

@@ -6,6 +6,7 @@ use crate::{
         profile::{admin::Admin, user::User},
         utils::pagination::Pagination,
     },
+    routes::utils::openapi::USER_TAG,
 };
 use axum::{
     extract::{Path, Query, State},
@@ -28,17 +29,23 @@ use service::Connection;
 ///
 /// - **Permissions**:  
 ///   If the user is disabled, only an admin can retrieve it.
-#[utoipa::path(get, path = "/user/{id}", 
-               params(
-                   ("id" = uuid::Uuid, Path, description = "The database ID of the user to retrieve."),
-                ),
-                responses(
-                   (status = 500, description = "An internal error, most likely related to the database, occurred."), 
-                   (status = 400, description = "The request is improperly formatted."), 
-                   (status = 404, description = "The user doesn't exist, or is disabled and the requester is not an admin."), 
-                   (status = 200, description = "The user was successfully retrieved.", body = UserResponse)
-                )
-            )]
+#[utoipa::path(
+    get,
+    path = "/{id}", 
+    tag = USER_TAG,
+    params(
+       ("id" = uuid::Uuid, Path, description = "The database ID of the user to retrieve."),
+    ),
+    responses(
+       (status = 500, description = "An internal error, most likely related to the database, occurred."), 
+       (status = 400, description = "The request is improperly formatted."), 
+       (status = 404, description = "The user doesn't exist, or is disabled and the requester is not an admin."), 
+       (status = 200, description = "The user was successfully retrieved.", body = UserResponse)
+    ),
+    security(
+        ("axum-oidc" = ["user", "admin"])
+    )
+)]
 pub async fn get_user(
     user: User,
     Path(id): Path<uuid::Uuid>,
@@ -71,17 +78,22 @@ pub async fn get_user(
 ///
 /// - **Permissions**:  
 ///   Only Admin can view others users
-#[utoipa::path(get, path = "/user",
-               params(
-                   ("page" = Option<u64>, Query, description = "The page index, default is 0"),
-                   ("per_page" = Option<u64>, Query, description = "The number of user per page, default is 20"),
-                ),
-                responses(
-                   (status = 500, description = "An internal error, most likely related to the database, occurred."), 
-                   (status = 400, description = "The request is improperly formatted."), 
-                   (status = 200, description = "Successfully retrieved a list of users.", body = UserListResponse)
-                )
-            )]
+#[utoipa::path(
+    get,
+    path = "",
+    tag = USER_TAG,
+    params(
+        Pagination
+    ),
+    responses(
+        (status = 500, description = "An internal error, most likely related to the database, occurred."), 
+        (status = 400, description = "The request is improperly formatted."), 
+        (status = 200, description = "Successfully retrieved a list of users.", body = UserListResponse)
+    ),
+    security(
+        ("axum-oidc" = [])
+    )
+)]
 pub async fn get_all_users(
     _admin: Admin,
     Query(pagination): Query<Pagination>,

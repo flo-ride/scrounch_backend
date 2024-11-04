@@ -3,6 +3,7 @@
 use crate::{
     error::AppError,
     models::{file::FileType, profile::admin::Admin},
+    routes::utils::openapi::PRODUCT_TAG,
 };
 use axum::{
     extract::{Path, State},
@@ -19,17 +20,23 @@ use service::Connection;
 /// If the product image is changed, the old image will be deleted from S3 storage.
 ///
 /// Returns an error if the product doesn't exist, if there is a validation issue, or if a database or S3 operation fails.
-#[utoipa::path(put, path = "/product/{id}",
-               params(
-                   ("id" = uuid::Uuid, Path, description = "Product database id to edit product for"),
-                ),
-               request_body(content = EditProductRequest, content_type = "application/json"), 
-               responses(
-                   (status = 500, description = "An internal error occured, probably database related"), 
-                   (status = 400, description = "Your request is not correctly formatted"), 
-                   (status = 200, description = "The product is correctly edited")
-                )
-               )]
+#[utoipa::path(
+    put,
+    path = "/{id}",
+    tag = PRODUCT_TAG,
+    params(
+        ("id" = uuid::Uuid, Path, description = "Product database id to edit product for"),
+    ),
+    request_body(content = EditProductRequest, content_type = "application/json"), 
+    responses(
+        (status = 500, description = "An internal error occured, probably database related"), 
+        (status = 400, description = "Your request is not correctly formatted"), 
+        (status = 200, description = "The product is correctly edited")
+    ),
+    security(
+        ("axum-oidc" = [])
+    )
+)]
 pub async fn edit_product(
     admin: Admin,
     Path(id): Path<uuid::Uuid>,

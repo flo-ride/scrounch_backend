@@ -16,6 +16,8 @@
 //! curl http://localhost:3000/status
 //! ```
 
+use super::openapi::MISC_TAG;
+
 /// Returns the status of the server.
 ///
 /// This asynchronous function handles the `/status` endpoint and returns a
@@ -28,12 +30,13 @@
 /// # Endpoint
 /// - **GET /status**: Responds with `"UP"` and a `200 OK` status.
 #[utoipa::path(
-        get,
-        path = "/status",
-        responses(
-            (status = 200, description = "API is up and functionnal", body = String)
-        )
-    )]
+    get,
+    path = "/status",
+    tag = MISC_TAG,
+    responses(
+        (status = 200, description = "API is up and functionnal", body = String)
+    )
+)]
 pub async fn get_status() -> &'static str {
     "UP"
 }
