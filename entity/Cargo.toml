@@ -9,10 +9,19 @@ name = "entity"
 path = "src/lib.rs"
 
 [dependencies]
+## Rest API
+axum = { version = "0.7.6", features = ["multipart"] }
+
+# S3 / Minio
+rust-s3 = "0.35.1"
+
 # Serialisation + Deserialisation 
 serde = { version = "1.0.210", features = ["derive"] }
 serde_json = { version = "1.0.114" }
 serde_with = { version ="3.11.0", features = ["macros"] }
+
+# Log
+log = "0.4.22"
 
 # OpenAPI
 utoipa = { version = "5.2.0", features = ["axum_extras", "uuid", "chrono", "time", "decimal", "non_strict_integers"] }
@@ -21,6 +30,7 @@ utoipa = { version = "5.2.0", features = ["axum_extras", "uuid", "chrono", "time
 uuid = { version = "1.10.0", features = ["v4", "fast-rng", "serde"] }
 chrono = "0.4.38"
 rust_decimal = "1.36.0"
+strum_macros = "0.26.4"
 
 [dependencies.sea-orm]
 version = "1.0.1"
