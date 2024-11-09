@@ -1,6 +1,6 @@
 //! This module contains the route handler for retrieving user information.
 
-use crate::{models::utils::pagination::Pagination, routes::utils::openapi::USER_TAG};
+use crate::routes::utils::openapi::USER_TAG;
 use axum::{
     extract::{Path, Query, State},
     Json,
@@ -9,7 +9,10 @@ use entity::{
     error::AppError,
     response::user::{UserListResponse, UserResponse},
 };
-use extractor::profile::{admin::Admin, user::User};
+use extractor::{
+    profile::{admin::Admin, user::User},
+    query::Pagination,
+};
 use migration::IntoCondition;
 use service::Connection;
 
