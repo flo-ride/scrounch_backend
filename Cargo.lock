@@ -3953,8 +3953,10 @@ dependencies = [
  "futures",
  "log",
  "sea-orm",
+ "serde",
  "serde_json",
  "tokio",
+ "utoipa",
  "uuid",
 ]
 
