@@ -6,7 +6,7 @@
 //! which is then used for database transactions. Additionally, it defines custom error
 //! types to handle validation failures in a structured manner.
 
-use crate::models::product::ActiveModel;
+use crate::{error::impl_bad_request_app_error, models::product::ActiveModel};
 use rust_decimal::{Decimal, Error as DecimalError};
 use sea_orm::ActiveValue::{NotSet, Set};
 use std::num::TryFromIntError;
@@ -22,7 +22,7 @@ pub const PRODUCT_NAME_MAX_LENGTH: usize = 32;
 pub const PRODUCT_MAX_QUANTITY_PER_COMMAND: u64 = 10;
 
 /// Errors specific to product requests, including validation and conversion errors.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, strum_macros::IntoStaticStr)]
 pub enum ProductRequestError {
     /// Error when the product name is empty.
     NameCannotBeEmpty,
@@ -72,6 +72,8 @@ impl std::fmt::Display for ProductRequestError {
         }
     }
 }
+
+impl_bad_request_app_error!(ProductRequestError);
 
 /// Request structure for creating a new product, including validation rules.
 #[derive(Debug, Clone, PartialEq, serde::Deserialize, utoipa::ToSchema)]

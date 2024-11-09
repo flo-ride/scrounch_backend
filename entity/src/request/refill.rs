@@ -2,7 +2,7 @@
 //! This module defines the structures and associated logic for handling refill requests in the system,
 //! including both the creation and editing of refills.
 
-use crate::models::refill::ActiveModel;
+use crate::{error::impl_bad_request_app_error, models::refill::ActiveModel};
 use rust_decimal::{Decimal, Error as DecimalError};
 use sea_orm::ActiveValue::{NotSet, Set};
 
@@ -13,7 +13,7 @@ use super::r#enum::CurrencyRequest;
 pub const REFILL_NAME_MAX_LENGTH: usize = 32;
 
 /// Enum representing potential errors in the refill request validation process.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, strum_macros::IntoStaticStr)]
 pub enum RefillRequestError {
     /// Error when the refill name is empty.
     NameCannotBeEmpty,
@@ -57,6 +57,7 @@ impl std::fmt::Display for RefillRequestError {
         }
     }
 }
+impl_bad_request_app_error!(RefillRequestError);
 
 /// Request structure for creating a new refill, including validation rules.
 #[derive(Debug, Clone, PartialEq, serde::Deserialize, utoipa::ToSchema)]

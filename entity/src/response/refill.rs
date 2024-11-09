@@ -4,6 +4,8 @@
 use rust_decimal::{Decimal, Error as DecimalError};
 use serde_with::skip_serializing_none;
 
+use crate::error::impl_from_error_to_string;
+
 use super::r#enum::CurrencyResponse;
 
 /// Enum representing errors that can occur during refill response construction.
@@ -37,6 +39,8 @@ impl std::fmt::Display for RefillResponseError {
         }
     }
 }
+
+impl_from_error_to_string!(RefillResponseError, InternalError);
 
 /// Represents a response containing refill information returned by the API.
 #[skip_serializing_none]

@@ -2,8 +2,11 @@
 //! including validation and mapping for creating new location entries
 //! in the database. Supports validation errors and enum mapping for categories.
 
-use crate::models::{
-    location::ActiveModel, sea_orm_active_enums::LocationCategory as ModelLocationCategory,
+use crate::{
+    error::impl_bad_request_app_error,
+    models::{
+        location::ActiveModel, sea_orm_active_enums::LocationCategory as ModelLocationCategory,
+    },
 };
 use sea_orm::ActiveValue::{NotSet, Set};
 
@@ -12,7 +15,7 @@ use sea_orm::ActiveValue::{NotSet, Set};
 pub const LOCATION_NAME_MAX_LENGTH: usize = 32;
 
 /// Represents possible errors encountered in location requests, such as validation issues.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, strum_macros::IntoStaticStr)]
 pub enum LocationRequestError {
     /// Occurs when a location name is left empty.
     NameCannotBeEmpty,
@@ -32,9 +35,11 @@ impl std::fmt::Display for LocationRequestError {
     }
 }
 
+impl_bad_request_app_error!(LocationRequestError);
+
 /// Enum representing categories of locations, such as dispensers or rooms.
 /// This type is used for deserializing request payloads.
-#[derive(Debug, PartialEq, Clone, Copy, serde::Deserialize, serde::Serialize, utoipa::ToSchema)]
+#[derive(Debug, PartialEq, Clone, Copy, serde::Deserialize, utoipa::ToSchema)]
 #[serde(rename_all = "lowercase")]
 pub enum LocationCategoryRequest {
     /// Represents a dispenser location type.

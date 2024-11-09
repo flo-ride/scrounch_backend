@@ -3,6 +3,7 @@
 //! product response construction, particularly for price and quantity conversions.
 
 use super::r#enum::CurrencyResponse;
+use crate::error::impl_from_error_to_string;
 use rust_decimal::{Decimal, Error as DecimalError};
 use serde_with::skip_serializing_none;
 use std::num::TryFromIntError;
@@ -29,6 +30,7 @@ impl std::fmt::Display for ProductResponseError {
         }
     }
 }
+impl_from_error_to_string!(ProductResponseError, InternalError);
 
 /// Response structure for a product, including its details.
 #[skip_serializing_none]
