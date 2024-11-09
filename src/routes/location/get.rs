@@ -1,13 +1,14 @@
 //! This module contains the route handler for retrieving location information.
 
-use crate::{
-    error::AppError, models::utils::pagination::Pagination, routes::utils::openapi::LOCATION_TAG,
-};
+use crate::{models::utils::pagination::Pagination, routes::utils::openapi::LOCATION_TAG};
 use axum::{
     extract::{Path, Query, State},
     Json,
 };
-use entity::response::location::{LocationListResponse, LocationResponse};
+use entity::{
+    error::AppError,
+    response::location::{LocationListResponse, LocationResponse},
+};
 use extractor::profile::admin::Admin;
 use migration::IntoCondition;
 use sea_orm::ColumnTrait;
@@ -35,7 +36,6 @@ use service::Connection;
     ),
     responses(
         (status = 500, description = "An internal error, most likely related to the database, occurred."), 
-        (status = 400, description = "The request is improperly formatted."), 
         (status = 404, description = "The location doesn't exist, or is disabled and the requester is not an admin."), 
         (status = 200, description = "The location was successfully retrieved.", body = LocationResponse)
     ),

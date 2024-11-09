@@ -6,13 +6,14 @@
 //! serving files in a web application.
 
 use super::openapi::MISC_TAG;
-use crate::{error::AppError, models::file::FileParams};
+use crate::models::file::FileParams;
 use axum::{
     body::Body,
     extract::{Path, Query, State},
     http::{header::CACHE_CONTROL, HeaderMap, HeaderValue},
     response::IntoResponse,
 };
+use entity::error::AppError;
 use s3::error::S3Error;
 
 /// Downloads files from the server's storage.
@@ -61,7 +62,7 @@ pub async fn download_file(
             S3Error::HttpFailWithBody(404, _body) => {
                 AppError::NotFound(format!("The file you've asked doesn't exist: {filename}"))
             }
-            _ => AppError::S3Error(err),
+            _ => err.into(),
         })?;
     let body = Body::from_stream(stream.bytes);
 

@@ -4,7 +4,6 @@
 
 use super::openapi::MISC_TAG;
 use crate::{
-    error::AppError,
     models::{
         file::FileType,
         utils::sma::{SmaChange, SmaChangeTypeMatrix, SmaProduct, SmaProducts},
@@ -16,6 +15,7 @@ use axum::{
     Json,
 };
 use entity::{
+    error::AppError,
     models::product,
     response::{
         product::{EditedProductResponse, ProductResponse, ProductResponseError},
@@ -65,14 +65,16 @@ pub async fn post_update_from_sma(
             headers.insert(
                 "api-key",
                 reqwest::header::HeaderValue::from_str(&api_key).map_err(|err| {
-                    AppError::Unknow(format!("Cannot map api_key to HeaderValue - {err}"))
+                    AppError::InternalError(format!("Cannot map api_key to HeaderValue - {err}"))
                 })?,
             );
 
             let client = reqwest::ClientBuilder::new()
                 .default_headers(headers)
                 .build()
-                .map_err(|err| AppError::Unknow(format!("Cannot build HTTP Client - {err}")))?;
+                .map_err(|err| {
+                    AppError::InternalError(format!("Cannot build HTTP Client - {err}"))
+                })?;
 
             let mut products: Vec<SmaChange> = Vec::new();
 
@@ -87,14 +89,14 @@ pub async fn post_update_from_sma(
                     .send()
                     .await
                     .map_err(|err| {
-                        AppError::Unknow(format!(
+                        AppError::InternalError(format!(
                             "Sorry it seems that we cannot contact the SMA Api - {err}"
                         ))
                     })?
                     .json::<SmaProducts>()
                     .await
                     .map_err(|err| {
-                        AppError::Unknow(format!(
+                        AppError::InternalError(format!(
                             "Cannot Deserialize SMA Response into json - {err}"
                         ))
                     })?;
@@ -157,7 +159,7 @@ pub async fn post_update_from_sma(
         }
         _ => {
             tracing::error!("Sorry but it seems all SMA variables are not filled");
-            Err(AppError::MissingOption("Sorry but it seems all SMA variables are not filled, Please contact your Website Admin".to_string()))
+            Err(AppError::InternalError("Sorry but it seems all SMA variables are not filled, Please contact your Website Admin".to_string()))
         }
     }
 }
@@ -185,12 +187,17 @@ async fn create_or_update_sma_product(
             if overwrite_matrix.price {
                 let price =
                     sea_orm::prelude::Decimal::from_str_exact(&product.price).map_err(|err| {
-                        AppError::Unknow(format!("Cannot convert price: {} - {err}", product.price))
+                        AppError::InternalError(format!(
+                            "Cannot convert price: {} - {err}",
+                            product.price
+                        ))
                     })?;
 
                 if price != existing_product.price {
                     let u64_price = price.try_into().map_err(|err| {
-                        AppError::Unknow(format!("Cannot convert price into u64: {price} - {err}"))
+                        AppError::InternalError(format!(
+                            "Cannot convert price into u64: {price} - {err}"
+                        ))
                     })?;
                     is_change = true;
                     changes.price = Some(u64_price);
@@ -211,26 +218,25 @@ async fn create_or_update_sma_product(
             let mut filename: Option<String> = None;
 
             if let Some(image_url) = product.image_url {
-                let sma_filename = image_url
-                    .split("/")
-                    .last()
-                    .ok_or(AppError::Unknow("Cannot find SMA filename".to_string()))?;
+                let sma_filename = image_url.split("/").last().ok_or(AppError::InternalError(
+                    "Cannot find SMA filename".to_string(),
+                ))?;
 
                 let extension = std::path::Path::new(&sma_filename)
                     .extension()
                     .and_then(std::ffi::OsStr::to_str)
-                    .ok_or(AppError::Unknow(format!(
+                    .ok_or(AppError::InternalError(format!(
                         "SMA file is missing an extension: {sma_filename}"
                     )))?;
 
                 let image = reqwest::get(image_url.clone()).await.map_err(|err| {
-                    AppError::Unknow(format!("Cannot download image from SMA: {err}"))
+                    AppError::InternalError(format!("Cannot download image from SMA: {err}"))
                 })?;
 
                 let name = format!("{}.{extension}", uuid::Uuid::new_v4());
                 let s3_path = format!("{}/{name}", FileType::Product);
                 let image = image.bytes().await.map_err(|err| {
-                    AppError::Unknow(format!("Cannot get bytes of image - {err}"))
+                    AppError::InternalError(format!("Cannot get bytes of image - {err}"))
                 })?;
                 s3.put_object(s3_path, &image).await?;
 
@@ -248,7 +254,10 @@ async fn create_or_update_sma_product(
 
                 price: Set(
                     sea_orm::prelude::Decimal::from_str_exact(&product.price).map_err(|err| {
-                        AppError::Unknow(format!("Cannot convert price: {} - {err}", product.price))
+                        AppError::InternalError(format!(
+                            "Cannot convert price: {} - {err}",
+                            product.price
+                        ))
                     })?,
                 ),
 

@@ -1,13 +1,17 @@
 //! Route for editing an existing location
 
-use crate::{error::AppError, routes::utils::openapi::LOCATION_TAG};
+use crate::routes::utils::openapi::LOCATION_TAG;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
     Json,
 };
-use entity::{models::location::ActiveModel, request::location::EditLocationRequest};
+use entity::{
+    error::{AppError, ErrorResponse},
+    models::location::ActiveModel,
+    request::location::EditLocationRequest,
+};
 use extractor::profile::admin::Admin;
 use service::Connection;
 
@@ -24,7 +28,7 @@ use service::Connection;
     request_body(content = EditLocationRequest, content_type = "application/json"), 
     responses(
         (status = 500, description = "An internal error occured, probably database related"), 
-        (status = 400, description = "Your request is not correctly formatted"), 
+        (status = 400, description = "Your request is not correctly formatted", body = ErrorResponse), 
         (status = 200, description = "The location is correctly edited")
     ),
     security(

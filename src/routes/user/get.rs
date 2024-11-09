@@ -1,13 +1,14 @@
 //! This module contains the route handler for retrieving user information.
 
-use crate::{
-    error::AppError, models::utils::pagination::Pagination, routes::utils::openapi::USER_TAG,
-};
+use crate::{models::utils::pagination::Pagination, routes::utils::openapi::USER_TAG};
 use axum::{
     extract::{Path, Query, State},
     Json,
 };
-use entity::response::user::{UserListResponse, UserResponse};
+use entity::{
+    error::AppError,
+    response::user::{UserListResponse, UserResponse},
+};
 use extractor::profile::{admin::Admin, user::User};
 use migration::IntoCondition;
 use service::Connection;
@@ -34,8 +35,8 @@ use service::Connection;
     ),
     responses(
        (status = 500, description = "An internal error, most likely related to the database, occurred."), 
-       (status = 400, description = "The request is improperly formatted."), 
-       (status = 404, description = "The user doesn't exist, or is disabled and the requester is not an admin."), 
+       (status = 404, description = "The user doesn't exist."), 
+       (status = 401, description = "You're not authorized to view this user"), 
        (status = 200, description = "The user was successfully retrieved.", body = UserResponse)
     ),
     security(
@@ -48,7 +49,9 @@ pub async fn get_user(
     State(conn): State<Connection>,
 ) -> Result<Json<UserResponse>, AppError> {
     if user.id != id && !user.is_admin {
-        return Err(AppError::Forbidden);
+        return Err(AppError::Forbidden(
+            "You're not authorized to view this user".to_string(),
+        ));
     }
 
     let result = service::Query::find_user_by_id(&conn, id).await?;

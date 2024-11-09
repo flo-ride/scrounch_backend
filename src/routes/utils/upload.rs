@@ -3,11 +3,12 @@
 //! This module provides functionality for handling file uploads, typically used
 //! for processing user-uploaded content such as images, documents, or other assets.
 
-use crate::{error::AppError, models::file::FileParams};
+use crate::models::file::FileParams;
 use axum::{
     extract::{Multipart, Query, State},
     Json,
 };
+use entity::error::AppError;
 use extractor::profile::admin::Admin;
 use futures::stream::TryStreamExt;
 
@@ -47,35 +48,13 @@ pub async fn post_upload_files(
     mut multipart: Multipart,
 ) -> Result<Json<Vec<(String, String)>>, AppError> {
     let mut result: Vec<(String, String)> = vec![];
-    while let Some(field) = multipart.next_field().await? {
-        let name = field
-            .name()
-            .ok_or(AppError::MissingOption(
-                "Multipart Field is missing name".to_string(),
-            ))?
-            .to_string();
-        let max_length = 32;
-        if name.is_empty() {
-            return Err(AppError::BadOption("Name cannot be empty".to_string()));
-        }
-        if name.len() > max_length {
-            return Err(AppError::BadOption(format!(
-                "Name cannot be longer than {max_length}: {name}",
-            )));
-        }
-
-        let filename = field
-            .file_name()
-            .ok_or(AppError::MissingOption(
-                "Multipart Field is missing filename".to_string(),
-            ))?
-            .to_string();
+    while let Ok(Some(field)) = multipart.next_field().await {
+        let filename = field.file_name().unwrap_or("").to_string();
         let extension = std::path::Path::new(&filename)
             .extension()
             .and_then(std::ffi::OsStr::to_str)
-            .ok_or(AppError::MissingOption(format!(
-                "Multipart file is missing an extension: {filename}"
-            )))?;
+            .or(None);
+
         let mimetype = field
             .content_type()
             .unwrap_or("application/octet-stream")
@@ -88,7 +67,10 @@ pub async fn post_upload_files(
 
         futures::pin_mut!(reader);
 
-        let new_filename = format!("{}_{name}.{extension}", uuid::Uuid::new_v4());
+        let new_filename = match extension {
+            Some(extension) => format!("{}.{extension}", uuid::Uuid::new_v4()),
+            None => uuid::Uuid::new_v4().to_string(),
+        };
         let s3_path = format!("{}/{new_filename}", params.file_type);
         conn.put_object_stream_with_content_type(&mut reader, &s3_path, &mimetype)
             .await?;

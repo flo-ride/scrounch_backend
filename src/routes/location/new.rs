@@ -4,9 +4,13 @@
 //! It allows for the creation of new location entries in the database.
 //! Admin privileges are required to access this route.
 
-use crate::{error::AppError, routes::utils::openapi::LOCATION_TAG};
+use crate::routes::utils::openapi::LOCATION_TAG;
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
-use entity::{models::location::ActiveModel, request::location::NewLocationRequest};
+use entity::{
+    error::{AppError, ErrorResponse},
+    models::location::ActiveModel,
+    request::location::NewLocationRequest,
+};
 use extractor::profile::admin::Admin;
 use service::Connection;
 
@@ -32,7 +36,7 @@ use service::Connection;
     request_body(content = NewLocationRequest, content_type = "application/json"), 
     responses(
        (status = 500, description = "An internal error, most likely related to the database, occurred."), 
-       (status = 400, description = "The request is improperly formatted."), 
+       (status = 400, description = "The request is improperly formatted.", body = ErrorResponse), 
        (status = 201, description = "Successfully created a new location, returns the new location's ID as a string.", body = uuid::Uuid)
     ),
     security(

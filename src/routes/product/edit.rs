@@ -1,13 +1,13 @@
 //! Route for editing an existing product in the store.
 
-use crate::{error::AppError, models::file::FileType, routes::utils::openapi::PRODUCT_TAG};
+use crate::{models::file::FileType, routes::utils::openapi::PRODUCT_TAG};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
     Json,
 };
-use entity::{models::product::ActiveModel, request::product::EditProductRequest};
+use entity::{error::AppError, models::product::ActiveModel, request::product::EditProductRequest};
 use extractor::profile::admin::Admin;
 use service::Connection;
 

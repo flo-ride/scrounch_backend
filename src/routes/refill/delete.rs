@@ -2,12 +2,13 @@
 //!
 //! Only an admin can delete a refill.
 
-use crate::{error::AppError, routes::utils::openapi::REFILL_TAG};
+use crate::routes::utils::openapi::REFILL_TAG;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
 };
+use entity::error::AppError;
 use extractor::profile::admin::Admin;
 use service::Connection;
 
@@ -32,7 +33,6 @@ use service::Connection;
     ),
     responses(
         (status = 500, description = "An internal error occured, probably databse related"), 
-        (status = 400, description = "Your request is not correctly formatted"), 
         (status = 200, description = "The refill is disabled")
     ),
     security(

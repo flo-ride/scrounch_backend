@@ -2,13 +2,13 @@
 //!
 //! Only an admin can delete a product.
 
-use crate::{error::AppError, routes::utils::openapi::PRODUCT_TAG};
+use crate::routes::utils::openapi::PRODUCT_TAG;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
 };
-use entity::models::product;
+use entity::{error::AppError, models::product};
 use extractor::profile::admin::Admin;
 use sea_orm::ActiveValue::Set;
 use service::Connection;

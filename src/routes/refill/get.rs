@@ -1,13 +1,14 @@
 //! This module contains the route handler for retrieving refill information.
 
-use crate::{
-    error::AppError, models::utils::pagination::Pagination, routes::utils::openapi::REFILL_TAG,
-};
+use crate::{models::utils::pagination::Pagination, routes::utils::openapi::REFILL_TAG};
 use axum::{
     extract::{Path, Query, State},
     Json,
 };
-use entity::response::refill::{RefillListResponse, RefillResponse, RefillResponseError};
+use entity::{
+    error::AppError,
+    response::refill::{RefillListResponse, RefillResponse, RefillResponseError},
+};
 use extractor::profile::admin::Admin;
 use migration::IntoCondition;
 use sea_orm::ColumnTrait;
@@ -35,7 +36,6 @@ use service::Connection;
     ),
     responses(
         (status = 500, description = "An internal error, most likely related to the database, occurred."), 
-        (status = 400, description = "The request is improperly formatted."), 
         (status = 404, description = "The refill doesn't exist, or is disabled and the requester is not an admin."), 
         (status = 200, description = "The refill was successfully retrieved.", body = RefillResponse)
     ),
@@ -88,7 +88,6 @@ pub async fn get_refill(
     ),
     responses(
         (status = 500, description = "An internal error, most likely related to the database, occurred."), 
-        (status = 400, description = "The request is improperly formatted."), 
         (status = 200, description = "Successfully retrieved a list of refills.", body = RefillListResponse)
     ),
     security(

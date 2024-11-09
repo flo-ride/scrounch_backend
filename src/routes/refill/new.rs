@@ -4,11 +4,13 @@
 //! It allows for the creation of new refill entries in the database.
 //! Admin privileges are required to access this route.
 
-use crate::error::AppError;
 use crate::routes::utils::openapi::REFILL_TAG;
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
-use entity::models::refill::ActiveModel;
-use entity::request::refill::NewRefillRequest;
+use entity::{
+    error::{AppError, ErrorResponse},
+    models::refill::ActiveModel,
+    request::refill::NewRefillRequest,
+};
 use extractor::profile::admin::Admin;
 use service::Connection;
 
@@ -34,7 +36,7 @@ use service::Connection;
     request_body(content = NewRefillRequest, content_type = "application/json"), 
     responses(
         (status = 500, description = "An internal error, most likely related to the database, occurred."), 
-        (status = 400, description = "The request is improperly formatted."), 
+        (status = 400, description = "The request is improperly formatted.", body = ErrorResponse), 
         (status = 201, description = "Successfully created a new refill, returns the new refill's ID as a string.", body = uuid::Uuid)
     ),
     security(

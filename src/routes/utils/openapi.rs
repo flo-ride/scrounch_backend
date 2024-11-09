@@ -11,7 +11,7 @@
 
 use utoipa::openapi::{
     security::{ApiKey, ApiKeyValue, SecurityScheme},
-    OpenApi,
+    LicenseBuilder, OpenApi,
 };
 
 use crate::models::file::FileType;
@@ -19,6 +19,12 @@ use crate::models::file::FileType;
 struct AxumOidcSecurity;
 impl utoipa::Modify for AxumOidcSecurity {
     fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+        openapi.info.license = Some(
+            LicenseBuilder::new()
+                .name("CLOSED")
+                .identifier(Some("CLOSED"))
+                .build(),
+        );
         if let Some(schema) = openapi.components.as_mut() {
             schema.add_security_scheme(
                 "axum-oidc",
@@ -31,10 +37,6 @@ impl utoipa::Modify for AxumOidcSecurity {
 #[derive(utoipa::OpenApi)]
 #[openapi(
     modifiers(&AxumOidcSecurity),
-    tags(
-        (name = USER_TAG),
-        (name = LOCATION_TAG)
-    ),
     components(
         schemas(FileType)
     ),

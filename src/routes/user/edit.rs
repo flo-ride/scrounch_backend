@@ -1,13 +1,13 @@
 //! Route for editing an existing user
 
-use crate::{error::AppError, routes::utils::openapi::USER_TAG};
+use crate::routes::utils::openapi::USER_TAG;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
     Json,
 };
-use entity::request::user::EditUserRequest;
+use entity::{error::AppError, request::user::EditUserRequest};
 use extractor::profile::{admin::Admin, user::User};
 use service::Connection;
 

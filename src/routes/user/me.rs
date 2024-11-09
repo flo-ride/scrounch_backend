@@ -3,12 +3,11 @@
 //! This module provides a handler for the `/me` endpoint, which retrieves the
 //! details of the currently authenticated user. It is typically used in contexts
 //! where user-specific information needs to be displayed or updated.
+use crate::routes::utils::openapi::USER_TAG;
 use axum::{extract::State, Json};
-use entity::response::user::UserResponse;
+use entity::{error::AppError, response::user::UserResponse};
 use extractor::profile::{oidc_user::OidcUser, user::User};
 use service::Connection;
-
-use crate::{error::AppError, routes::utils::openapi::USER_TAG};
 
 /// Handles the `/me` route, returning the current user's information if authenticated.
 ///
@@ -42,9 +41,9 @@ pub async fn get_me(
         let user = service::Query::find_user_by_id(&conn, oidc_user.id).await?;
         match user {
             Some(user) => Ok(Json(user.into())),
-            None => Err(AppError::NoContent("You're not logged in".to_string())),
+            None => Err(AppError::NoContent),
         }
     } else {
-        Err(AppError::NoContent("You're not logged in".to_string()))
+        Err(AppError::NoContent)
     }
 }

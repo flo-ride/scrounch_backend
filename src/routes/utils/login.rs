@@ -7,8 +7,9 @@
 //!
 
 use super::openapi::USER_TAG;
-use crate::{error::AppError, state::AppState};
+use crate::state::AppState;
 use axum::{extract::State, response::IntoResponse};
+use entity::error::AppError;
 use entity::models::sea_orm_active_enums::Currency;
 use entity::models::user::{self};
 use extractor::profile::oidc_user::OidcUser;
