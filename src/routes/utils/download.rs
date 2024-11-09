@@ -6,7 +6,6 @@
 //! serving files in a web application.
 
 use super::openapi::MISC_TAG;
-use crate::models::file::FileParams;
 use axum::{
     body::Body,
     extract::{Path, Query, State},
@@ -15,6 +14,7 @@ use axum::{
 };
 use entity::error::AppError;
 use s3::error::S3Error;
+use service::s3::FileParams;
 
 /// Downloads files from the server's storage.
 ///

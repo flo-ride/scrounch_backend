@@ -4,7 +4,7 @@
 //! It allows for the creation of new product entries in the database.
 //! Admin privileges are required to access this route.
 
-use crate::{models::file::FileType, routes::utils::openapi::PRODUCT_TAG};
+use crate::routes::utils::openapi::PRODUCT_TAG;
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use entity::{
     error::{AppError, ErrorResponse},
@@ -12,7 +12,7 @@ use entity::{
     request::product::NewProductRequest,
 };
 use extractor::profile::admin::Admin;
-use service::Connection;
+use service::{s3::FileType, Connection};
 
 /// Handler for creating a new product.
 ///

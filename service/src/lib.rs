@@ -8,6 +8,7 @@
 mod r#macro;
 mod mutation;
 mod query;
+pub mod s3;
 mod utils;
 
 pub use mutation::Mutation;

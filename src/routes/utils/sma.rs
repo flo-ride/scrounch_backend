@@ -4,10 +4,7 @@
 
 use super::openapi::MISC_TAG;
 use crate::{
-    models::{
-        file::FileType,
-        utils::sma::{SmaChange, SmaChangeTypeMatrix, SmaProduct, SmaProducts},
-    },
+    models::utils::sma::{SmaChange, SmaChangeTypeMatrix, SmaProduct, SmaProducts},
     Arguments,
 };
 use axum::{
@@ -25,7 +22,7 @@ use entity::{
 use extractor::profile::admin::Admin;
 use futures::future::join_all;
 use sea_orm::ActiveValue::Set;
-use service::Connection;
+use service::{s3::FileType, Connection};
 
 /// Updates the local product database by importing products from the Sma API.
 /// This function retrieves the latest products from Sma, processes the data,

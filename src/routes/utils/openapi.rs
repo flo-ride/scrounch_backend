@@ -9,12 +9,11 @@
 //! - Serving the OpenAPI schema in JSON format.
 //! - Providing documentation for the API endpoints as specified by the OpenAPI standard.
 
+use service::s3::FileType;
 use utoipa::openapi::{
     security::{ApiKey, ApiKeyValue, SecurityScheme},
     LicenseBuilder, OpenApi,
 };
-
-use crate::models::file::FileType;
 
 struct AxumOidcSecurity;
 impl utoipa::Modify for AxumOidcSecurity {

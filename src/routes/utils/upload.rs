@@ -3,7 +3,6 @@
 //! This module provides functionality for handling file uploads, typically used
 //! for processing user-uploaded content such as images, documents, or other assets.
 
-use crate::models::file::FileParams;
 use axum::{
     extract::{Multipart, Query, State},
     Json,
@@ -11,6 +10,7 @@ use axum::{
 use entity::error::AppError;
 use extractor::profile::admin::Admin;
 use futures::stream::TryStreamExt;
+use service::s3::FileParams;
 
 use super::openapi::MISC_TAG;
 #[derive(utoipa::ToSchema)]
