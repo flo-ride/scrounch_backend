@@ -3,17 +3,14 @@
 //! processing the data, and updating the local database with imported products.
 
 use super::openapi::MISC_TAG;
-use crate::{
-    models::utils::sma::{SmaChange, SmaChangeTypeMatrix, SmaProduct, SmaProducts},
-    Arguments,
-};
+use crate::Arguments;
 use axum::{
     extract::{Query, State},
     Json,
 };
 use entity::{
     error::AppError,
-    models::product,
+    models::product::{self, Model as Product},
     response::{
         product::{EditedProductResponse, ProductResponse, ProductResponseError},
         sma::SmaResponse,
@@ -23,6 +20,181 @@ use extractor::profile::admin::Admin;
 use futures::future::join_all;
 use sea_orm::ActiveValue::Set;
 use service::{s3::FileType, Connection};
+
+/// Enum representing changes in SMA products.
+///
+/// `SmaChange` tracks the state of products, indicating whether a product
+/// was unchanged, edited, or newly created.
+///
+/// - `Unchanged`: The product remains the same.
+/// - `Edited`: The product has been edited, with updated information in `EditedProductResponse`.
+/// - `Created`: The product is new and has been added to the system.
+#[derive(Debug, Clone, PartialEq)]
+pub enum SmaChange {
+    Unchanged(Product),
+    Edited(EditedProductResponse),
+    Created(Product),
+}
+
+/// Struct defining the fields that determine changes in a product.
+///
+/// `SmaChangeTypeMatrix` specifies which attributes of a product (e.g., `name` or `price`)
+/// have changed. Each field is a boolean representing whether the corresponding attribute
+/// has changed (`true`) or remained the same (`false`).
+#[derive(Debug, Clone, Copy, PartialEq, serde::Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub struct SmaChangeTypeMatrix {
+    /// Indicates if the product's name has changed.
+    #[serde(default)]
+    pub name: bool,
+
+    /// Indicates if the product's price has changed.
+    #[serde(default)]
+    pub price: bool,
+}
+
+/// Struct representing a collection of SMA products, used for pagination purposes.
+///
+/// `SmaProducts` holds a list of products with metadata, including total count, current limit,
+/// and start position for pagination.
+#[derive(Default, Debug, Clone, PartialEq, serde::Deserialize)]
+pub struct SmaProducts {
+    /// List of SMA products.
+    pub data: Vec<SmaProduct>,
+
+    /// Maximum number of products returned per page.
+    pub limit: serde_json::Value,
+
+    /// Start index for the current set of products.
+    pub start: serde_json::Value,
+
+    /// Total number of available products.
+    pub total: u64,
+}
+
+/// Struct representing an individual SMA product with detailed attributes.
+///
+/// `SmaProduct` includes product details such as category, price, tax rate, and unit.
+#[derive(Default, Debug, Clone, PartialEq, serde::Deserialize)]
+pub struct SmaProduct {
+    /// Category details of the product.
+    pub category: SmCategory,
+
+    /// Unique code identifying the product.
+    pub code: String,
+
+    /// Unique identifier of the product.
+    pub id: String,
+
+    /// Optional URL of the product's image.
+    pub image_url: Option<String>,
+
+    /// Name of the product.
+    pub name: String,
+
+    /// Net price of the product.
+    pub net_price: String,
+
+    /// Final price of the product including applicable taxes.
+    pub price: String,
+
+    /// Slug for URL-friendly product identification.
+    pub slug: String,
+
+    /// Tax method used for the product.
+    pub tax_method: String,
+
+    /// Tax rate details for the product.
+    pub tax_rate: SmaTaxRate,
+
+    /// Type of the product.
+    #[serde(rename = "type")]
+    pub type_field: String,
+
+    /// Unit of measurement for the product.
+    pub unit: SmaUnit,
+
+    /// Price per unit of the product.
+    pub unit_price: String,
+}
+
+/// Struct representing the category of an SMA product.
+///
+/// `SmCategory` provides metadata about the product's category, including name,
+/// description, and parent category ID.
+#[derive(Default, Debug, Clone, PartialEq, serde::Deserialize)]
+pub struct SmCategory {
+    /// Unique identifier of the category.
+    pub id: String,
+
+    /// Unique code identifying the category.
+    pub code: String,
+
+    /// Name of the category.
+    pub name: String,
+
+    /// Optional URL of the category's image.
+    pub image: Option<String>,
+
+    /// Identifier of the parent category, if any.
+    pub parent_id: String,
+
+    /// Slug for URL-friendly category identification.
+    pub slug: String,
+
+    /// Description of the category.
+    pub description: String,
+}
+
+/// Struct representing the tax rate associated with an SMA product.
+///
+/// `SmaTaxRate` includes tax attributes such as rate, type, and unique identifiers.
+#[derive(Default, Debug, Clone, PartialEq, serde::Deserialize)]
+pub struct SmaTaxRate {
+    /// Unique identifier of the tax rate.
+    pub id: String,
+
+    /// Name of the tax rate.
+    pub name: String,
+
+    /// Unique code identifying the tax rate.
+    pub code: String,
+
+    /// Rate of the tax as a percentage or absolute value.
+    pub rate: String,
+
+    /// Type of the tax rate.
+    #[serde(rename = "type")]
+    pub type_field: String,
+}
+
+/// Struct representing the unit of measurement for an SMA product.
+///
+/// `SmaUnit` provides details such as unit name, base unit, and any applicable
+/// operations or values for unit conversion.
+#[derive(Default, Debug, Clone, PartialEq, serde::Deserialize)]
+pub struct SmaUnit {
+    /// Unique identifier of the unit.
+    pub id: String,
+
+    /// Code identifying the unit.
+    pub code: String,
+
+    /// Name of the unit.
+    pub name: String,
+
+    /// Optional base unit for conversion.
+    pub base_unit: Option<String>,
+
+    /// Optional operator for unit conversion.
+    pub operator: Option<String>,
+
+    /// Optional value for unit conversion.
+    pub unit_value: Option<String>,
+
+    /// Optional operation value for unit conversion.
+    pub operation_value: Option<String>,
+}
 
 /// Updates the local product database by importing products from the Sma API.
 /// This function retrieves the latest products from Sma, processes the data,
