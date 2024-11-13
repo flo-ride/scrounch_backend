@@ -7,7 +7,6 @@
 
 mod cli;
 mod oidc;
-mod routes;
 mod state;
 
 use std::time::Duration;
@@ -117,7 +116,7 @@ pub async fn app(arguments: Arguments) -> axum::Router {
         }
     };
 
-    let (router, api) = OpenApiRouter::with_openapi(routes::utils::openapi::ApiDoc::openapi())
+    let (router, api) = OpenApiRouter::with_openapi(api::utils::openapi::ApiDoc::openapi())
         .merge(auth_required_routes(&path))
         .layer(login_service)
         .merge(auth_optional_routes(&path))
@@ -128,7 +127,7 @@ pub async fn app(arguments: Arguments) -> axum::Router {
         return router
             .layer(auth_service)
             .layer(oidc::cache_session_layer(pool))
-            .merge(routes::utils::openapi::openapi(&path, api))
+            .merge(api::utils::openapi::openapi(&path, api))
             .layer(cors_layer)
             .with_state(state);
     }
@@ -136,7 +135,7 @@ pub async fn app(arguments: Arguments) -> axum::Router {
     router
         .layer(auth_service)
         .layer(oidc::memory_session_layer())
-        .merge(routes::utils::openapi::openapi(&path, api))
+        .merge(api::utils::openapi::openapi(&path, api))
         .layer(cors_layer)
         .with_state(state)
 }
@@ -151,8 +150,8 @@ fn auth_required_routes(path: &str) -> OpenApiRouter<state::AppState> {
     OpenApiRouter::new().nest(
         path,
         OpenApiRouter::new()
-            .routes(routes!(routes::utils::login::get_login))
-            .routes(routes!(routes::utils::logout::get_logout)),
+            .routes(routes!(api::utils::login::get_login))
+            .routes(routes!(api::utils::logout::get_logout)),
     )
 }
 
@@ -165,15 +164,45 @@ fn auth_optional_routes(path: &str) -> OpenApiRouter<state::AppState> {
     OpenApiRouter::new().nest(
         path,
         OpenApiRouter::new()
-            .routes(routes!(routes::user::me::get_me))
-            .routes(routes!(routes::utils::upload::post_upload_files))
-            .routes(routes!(routes::utils::download::download_file))
-            .routes(routes!(routes::utils::status::get_status))
-            .routes(routes!(routes::utils::sma::post_update_from_sma))
-            .nest("/product", routes::product::router())
-            .nest("/user", routes::user::router())
-            .nest("/location", routes::location::router())
-            .nest("/refill", routes::refill::router()),
+            .routes(routes!(api::user::me::get_me))
+            .routes(routes!(api::utils::upload::post_upload_files))
+            .routes(routes!(api::utils::download::download_file))
+            .routes(routes!(api::utils::status::get_status))
+            .routes(routes!(api::utils::sma::post_update_from_sma))
+            .nest(
+                "/product",
+                OpenApiRouter::new()
+                    .routes(routes!(api::product::get::get_product))
+                    .routes(routes!(api::product::get::get_all_products))
+                    .routes(routes!(api::product::new::post_new_product))
+                    .routes(routes!(api::product::edit::edit_product))
+                    .routes(routes!(api::product::delete::delete_product)),
+            )
+            .nest(
+                "/user",
+                OpenApiRouter::new()
+                    .routes(routes!(api::user::get::get_user))
+                    .routes(routes!(api::user::get::get_all_users))
+                    .routes(routes!(api::user::edit::edit_user)),
+            )
+            .nest(
+                "/location",
+                OpenApiRouter::new()
+                    .routes(routes!(api::location::get::get_location))
+                    .routes(routes!(api::location::get::get_all_locations))
+                    .routes(routes!(api::location::new::post_new_location))
+                    .routes(routes!(api::location::edit::edit_location))
+                    .routes(routes!(api::location::delete::delete_location)),
+            )
+            .nest(
+                "/refill",
+                OpenApiRouter::new()
+                    .routes(routes!(api::refill::get::get_refill))
+                    .routes(routes!(api::refill::get::get_all_refills))
+                    .routes(routes!(api::refill::new::post_new_refill))
+                    .routes(routes!(api::refill::edit::edit_refill))
+                    .routes(routes!(api::refill::delete::delete_refill)),
+            ),
     )
 }
 

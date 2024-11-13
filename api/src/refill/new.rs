@@ -4,7 +4,7 @@
 //! It allows for the creation of new refill entries in the database.
 //! Admin privileges are required to access this route.
 
-use crate::routes::utils::openapi::REFILL_TAG;
+use crate::utils::openapi::REFILL_TAG;
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use entity::{
     error::{AppError, ErrorResponse},
@@ -53,7 +53,7 @@ pub async fn post_new_refill(
     let result = service::Mutation::create_refill(&conn, refill).await?;
 
     let id = result.id;
-    tracing::info!(
+    log::info!(
         "{admin} added a new refill \"{}\" - ({} -> {})",
         id,
         result.price,

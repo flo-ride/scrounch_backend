@@ -25,13 +25,13 @@ use service::{s3::FileType, Connection};
 /// `SmaChange` tracks the state of products, indicating whether a product
 /// was unchanged, edited, or newly created.
 ///
-/// - `Unchanged`: The product remains the same.
-/// - `Edited`: The product has been edited, with updated information in `EditedProductResponse`.
-/// - `Created`: The product is new and has been added to the system.
 #[derive(Debug, Clone, PartialEq)]
 pub enum SmaChange {
+    /// The product remains the same.
     Unchanged(Product),
+    /// The product has been edited, with updated information in `EditedProductResponse`.
     Edited(EditedProductResponse),
+    /// The product is new and has been added to the system.
     Created(Product),
 }
 
@@ -40,7 +40,7 @@ pub enum SmaChange {
 /// `SmaChangeTypeMatrix` specifies which attributes of a product (e.g., `name` or `price`)
 /// have changed. Each field is a boolean representing whether the corresponding attribute
 /// has changed (`true`) or remained the same (`false`).
-#[derive(Debug, Clone, Copy, PartialEq, serde::Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, serde::Deserialize, utoipa::IntoParams)]
 #[serde(rename_all = "lowercase")]
 pub struct SmaChangeTypeMatrix {
     /// Indicates if the product's name has changed.
@@ -209,6 +209,9 @@ pub struct SmaUnit {
     post,
     path = "/sma", 
     tag = MISC_TAG,
+    params(
+        SmaChangeTypeMatrix
+    ),
     responses(
         (status = 500, description = "An internal error, most likely related to the database, occurred."), 
         (status = 400, description = "The request is improperly formatted."), 
@@ -225,7 +228,7 @@ pub async fn post_update_from_sma(
     State(s3): State<s3::Bucket>,
     Query(params): Query<SmaChangeTypeMatrix>,
 ) -> Result<Json<SmaResponse>, AppError> {
-    tracing::info!("{admin} just asked for an SMA update",);
+    log::info!("{admin} just asked for an SMA update",);
 
     match (arguments.api_key, arguments.url) {
         (Some(api_key), Some(url)) => {
@@ -326,12 +329,15 @@ pub async fn post_update_from_sma(
             }))
         }
         _ => {
-            tracing::error!("Sorry but it seems all SMA variables are not filled");
+            log::error!("Sorry but it seems all SMA variables are not filled");
             Err(AppError::InternalError("Sorry but it seems all SMA variables are not filled, Please contact your Website Admin".to_string()))
         }
     }
 }
 
+/// Creates or updates a product from the SMA system in the database, depending on whether
+/// the product already exists or not. If the product exists, it will be updated based on
+/// the changes indicated by the `overwrite_matrix`; otherwise, a new product will be cre
 async fn create_or_update_sma_product(
     conn: &Connection,
     s3: &s3::Bucket,
@@ -410,7 +416,7 @@ async fn create_or_update_sma_product(
 
                 filename = Some(name.clone());
 
-                tracing::info!("Adding new product Image from SMA: {name}");
+                log::info!("Adding new product Image from SMA: {name}");
             }
 
             let form_data = product::ActiveModel {
@@ -435,7 +441,7 @@ async fn create_or_update_sma_product(
                 ..Default::default()
             };
             let result = service::Mutation::create_product(conn, form_data).await?;
-            tracing::info!(
+            log::info!(
                 "Adding new product from SMA: {} \"{}\" - {result:?}",
                 result.name,
                 result.id

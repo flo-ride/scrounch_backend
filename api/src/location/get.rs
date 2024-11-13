@@ -1,6 +1,6 @@
 //! This module contains the route handler for retrieving location information.
 
-use crate::routes::utils::openapi::LOCATION_TAG;
+use crate::utils::openapi::LOCATION_TAG;
 use axum::{
     extract::{Path, Query, State},
     Json,
@@ -10,8 +10,7 @@ use entity::{
     response::location::{LocationListResponse, LocationResponse},
 };
 use extractor::{profile::admin::Admin, query::Pagination};
-use migration::IntoCondition;
-use sea_orm::ColumnTrait;
+use sea_orm::{sea_query::IntoCondition, ColumnTrait};
 use service::Connection;
 
 /// Handles the request to fetch a location by its unique identifier.

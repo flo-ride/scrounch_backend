@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [workspace]
-members = [".", "migration", "entity", "service", "extractor"]
+members = [".", "migration", "entity", "service", "extractor", "api"]
 
 # Enable high optimizations for dependencies:
 [profile.dev.package."*"]
@@ -42,6 +42,7 @@ migration = { path = "migration" }
 entity = { path = "entity" }
 service = { path = "service" }
 extractor = { path = "extractor" }
+api = { path = "api" }
 
 # CLI + Env + Config
 clap = { version = "4.5.17", features = ["derive", "env"] }

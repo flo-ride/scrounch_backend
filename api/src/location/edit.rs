@@ -1,6 +1,6 @@
 //! Route for editing an existing location
 
-use crate::routes::utils::openapi::LOCATION_TAG;
+use crate::utils::openapi::LOCATION_TAG;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -49,7 +49,7 @@ pub async fn edit_location(
 
             let result = service::Mutation::update_location(&conn, id, location_model).await?;
 
-            tracing::info!(
+            log::info!(
                 "{admin} successfully edited location {} \"{}\" - {:?}",
                 existing_location.name,
                 id,

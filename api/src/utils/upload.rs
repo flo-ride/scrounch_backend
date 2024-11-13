@@ -13,8 +13,15 @@ use futures::stream::TryStreamExt;
 use service::s3::FileParams;
 
 use super::openapi::MISC_TAG;
+
+/// Represents a file schema used in API interactions, typically for file uploads.
+///
+/// The `FileSchema` struct is used to define a file's content in an API endpoint,
+/// particularly for handling binary file uploads. It includes the file's content
+/// as a byte vector, which can be processed by the server during file transfer.
 #[derive(utoipa::ToSchema)]
 pub struct FileSchema {
+    /// Represents the file data
     #[allow(dead_code)]
     #[schema(content_media_type = "application/octet-stream")]
     file_bytes: Vec<u8>,
@@ -83,7 +90,7 @@ pub async fn post_upload_files(
         )
         .await?;
 
-        tracing::info!("{user} just uploaded a new file: \"{filename}\" -> \"{s3_path}\"",);
+        log::info!("{user} just uploaded a new file: \"{filename}\" -> \"{s3_path}\"",);
         result.push((filename, new_filename));
     }
     Ok(Json(result))

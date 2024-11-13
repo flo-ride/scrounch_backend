@@ -4,7 +4,7 @@
 //! It allows for the creation of new product entries in the database.
 //! Admin privileges are required to access this route.
 
-use crate::routes::utils::openapi::PRODUCT_TAG;
+use crate::utils::openapi::PRODUCT_TAG;
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use entity::{
     error::{AppError, ErrorResponse},
@@ -58,7 +58,7 @@ pub async fn post_new_product(
 
     let id = result.id;
 
-    tracing::info!(
+    log::info!(
         "{admin} added a new product {} \"{}\" - {:?}",
         result.name,
         id,

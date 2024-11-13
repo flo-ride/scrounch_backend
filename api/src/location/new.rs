@@ -4,7 +4,7 @@
 //! It allows for the creation of new location entries in the database.
 //! Admin privileges are required to access this route.
 
-use crate::routes::utils::openapi::LOCATION_TAG;
+use crate::utils::openapi::LOCATION_TAG;
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use entity::{
     error::{AppError, ErrorResponse},
@@ -54,7 +54,7 @@ pub async fn post_new_location(
 
     let id = result.id;
 
-    tracing::info!(
+    log::info!(
         "{admin} added a new location {} \"{}\" - {:?}",
         id,
         result.name,

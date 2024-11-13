@@ -2,7 +2,7 @@
 //!
 //! Only an admin can delete a product.
 
-use crate::routes::utils::openapi::PRODUCT_TAG;
+use crate::utils::openapi::PRODUCT_TAG;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -61,7 +61,7 @@ pub async fn delete_product(
             )
             .await?;
 
-            tracing::info!(
+            log::info!(
                 "{admin} just disabled the product {} \"{}\" - {:?}",
                 product.name,
                 id,

@@ -1,0 +1,49 @@
+[package]
+name = "api"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Internal
+entity = { path = "../entity" }
+service = { path = "../service" }
+extractor = { path = "../extractor" }
+
+## Rest API
+axum = { version = "0.7.6", features = ["multipart"] }
+
+# Trace + Log
+log = "0.4.22"
+
+# Database
+sea-orm = { version = "1.0.1", features = ["sqlx-postgres", "runtime-tokio-rustls", "with-chrono"] }
+
+# Runtime
+tokio = { version = "1.40.0", features = ["full"] }
+tokio-util = { version = "0.7.12", features = ["io"] }
+futures = "0.3.30"
+
+# OpenAPI
+utoipa = { version = "5.2.0", features = ["axum_extras", "uuid", "chrono", "time", "decimal", "non_strict_integers"] }
+utoipa-axum = "0.1.2"
+utoipa-swagger-ui = { version = "8.0.3", features = ["axum"] }
+
+# Auth + OIDC
+axum-oidc = "0.5.0"
+
+# Serialisation + Deserialisation 
+serde = { version = "1.0.210", features = ["derive"] }
+serde_json = { version = "1.0.114" }
+serde_with = { version ="3.11.0", features = ["macros"] }
+
+# S3 / Minio
+rust-s3 = "0.35.1"
+
+# HTTP Client
+reqwest = { version = "0.12.7", features = ["json", "cookies"] }
+
+# Utils
+uuid = { version = "1.10.0", features = ["v4", "fast-rng", "serde"] }
+chrono = "0.4.38"
+url = "2.5.2"
+rust_decimal = "1.36.0"

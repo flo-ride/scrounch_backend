@@ -1,6 +1,6 @@
 //! This module contains the route handler for retrieving user information.
 
-use crate::routes::utils::openapi::USER_TAG;
+use crate::utils::openapi::USER_TAG;
 use axum::{
     extract::{Path, Query, State},
     Json,
@@ -13,7 +13,7 @@ use extractor::{
     profile::{admin::Admin, user::User},
     query::Pagination,
 };
-use migration::IntoCondition;
+use sea_orm::sea_query::IntoCondition;
 use service::Connection;
 
 /// Handles the request to fetch a user by its unique identifier.

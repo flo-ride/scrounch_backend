@@ -1,6 +1,6 @@
 //! Route for editing an existing product in the store.
 
-use crate::routes::utils::openapi::PRODUCT_TAG;
+use crate::utils::openapi::PRODUCT_TAG;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -84,7 +84,7 @@ pub async fn edit_product(
                     .await?;
             }
 
-            tracing::info!(
+            log::info!(
                 "{admin} successfully edited product {} \"{}\" - {:?}",
                 existing_product.name,
                 id,

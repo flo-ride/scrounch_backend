@@ -2,7 +2,7 @@
 //!
 //! Only an admin can delete a refill.
 
-use crate::routes::utils::openapi::REFILL_TAG;
+use crate::utils::openapi::REFILL_TAG;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -50,7 +50,7 @@ pub async fn delete_refill(
         Some(refill) => {
             service::Mutation::delete_refill(&conn, id).await?;
 
-            tracing::info!("{admin} just deleted the refill \"{}\" - {:?}", id, refill);
+            log::info!("{admin} just deleted the refill \"{}\" - {:?}", id, refill);
 
             Ok((StatusCode::OK, ""))
         }

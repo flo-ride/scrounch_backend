@@ -1,6 +1,6 @@
 //! Route for editing an existing user
 
-use crate::routes::utils::openapi::USER_TAG;
+use crate::utils::openapi::USER_TAG;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -43,7 +43,7 @@ pub async fn edit_user(
         Some(existing_user) => {
             let result = service::Mutation::update_user(&conn, id, edit_user).await?;
 
-            tracing::info!(
+            log::info!(
                 "{admin} successfully edited {} - {:?}",
                 Into::<User>::into(existing_user),
                 result

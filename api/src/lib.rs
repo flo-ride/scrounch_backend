@@ -1,3 +1,6 @@
+#![warn(missing_docs)]
+#![warn(clippy::missing_docs_in_private_items)]
+
 //! Module for defining the application's routes.
 //!
 //! This module serves as the central hub for all HTTP route definitions
@@ -8,6 +11,7 @@
 //! # Structure
 //! - This file exports submodules that define individual route handlers.
 //! - Each submodule is responsible for a specific section of the API
+
 pub mod location;
 pub mod product;
 pub mod refill;

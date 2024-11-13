@@ -2,7 +2,7 @@
 //!
 //! Only an admin can delete a location.
 
-use crate::routes::utils::openapi::LOCATION_TAG;
+use crate::utils::openapi::LOCATION_TAG;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -51,7 +51,7 @@ pub async fn delete_location(
         Some(location) => {
             service::Mutation::delete_location(&conn, id).await?;
 
-            tracing::info!(
+            log::info!(
                 "{admin} just deleted the location {} \"{}\" - {:?}",
                 location.name,
                 id,

@@ -1,6 +1,6 @@
 //! Route for editing an existing refill in the store.
 
-use crate::routes::utils::openapi::REFILL_TAG;
+use crate::utils::openapi::REFILL_TAG;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -51,7 +51,7 @@ pub async fn edit_refill(
 
             let result = service::Mutation::update_refill(&conn, id, edit_refill).await?;
 
-            tracing::info!(
+            log::info!(
                 "{admin} successfully edited refill \"{}\" - {:?}",
                 id,
                 result

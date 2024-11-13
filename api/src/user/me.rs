@@ -3,7 +3,7 @@
 //! This module provides a handler for the `/me` endpoint, which retrieves the
 //! details of the currently authenticated user. It is typically used in contexts
 //! where user-specific information needs to be displayed or updated.
-use crate::routes::utils::openapi::USER_TAG;
+use crate::utils::openapi::USER_TAG;
 use axum::{extract::State, Json};
 use entity::{error::AppError, response::user::UserResponse};
 use extractor::profile::{oidc_user::OidcUser, user::User};

@@ -14,7 +14,12 @@ use utoipa::openapi::{
     security::{ApiKey, ApiKeyValue, SecurityScheme},
     LicenseBuilder, OpenApi,
 };
+use utoipa_swagger_ui::SwaggerUi;
 
+/// Custom security configuration for OpenAPI in the Axum-OIDC integration.
+///
+/// This struct implements the `utoipa::Modify` trait to modify the OpenAPI schema
+/// to include a license and a security scheme specific to the Axum OIDC configuration.
 struct AxumOidcSecurity;
 impl utoipa::Modify for AxumOidcSecurity {
     fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
@@ -33,6 +38,10 @@ impl utoipa::Modify for AxumOidcSecurity {
     }
 }
 
+/// OpenAPI documentation for the `scrounch_backend` API.
+///
+/// The `ApiDoc` struct configures the OpenAPI documentation for the API,
+/// including security, component schemas, and various tagged endpoint categories.
 #[derive(utoipa::OpenApi)]
 #[openapi(
     modifiers(&AxumOidcSecurity),
@@ -42,10 +51,19 @@ impl utoipa::Modify for AxumOidcSecurity {
 )]
 pub struct ApiDoc;
 
+/// Tag used to categorize API endpoints related to user management and user-specific actions.
 pub const USER_TAG: &str = "user";
+
+/// Tag used to categorize API endpoints for managing and accessing location-based data.
 pub const LOCATION_TAG: &str = "location";
+
+/// Tag used to categorize API endpoints related to product creation, retrieval, and management.
 pub const PRODUCT_TAG: &str = "product";
+
+/// Tag used to categorize API endpoints focused on refills and related operations.
 pub const REFILL_TAG: &str = "refill";
+
+/// Tag used to categorize miscellaneous API endpoints that do not fit into other categories.
 pub const MISC_TAG: &str = "misc";
 
 /// Configures the OpenAPI documentation routes.
@@ -56,14 +74,7 @@ pub const MISC_TAG: &str = "misc";
 /// # Behavior
 /// - **Debug Mode**: If the application is running in debug mode the function will return a router with Swagger UI and OpenAPI schema endpoints enabled.
 /// - **Release Mode**: In release mode, it returns an empty router with no OpenAPI documentation routes.
-pub fn openapi(path: &str, api: OpenApi) -> axum::Router<crate::state::AppState> {
-    // Enable openapi documentation only in debug (not in release)
-    if cfg!(debug_assertions) {
-        axum::Router::new().merge(
-            utoipa_swagger_ui::SwaggerUi::new(format!("{path}/swagger-ui"))
-                .url(format!("{path}/api-docs/openapi.json"), api),
-        )
-    } else {
-        axum::Router::new()
-    }
+pub fn openapi(path: &str, api: OpenApi) -> SwaggerUi {
+    utoipa_swagger_ui::SwaggerUi::new(format!("{path}/swagger-ui"))
+        .url(format!("{path}/api-docs/openapi.json"), api)
 }
