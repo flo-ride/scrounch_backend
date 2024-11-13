@@ -8,6 +8,7 @@
 use super::openapi::USER_TAG;
 use axum::{extract::State, http::Uri, response::IntoResponse};
 use axum_oidc::OidcRpInitiatedLogout;
+use extractor::utils::FrontendUrl;
 use std::str::FromStr;
 
 /// Handles the logout process by initiating a logout request with the OIDC provider
@@ -24,10 +25,9 @@ use std::str::FromStr;
     )
 )]
 pub async fn get_logout(
-    State(arguments): State<crate::cli::Arguments>,
+    State(url): State<FrontendUrl>,
     logout: OidcRpInitiatedLogout,
 ) -> impl IntoResponse {
-    let url = Uri::from_str(&arguments.frontend_url)
-        .expect("Frontend url shoul'd be correctyl formatted");
+    let url = Uri::from_str(&url.0).expect("Frontend url shoul'd be correctyl formatted");
     logout.with_post_logout_redirect(url)
 }

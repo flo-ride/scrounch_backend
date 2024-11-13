@@ -1,6 +1,7 @@
 //! This module defines the `AppState` struct, which holds shared state for the `scrounch_backend` application.
 
 use crate::cli::Arguments;
+use extractor::utils::{FrontendUrl, SmaParams};
 use sea_orm::DatabaseConnection;
 
 /// Global application state.
@@ -16,13 +17,19 @@ pub struct AppState {
     pub s3_bucket: s3::Bucket,
 }
 
-/// Allows Axum to extract the `Arguments` from `AppState`.
-///
-/// This implementation enables Axum's request handlers to extract the command-line arguments
-/// from the shared application state using the `FromRef` trait.
-impl axum::extract::FromRef<AppState> for Arguments {
+impl axum::extract::FromRef<AppState> for FrontendUrl {
     fn from_ref(state: &AppState) -> Self {
-        state.arguments.clone()
+        Self(state.arguments.frontend_url.clone())
+    }
+}
+
+impl axum::extract::FromRef<AppState> for SmaParams {
+    fn from_ref(state: &AppState) -> Self {
+        Self {
+            url: state.arguments.sma_url.clone(),
+            api_key: state.arguments.sma_api_key.clone(),
+            categories: state.arguments.sma_categories.clone(),
+        }
     }
 }
 

@@ -3,7 +3,6 @@
 //! processing the data, and updating the local database with imported products.
 
 use super::openapi::MISC_TAG;
-use crate::Arguments;
 use axum::{
     extract::{Query, State},
     Json,
@@ -16,7 +15,7 @@ use entity::{
         sma::SmaResponse,
     },
 };
-use extractor::profile::admin::Admin;
+use extractor::{profile::admin::Admin, utils::SmaParams};
 use futures::future::join_all;
 use sea_orm::ActiveValue::Set;
 use service::{s3::FileType, Connection};
@@ -221,14 +220,14 @@ pub struct SmaUnit {
 )]
 pub async fn post_update_from_sma(
     admin: Admin,
-    State(arguments): State<Arguments>,
     State(conn): State<Connection>,
+    State(arguments): State<SmaParams>,
     State(s3): State<s3::Bucket>,
     Query(params): Query<SmaChangeTypeMatrix>,
 ) -> Result<Json<SmaResponse>, AppError> {
     tracing::info!("{admin} just asked for an SMA update",);
 
-    match (arguments.sma_api_key, arguments.sma_url) {
+    match (arguments.api_key, arguments.url) {
         (Some(api_key), Some(url)) => {
             let mut headers = reqwest::header::HeaderMap::new();
             headers.insert(
@@ -277,7 +276,7 @@ pub async fn post_update_from_sma(
                         .data
                         .into_iter()
                         .filter(|x| {
-                            if let Some(categories) = arguments.sma_categories.clone() {
+                            if let Some(categories) = arguments.categories.clone() {
                                 categories.contains(&x.category.code)
                             } else {
                                 true

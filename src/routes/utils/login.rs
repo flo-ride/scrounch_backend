@@ -7,12 +7,15 @@
 //!
 
 use super::openapi::USER_TAG;
-use crate::state::AppState;
 use axum::{extract::State, response::IntoResponse};
-use entity::error::AppError;
-use entity::models::sea_orm_active_enums::Currency;
-use entity::models::user::{self};
-use extractor::profile::oidc_user::OidcUser;
+use entity::{
+    error::AppError,
+    models::{
+        sea_orm_active_enums::Currency,
+        user::{self},
+    },
+};
+use extractor::{profile::oidc_user::OidcUser, utils::FrontendUrl};
 use sea_orm::ActiveValue::Set;
 use service::Connection;
 
@@ -34,7 +37,7 @@ use service::Connection;
 pub async fn get_login(
     user: OidcUser,
     State(conn): State<Connection>,
-    State(state): State<AppState>,
+    State(url): State<FrontendUrl>,
 ) -> Result<impl IntoResponse, AppError> {
     if service::Query::find_user_by_id(&conn, user.id)
         .await?
@@ -68,5 +71,5 @@ pub async fn get_login(
         service::Mutation::update_user_last_access_time(&conn, user.id).await?;
     }
 
-    Ok(axum::response::Redirect::to(&state.arguments.frontend_url))
+    Ok(axum::response::Redirect::to(&url.0))
 }
