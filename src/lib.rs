@@ -120,6 +120,7 @@ pub async fn app(arguments: Arguments) -> axum::Router {
         .merge(auth_required_routes(&path))
         .layer(login_service)
         .merge(auth_optional_routes(&path))
+        .layer(axum::extract::DefaultBodyLimit::max(64000000))
         .split_for_parts();
 
     let cookie_duration = arguments.openid_token_duration;
