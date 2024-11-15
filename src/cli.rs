@@ -52,6 +52,10 @@ pub struct Arguments {
     #[arg(env, long)]
     pub openid_client_secret: Option<String>,
 
+    ///  The openid token duration
+    #[arg(env, long, value_parser = humantime::parse_duration, default_value = "3d")]
+    pub openid_token_duration: std::time::Duration,
+
     /// The URL of the database the application connects to, typically in the format of a connection string
     /// Example:
     /// - postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
