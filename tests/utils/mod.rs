@@ -57,6 +57,7 @@ pub async fn create_basic_session(
     arguments.openid_issuer = issuer.clone();
     arguments.openid_client_id = realm.clients[0].client_id.clone();
     arguments.openid_client_secret = realm.clients[0].client_secret.clone();
+    arguments.openid_token_duration = std::time::Duration::from_secs(360);
     arguments.backend_url = "http://localhost:3000".to_string();
     arguments.frontend_url = "http://localhost:5173".to_string();
     arguments.database_url = db_url.to_string();
