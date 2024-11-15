@@ -23,8 +23,8 @@ use super::openapi::MISC_TAG;
 pub struct FileSchema {
     /// Represents the file data
     #[allow(dead_code)]
-    #[schema(content_media_type = "application/octet-stream")]
-    file_bytes: Vec<u8>,
+    #[schema(value_type = String, format = Binary)]
+    file: std::fs::File,
 }
 
 /// Upload files
@@ -38,7 +38,7 @@ pub struct FileSchema {
     params(
         FileParams
     ),
-    request_body(content = inline(FileSchema), content_type = "multipart/form-data"),
+    request_body(content = FileSchema, content_type = "multipart/form-data"),
     responses(
         (status = 200, description = "The file is correctly uploaded", body = String),
         (status = 400, description = "You're missing some field"),
