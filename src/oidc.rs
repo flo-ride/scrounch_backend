@@ -14,18 +14,21 @@ use axum_oidc::{error::MiddlewareError, EmptyAdditionalClaims};
 /// This function returns a session layer based on an in-memory store. The session layer
 /// is used to manage user authentication sessions in the application, allowing the
 /// server to store session data such as authentication tokens.
-pub fn memory_session_layer() -> tower_sessions::SessionManagerLayer<tower_sessions::MemoryStore> {
+pub fn memory_session_layer(
+    duration: std::time::Duration,
+) -> tower_sessions::SessionManagerLayer<tower_sessions::MemoryStore> {
     let session_store = tower_sessions::MemoryStore::default();
     tower_sessions::SessionManagerLayer::new(session_store)
         .with_same_site(tower_sessions::cookie::SameSite::None)
         .with_expiry(tower_sessions::Expiry::OnInactivity(
-            tower_sessions::cookie::time::Duration::minutes(120),
+            tower_sessions::cookie::time::Duration::seconds_f64(duration.as_secs_f64()),
         ))
 }
 
 #[cfg(feature = "cache")]
 pub fn cache_session_layer(
     pool: fred::clients::RedisPool,
+    duration: std::time::Duration,
 ) -> tower_sessions::SessionManagerLayer<
     tower_sessions_redis_store::RedisStore<fred::clients::RedisPool>,
 > {
@@ -33,7 +36,7 @@ pub fn cache_session_layer(
     tower_sessions::SessionManagerLayer::new(session_store)
         .with_same_site(tower_sessions::cookie::SameSite::None)
         .with_expiry(tower_sessions::Expiry::OnInactivity(
-            tower_sessions::cookie::time::Duration::minutes(120),
+            tower_sessions::cookie::time::Duration::seconds_f64(duration.as_secs_f64()),
         ))
 }
 

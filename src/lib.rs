@@ -122,11 +122,13 @@ pub async fn app(arguments: Arguments) -> axum::Router {
         .merge(auth_optional_routes(&path))
         .split_for_parts();
 
+    let cookie_duration = arguments.openid_token_duration;
+
     #[cfg(feature = "cache")]
     if let Some(pool) = state.cache_pool.clone() {
         return router
             .layer(auth_service)
-            .layer(oidc::cache_session_layer(pool))
+            .layer(oidc::cache_session_layer(pool, cookie_duration))
             .merge(api::utils::openapi::openapi(&path, api))
             .layer(cors_layer)
             .with_state(state);
@@ -134,7 +136,7 @@ pub async fn app(arguments: Arguments) -> axum::Router {
 
     router
         .layer(auth_service)
-        .layer(oidc::memory_session_layer())
+        .layer(oidc::memory_session_layer(cookie_duration))
         .merge(api::utils::openapi::openapi(&path, api))
         .layer(cors_layer)
         .with_state(state)
