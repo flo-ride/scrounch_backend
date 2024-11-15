@@ -83,6 +83,7 @@ uuid = { version = "1.10.0", features = ["v4", "fast-rng", "serde"] }
 chrono = "0.4.38"
 url = "2.5.2"
 rust_decimal = "1.36.0"
+humantime = "2.1.0"
 
 [features]
 default = ["cache"]
