@@ -155,6 +155,15 @@ async fn product_test_1() {
         "max_quantity_per_command": 2,
         "created_at": created_at
     }));
+
+    let response = server
+        .delete(&format!("/product/{new_product_id}"))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_ok();
+
+    let response = server.get(&format!("/product/{new_product_id}")).await;
+    response.assert_status_not_found();
 }
 
 #[tokio::test(flavor = "multi_thread")]
