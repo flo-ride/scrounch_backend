@@ -8,9 +8,8 @@ use axum::{
     http::StatusCode,
     response::IntoResponse,
 };
-use entity::{error::AppError, models::product};
+use entity::error::AppError;
 use extractor::profile::admin::Admin;
-use sea_orm::ActiveValue::Set;
 use service::Connection;
 
 /// Deletes a product by its database ID.
@@ -50,19 +49,10 @@ pub async fn delete_product(
 
     match result {
         Some(product) => {
-            service::Mutation::update_product(
-                &conn,
-                id,
-                product::ActiveModel {
-                    id: Set(id),
-                    disabled: Set(true),
-                    ..Default::default()
-                },
-            )
-            .await?;
+            service::Mutation::delete_product(&conn, id).await?;
 
             log::info!(
-                "{admin} just disabled the product {} \"{}\" - {:?}",
+                "{admin} just deleted the product {} \"{}\" - {:?}",
                 product.name,
                 id,
                 product
