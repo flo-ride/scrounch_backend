@@ -9,11 +9,6 @@ use axum::http::StatusCode;
 
 /// Macro to implement `From<$source_type>` for `AppError` when the error needs to be converted into a string.
 /// This is useful for errors that can be represented as a string message.
-///
-/// # Example:
-/// ```rust
-/// impl_from_error_to_string!(SomeErrorType, InternalError);
-/// ```
 macro_rules! impl_from_error_to_string {
     ($source_type:ty, $variant:ident) => {
         impl From<$source_type> for crate::error::AppError {
@@ -26,11 +21,6 @@ macro_rules! impl_from_error_to_string {
 
 /// Macro to implement `From<$source_type>` for `AppError` when the error is directly converted into an `AppError` variant.
 /// This is useful when the error type can be directly used without transformation.
-///
-/// # Example:
-/// ```rust
-/// impl_from_error!(DatabaseErrorType, InternalError);
-/// ```
 macro_rules! impl_from_error {
     ($source_type:ty, $variant:ident) => {
         impl From<$source_type> for crate::error::AppError {
@@ -44,11 +34,6 @@ macro_rules! impl_from_error {
 /// Macro to implement `From<$source_type>` for `AppError::BadRequest` variant.
 /// This macro is designed for errors that should be returned with a 400 status code and a detailed error message.
 /// It creates an `ErrorResponse` with a `Bad Request` status, setting the `kind` and `message` based on the source error.
-///
-/// # Example:
-/// ```rust
-/// impl_bad_request_app_error!(ValidationErrorType);
-/// ```
 macro_rules! impl_bad_request_app_error {
     ($source_type:ty) => {
         impl From<$source_type> for crate::error::AppError {
