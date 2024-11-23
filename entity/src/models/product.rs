@@ -52,6 +52,10 @@ pub struct Model {
     /// Optional unique code for the product used by the Sma system.
     #[sea_orm(unique)]
     pub sma_code: Option<String>,
+
+    /// Optional unique code for parts product used by Inventree (IPN) .
+    #[sea_orm(unique)]
+    pub inventree_code: Option<String>,
 }
 
 /// Enum representing the relations of the `Product` entity.
