@@ -81,6 +81,9 @@ pub struct ProductResponse {
     /// Optional SMA code associated with the product.
     sma_code: Option<String>,
 
+    /// Optional Inventree IPN
+    inventree_code: Option<String>,
+
     /// Creation timestamp of the product.
     created_at: chrono::DateTime<chrono::Utc>,
 
@@ -115,6 +118,7 @@ impl TryFrom<crate::models::product::Model> for ProductResponse {
             purchasable: value.purchasable,
             unit: value.unit.into(),
             sma_code: value.sma_code,
+            inventree_code: value.inventree_code,
             created_at: value.created_at.into(),
             disabled: match value.disabled {
                 true => Some(true),
