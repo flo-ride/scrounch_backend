@@ -1,7 +1,9 @@
 use sea_orm::Iterable;
 use sea_orm_migration::{prelude::*, schema::*};
 
-use crate::m20220101_000001_create_configuration_table::{Currency, CurrencyVariant};
+use crate::m20220101_000001_create_configuration_table::{
+    Currency, CurrencyVariant, Unit, UnitVariant,
+};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -17,13 +19,16 @@ impl MigrationTrait for Migration {
                     .col(uuid(Product::Id).primary_key())
                     .col(string_null(Product::Image))
                     .col(string(Product::Name))
-                    .col(decimal_len(Product::Price, 10, 2))
+                    .col(integer(Product::DisplayOrder).default(0))
+                    .col(decimal_len(Product::SellPrice, 10, 2))
                     .col(enumeration(
-                        Product::PriceCurrency,
+                        Product::SellPriceCurrency,
                         Currency,
                         CurrencyVariant::iter(),
                     ))
                     .col(small_integer_null(Product::MaxQuantityPerCommand))
+                    .col(boolean(Product::Purchasable).default(true))
+                    .col(enumeration(Product::Unit, Unit, UnitVariant::iter()))
                     .col(boolean(Product::Disabled).default(false))
                     .col(
                         timestamp_with_time_zone(Product::CreatedAt)
@@ -46,12 +51,32 @@ impl MigrationTrait for Migration {
 pub enum Product {
     Table,
     Id,
+
     Image,
-    Name,
-    Price,
-    PriceCurrency,
+    // TODO: Gallery Images
+    Name, // TODO: Change to i18n
+    // TODO: Description / Details (i18n)
+    // TODO: Category
+    // TODO: Sub Category
+    // TODO: Tags
+    DisplayOrder,
+
+    SellPrice,
+    SellPriceCurrency,
+    // TODO: BuyPrice,
+    // TODO: BuyPriceCurrency,
     MaxQuantityPerCommand,
+    Purchasable,
+    Unit,
+
     Disabled,
+
     CreatedAt,
+
+    // SMA
     SmaCode,
+    // Inventree
+    // TODO: InventreeCode,
+    // Stripe
+    // TODO: StripeCode,
 }
