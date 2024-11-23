@@ -35,6 +35,7 @@ impl MigrationTrait for Migration {
                             .default(Expr::current_timestamp()),
                     )
                     .col(string_null(Product::SmaCode).unique_key())
+                    .col(string_null(Product::InventreeCode).unique_key())
                     .to_owned(),
             )
             .await
@@ -76,7 +77,7 @@ pub enum Product {
     // SMA
     SmaCode,
     // Inventree
-    // TODO: InventreeCode,
+    InventreeCode,
     // Stripe
     // TODO: StripeCode,
 }
