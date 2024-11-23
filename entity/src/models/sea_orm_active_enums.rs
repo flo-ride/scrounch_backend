@@ -23,6 +23,26 @@ pub enum Currency {
     Euro,
 }
 
+/// Represents a unit of measurement used in the application.
+///
+/// This enum defines various standard units, such as grams, liters, meters, and generic units
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "unit")]
+pub enum Unit {
+    ///  Represents a unit of weight (grams).
+    #[sea_orm(string_value = "gram")]
+    Gram,
+    ///  Represents a unit of volume (liters).
+    #[sea_orm(string_value = "liter")]
+    Liter,
+    ///  Represents a unit of length (meters).
+    #[sea_orm(string_value = "meter")]
+    Meter,
+    ///  Represents a generic unit.
+    #[sea_orm(string_value = "unit")]
+    Unit,
+}
+
 /// Enum representing categories for various locations.
 ///
 /// This enum is used to classify locations into specific categories, such as
