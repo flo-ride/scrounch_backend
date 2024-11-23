@@ -2,7 +2,7 @@
 //! The module also defines the `ProductResponseError` enum for error handling during
 //! product response construction, particularly for price and quantity conversions.
 
-use super::r#enum::CurrencyResponse;
+use super::r#enum::{CurrencyResponse, UnitResponse};
 use crate::error::impl_from_error_to_string;
 use rust_decimal::{Decimal, Error as DecimalError};
 use serde_with::skip_serializing_none;
@@ -15,17 +15,25 @@ pub enum ProductResponseError {
     PriceCannotBeConverted(Decimal, DecimalError),
     /// Error indicating that the maximum quantity per command cannot be converted from i16.
     MaxPerCommandCannotBeConverted(i16, TryFromIntError),
+    /// Error indicating that the display order cannot be converted from i32.
+    DisplayOrderCannotBeConverted(i32, TryFromIntError),
 }
 impl std::error::Error for ProductResponseError {}
 
 impl std::fmt::Display for ProductResponseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ProductResponseError::PriceCannotBeConverted(price, err) => {
+            Self::PriceCannotBeConverted(price, err) => {
                 write!(f, "Price \"{price}\" cannot be converted in : {err}")
             }
-            ProductResponseError::MaxPerCommandCannotBeConverted(max_quantity_per_command, err) => {
+            Self::MaxPerCommandCannotBeConverted(max_quantity_per_command, err) => {
                 write!(f, "Max Quantity Per Command \"{max_quantity_per_command}\" cannot be converted {err}")
+            }
+            Self::DisplayOrderCannotBeConverted(display_order, err) => {
+                write!(
+                    f,
+                    "Display Order \"{display_order}\" cannot be converted {err}"
+                )
             }
         }
     }
@@ -52,14 +60,23 @@ pub struct ProductResponse {
     /// Name of the product.
     name: String,
 
+    /// Display Order of the product.
+    display_order: u64,
+
     /// Price of the product.
-    price: f64,
+    sell_price: f64,
 
     /// Currency of the product price.
-    currency: CurrencyResponse,
+    sell_price_currency: CurrencyResponse,
 
     /// Optional maximum quantity allowed per command.
     max_quantity_per_command: Option<u64>,
+
+    /// Represent the unit type of Product, if it's a liquid -> Liter, etc...
+    unit: UnitResponse,
+
+    /// Is the product purchasable
+    purchasable: bool,
 
     /// Optional SMA code associated with the product.
     sma_code: Option<String>,
@@ -80,11 +97,14 @@ impl TryFrom<crate::models::product::Model> for ProductResponse {
             image: value.image,
             id: value.id,
             name: value.name,
-            price: value
-                .price
+            display_order: value.display_order.try_into().map_err(|err| {
+                Self::Error::DisplayOrderCannotBeConverted(value.display_order, err)
+            })?,
+            sell_price: value
+                .sell_price
                 .try_into()
-                .map_err(|err| Self::Error::PriceCannotBeConverted(value.price, err))?,
-            currency: value.price_currency.into(),
+                .map_err(|err| Self::Error::PriceCannotBeConverted(value.sell_price, err))?,
+            sell_price_currency: value.sell_price_currency.into(),
             max_quantity_per_command: match value.max_quantity_per_command {
                 Some(x) => Some(
                     x.try_into()
@@ -92,6 +112,8 @@ impl TryFrom<crate::models::product::Model> for ProductResponse {
                 ),
                 None => None,
             },
+            purchasable: value.purchasable,
+            unit: value.unit.into(),
             sma_code: value.sma_code,
             created_at: value.created_at.into(),
             disabled: match value.disabled {
