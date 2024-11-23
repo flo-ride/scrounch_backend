@@ -20,6 +20,15 @@ impl MigrationTrait for Migration {
                             .to_owned(),
                     )
                     .await?;
+
+                manager
+                    .create_type(
+                        extension::postgres::Type::create()
+                            .as_enum(Unit)
+                            .values(UnitVariant::iter())
+                            .to_owned(),
+                    )
+                    .await?;
             }
         }
         Ok(())
@@ -32,6 +41,10 @@ impl MigrationTrait for Migration {
             DbBackend::Postgres => {
                 manager
                     .drop_type(Type::drop().name(Currency).to_owned())
+                    .await?;
+
+                manager
+                    .drop_type(Type::drop().name(Unit).to_owned())
                     .await?;
             }
         }
@@ -46,4 +59,19 @@ pub struct Currency;
 pub enum CurrencyVariant {
     Euro,
     Epicoin,
+}
+
+#[derive(DeriveIden)]
+pub struct Unit;
+
+#[derive(DeriveIden, EnumIter)]
+pub enum UnitVariant {
+    /// Represents a single unit or piece (e.g., an item).
+    Unit,
+    /// Represents weight in grams (as the base unit for mass).
+    Gram,
+    /// Represents volume in liters (as the base unit for volume).
+    Liter,
+    /// Represents length in meters (as the base unit for distance).
+    Meter,
 }
