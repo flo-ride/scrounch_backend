@@ -11,7 +11,7 @@ use rust_decimal::{Decimal, Error as DecimalError};
 use sea_orm::ActiveValue::{NotSet, Set};
 use std::num::TryFromIntError;
 
-use super::r#enum::CurrencyRequest;
+use super::r#enum::{CurrencyRequest, UnitRequest};
 
 /// The maximum allowed length for a product name.
 /// This constraint ensures that names remain concise and standardized in the database.
@@ -38,6 +38,8 @@ pub enum ProductRequestError {
     MaxQuantityPerCommandCannotBeConvertedToI16(u64, TryFromIntError),
     /// Error when the specified image does not exist in S3.
     ImageDoesNotExist(String),
+    /// Display order cannot be converted to i32
+    DisplayOrderCannotBeConvertedToI32(u64, TryFromIntError),
 }
 impl std::error::Error for ProductRequestError {}
 
@@ -69,6 +71,12 @@ impl std::fmt::Display for ProductRequestError {
             ProductRequestError::ImageDoesNotExist(image) => {
                 write!(f, "Image \"{image}\" does't exist in S3")
             }
+            ProductRequestError::DisplayOrderCannotBeConvertedToI32(display_order, err) => {
+                write!(
+                    f,
+                    "Display Order \"{display_order}\" cannot be converted to i32 {err}"
+                )
+            }
         }
     }
 }
@@ -83,9 +91,13 @@ pub struct NewProductRequest {
     /// Name of the product, required and validated for length.
     pub name: String,
     /// Price of the product, required and must be positive.
-    pub price: f64,
+    pub sell_price: f64,
     /// Currency of the product.
-    pub currency: CurrencyRequest,
+    pub sell_price_currency: CurrencyRequest,
+    /// If the product is purchasable or if it's just an ingredients
+    pub purchasable: Option<bool>,
+    /// Represent the unit type of Product, if it's a liquid -> Liter, etc..., the default is Unit
+    pub unit: Option<UnitRequest>,
     /// Optional maximum quantity per command, limited to a certain maximum.
     pub max_quantity_per_command: Option<u64>,
     /// Optional SMA code for product identification.
@@ -111,8 +123,9 @@ impl TryFrom<NewProductRequest> for ActiveModel {
                 }
                 Set(name)
             },
-            price: {
-                let price = value.price;
+            display_order: Set(0),
+            sell_price: {
+                let price = value.sell_price;
                 if price <= 0.0 {
                     return Err(Self::Error::PriceCannotBeNegativeOrNull(price));
                 }
@@ -125,7 +138,9 @@ impl TryFrom<NewProductRequest> for ActiveModel {
                     }
                 }
             },
-            price_currency: Set(value.currency.into()),
+            sell_price_currency: Set(value.sell_price_currency.into()),
+            purchasable: Set(value.purchasable.unwrap_or(true)),
+            unit: Set(value.unit.unwrap_or(UnitRequest::Unit).into()),
             max_quantity_per_command: match value.max_quantity_per_command {
                 Some(max) => {
                     if max > PRODUCT_MAX_QUANTITY_PER_COMMAND {
@@ -159,10 +174,16 @@ pub struct EditProductRequest {
     pub image: Option<Option<String>>,
     /// Optional name of the product with length validation.
     pub name: Option<String>,
+    /// Display Order of the product inside of lists, 0 is last + default
+    pub display_order: Option<u64>,
     /// Optional price of the product, required to be positive if present.
-    pub price: Option<f64>,
+    pub sell_price: Option<f64>,
     /// Optional price of the product, required to be positive if present.
-    pub currency: Option<CurrencyRequest>,
+    pub sell_price_currency: Option<CurrencyRequest>,
+    /// If the product is purchasable or if it's just an ingredients
+    pub purchasable: Option<bool>,
+    /// Represent the unit type of Product, if it's a liquid -> Liter, etc..., the default is Unit
+    pub unit: Option<UnitRequest>,
     /// Optional maximum quantity per command with conversion and size limits.
     pub max_quantity_per_command: Option<Option<u64>>,
     /// Optional SMA code for product identification, can be `None` if specified.
@@ -198,7 +219,14 @@ impl TryFrom<EditProductRequest> for ActiveModel {
                 }
                 None => NotSet,
             },
-            price: match value.price {
+            display_order: {
+                let display_order = value.display_order.unwrap_or(0);
+                let display_order_i32 = display_order.try_into().map_err(|err| {
+                    Self::Error::DisplayOrderCannotBeConvertedToI32(display_order, err)
+                })?;
+                Set(display_order_i32)
+            },
+            sell_price: match value.sell_price {
                 Some(price) => {
                     if price <= 0.0 {
                         return Err(Self::Error::PriceCannotBeNegativeOrNull(price));
@@ -214,7 +242,7 @@ impl TryFrom<EditProductRequest> for ActiveModel {
                 }
                 None => NotSet,
             },
-            price_currency: match value.currency {
+            sell_price_currency: match value.sell_price_currency {
                 Some(currency) => Set(currency.into()),
                 None => NotSet,
             },
@@ -240,6 +268,14 @@ impl TryFrom<EditProductRequest> for ActiveModel {
                     }
                     None => Set(None),
                 },
+                None => NotSet,
+            },
+            purchasable: match value.purchasable {
+                Some(purchasable) => Set(purchasable),
+                None => NotSet,
+            },
+            unit: match value.unit {
+                Some(unit) => Set(unit.into()),
                 None => NotSet,
             },
             sma_code: match value.sma_code {
