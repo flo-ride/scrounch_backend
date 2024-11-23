@@ -102,6 +102,8 @@ pub struct NewProductRequest {
     pub max_quantity_per_command: Option<u64>,
     /// Optional SMA code for product identification.
     pub sma_code: Option<String>,
+    /// Optional Inventree IPN
+    pub inventree_code: Option<String>,
 }
 
 impl TryFrom<NewProductRequest> for ActiveModel {
@@ -161,6 +163,7 @@ impl TryFrom<NewProductRequest> for ActiveModel {
                 None => NotSet,
             },
             sma_code: Set(value.sma_code),
+            inventree_code: Set(value.inventree_code),
             disabled: Set(false),
             created_at: Set(chrono::offset::Local::now().into()),
         })
@@ -188,6 +191,8 @@ pub struct EditProductRequest {
     pub max_quantity_per_command: Option<Option<u64>>,
     /// Optional SMA code for product identification, can be `None` if specified.
     pub sma_code: Option<Option<String>>,
+    /// Optional Inventree IPN, can be `None` if specified.
+    pub inventree_code: Option<Option<String>>,
     /// Optional field to disable or enable the product.
     pub disabled: Option<bool>,
 }
@@ -281,6 +286,13 @@ impl TryFrom<EditProductRequest> for ActiveModel {
             sma_code: match value.sma_code {
                 Some(sma_opt) => match sma_opt {
                     Some(sma_code) => Set(Some(sma_code)),
+                    None => Set(None),
+                },
+                None => NotSet,
+            },
+            inventree_code: match value.inventree_code {
+                Some(inventree_opt) => match inventree_opt {
+                    Some(inventree_code) => Set(Some(inventree_code)),
                     None => Set(None),
                 },
                 None => NotSet,
