@@ -10,7 +10,16 @@ use serde::{Deserialize, Serialize};
 
 /// Represents the `product` entity in the database, encompassing details about
 /// the products available for sale, including pricing, quantities, and images.
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    DeriveEntityModel,
+    Eq,
+    Serialize,
+    Deserialize,
+    proc::DeriveToFilterQuery,
+)]
 #[sea_orm(table_name = "product")]
 pub struct Model {
     /// Unique identifier for the product. Primary key, non-auto-incrementing.
@@ -24,6 +33,7 @@ pub struct Model {
     pub name: String,
 
     /// Display Order of the product inside of lists, 0 is last + default
+    #[sea_orm(filter_plus_order)]
     pub display_order: i32,
 
     /// Selling Price of the product, stored as a decimal with up to 10 digits
@@ -32,21 +42,26 @@ pub struct Model {
     pub sell_price: Decimal,
 
     /// Selling Price Currency for the product,
+    #[sea_orm(filter_override = "crate::request::r#enum::CurrencyRequest")]
     pub sell_price_currency: Currency,
 
     /// If the product is purchasable or if it's just an ingredients
+    #[sea_orm(filter_single)]
     pub purchasable: bool,
 
     /// Represent the unit type of Product, if it's a liquid -> Liter, etc..., the default is Unit
+    #[sea_orm(filter_override = "crate::request::r#enum::UnitRequest")]
     pub unit: Unit,
 
     /// Optional maximum quantity that can be ordered in a single command.
     pub max_quantity_per_command: Option<i16>,
 
     /// Indicates if the product is currently disabled for sale.
+    #[sea_orm(filter_single)]
     pub disabled: bool,
 
     /// Timestamp indicating when the product was created in the system.
+    #[sea_orm(filter_override = "chrono::DateTime<chrono::Utc>", filter_plus_order)]
     pub created_at: DateTimeWithTimeZone,
 
     /// Optional unique code for the product used by the Sma system.

@@ -57,6 +57,12 @@ impl From<LocationCategoryRequest> for ModelLocationCategory {
     }
 }
 
+impl From<LocationCategoryRequest> for Option<ModelLocationCategory> {
+    fn from(value: LocationCategoryRequest) -> Self {
+        Some(value.into())
+    }
+}
+
 /// Represents a request to create a new location, including necessary
 /// validation for name length and optional category.
 #[derive(Debug, Default, Clone, PartialEq, serde::Deserialize, utoipa::ToSchema)]

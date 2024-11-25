@@ -12,7 +12,16 @@ use serde::{Deserialize, Serialize};
 
 /// Represents the `user` entity in the database, encapsulating essential
 /// user information such as account status, balance, and timestamps.
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    DeriveEntityModel,
+    Eq,
+    Serialize,
+    Deserialize,
+    proc::DeriveToFilterQuery,
+)]
 #[sea_orm(table_name = "user")]
 pub struct Model {
     /// Unique identifier for the user. Primary key, non-auto-incrementing.
@@ -30,22 +39,27 @@ pub struct Model {
 
     /// User's current balance, stored as a decimal with up to 10 digits
     /// and 2 decimal places.
-    #[sea_orm(column_type = "Decimal(Some((10, 2)))")]
+    #[sea_orm(column_type = "Decimal(Some((10, 2)))", filter_plus_order)]
     pub balance: Decimal,
 
     /// Currency type of the user's balance.
+    #[sea_orm(filter_override = "crate::request::r#enum::CurrencyRequest")]
     pub balance_currency: Currency,
 
     /// Indicates if the user has administrative privileges.
+    #[sea_orm(filter_single)]
     pub is_admin: bool,
 
     /// Indicates if the user is banned from the system.
+    #[sea_orm(filter_single)]
     pub is_banned: bool,
 
     /// Timestamp when the user account was created.
+    #[sea_orm(filter_override = "chrono::DateTime<chrono::Utc>", filter_plus_order)]
     pub created_at: DateTimeWithTimeZone,
 
     /// Timestamp of the user's last access to the system.
+    #[sea_orm(filter_override = "chrono::DateTime<chrono::Utc>", filter_plus_order)]
     pub last_access_at: DateTimeWithTimeZone,
 }
 

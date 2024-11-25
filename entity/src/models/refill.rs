@@ -9,7 +9,16 @@ use super::sea_orm_active_enums::Currency;
 
 /// Represents the `refill` entity in the database, detailing refill transactions
 /// including pricing, credit amount, and currency information.
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    DeriveEntityModel,
+    Eq,
+    Serialize,
+    Deserialize,
+    proc::DeriveToFilterQuery,
+)]
 #[sea_orm(table_name = "refill")]
 pub struct Model {
     /// Unique identifier for the refill transaction. Primary key, non-auto-incrementing.
@@ -20,6 +29,7 @@ pub struct Model {
     pub name: Option<String>,
 
     /// Timestamp indicating when the refill transaction was created.
+    #[sea_orm(filter_override = "chrono::DateTime<chrono::Utc>", filter_plus_order)]
     pub created_at: DateTimeWithTimeZone,
 
     /// Price of the refill transaction, stored as a decimal with up to 10 digits
@@ -28,6 +38,7 @@ pub struct Model {
     pub price: Decimal,
 
     /// Currency type for the refill transaction price.
+    #[sea_orm(filter_override = "crate::request::r#enum::CurrencyRequest")]
     pub price_currency: Currency,
 
     /// Credit amount awarded in this refill transaction, stored as a decimal
@@ -36,9 +47,11 @@ pub struct Model {
     pub credit: Decimal,
 
     /// Currency type for the refill transaction credit.
+    #[sea_orm(filter_override = "crate::request::r#enum::CurrencyRequest")]
     pub credit_currency: Currency,
 
     /// Indicates if the refill transaction is disabled.
+    #[sea_orm(filter_single)]
     pub disabled: bool,
 }
 

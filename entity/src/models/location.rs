@@ -14,7 +14,16 @@ use serde::{Deserialize, Serialize};
 /// columns in the `location` table. It includes a unique identifier (`id`),
 /// a name, the creation time of the location, an optional category,
 /// and a flag indicating whether the location is disabled
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    DeriveEntityModel,
+    Eq,
+    Serialize,
+    Deserialize,
+    proc::DeriveToFilterQuery,
+)]
 #[sea_orm(table_name = "location")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
@@ -29,14 +38,17 @@ pub struct Model {
 
     /// Timestamp of when the location was created.
     /// This field stores the creation time with timezone information.
+    #[sea_orm(filter_override = "chrono::DateTime<chrono::Utc>", filter_plus_order)]
     pub created_at: DateTimeWithTimeZone,
 
     /// Optional category for the location.
     /// This field can be used to classify the location into different categories.
+    #[sea_orm(filter_override = "crate::request::location::LocationCategoryRequest")]
     pub category: Option<LocationCategory>,
 
     /// Flag indicating if the location is disabled.
     /// This field is a boolean that signifies whether the location is active or not.
+    #[sea_orm(filter_single)]
     pub disabled: bool,
 }
 
