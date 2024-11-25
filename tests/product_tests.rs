@@ -65,8 +65,8 @@ async fn product_test_1() {
         .json(&json!({
             "name": "Bug Magnet",
             "image": image_id,
-            "price": 2.51,
-            "currency": "euro",
+            "sell_price": 2.51,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -88,9 +88,12 @@ async fn product_test_1() {
             {
                 "id":  new_product_id,
                 "name": "Bug Magnet",
+                "display_order": 0,
                 "image": image_id,
-                "price": 2.51,
-                "currency": "euro",
+                "sell_price": 2.51,
+                "sell_price_currency": "euro",
+                "unit": "unit",
+                "purchasable": true,
                 "created_at": created_at
             }
         ]
@@ -102,9 +105,12 @@ async fn product_test_1() {
     response.assert_json(&json!({
         "id":  new_product_id,
         "name": "Bug Magnet",
+        "display_order": 0,
         "image": image_id,
-        "price": 2.51,
-        "currency": "euro",
+        "sell_price": 2.51,
+        "sell_price_currency": "euro",
+        "unit": "unit",
+        "purchasable": true,
         "created_at": created_at
     }));
 
@@ -118,6 +124,7 @@ async fn product_test_1() {
         .put(&format!("/product/{new_product_id}"))
         .json(&json!({
             "name": "Logic Drill",
+            "unit": "meter",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -128,16 +135,19 @@ async fn product_test_1() {
     response.assert_json(&json!({
         "id":  new_product_id,
         "name": "Logic Drill",
+        "display_order": 0,
         "image": image_id,
-        "price": 2.51,
-        "currency": "euro",
+        "sell_price": 2.51,
+        "sell_price_currency": "euro",
+        "unit": "meter",
+        "purchasable": true,
         "created_at": created_at
     }));
 
     let response = server
         .put(&format!("/product/{new_product_id}"))
         .json(&json!({
-            "price": 14.00,
+            "sell_price": 14.00,
             "max_quantity_per_command": 2,
         }))
         .add_cookie(cookies[0].clone())
@@ -149,10 +159,13 @@ async fn product_test_1() {
     response.assert_json(&json!({
         "id":  new_product_id,
         "name": "Logic Drill",
+        "display_order": 0,
         "image": image_id,
-        "price": 14.00,
-        "currency": "euro",
+        "sell_price": 14.00,
+        "sell_price_currency": "euro",
         "max_quantity_per_command": 2,
+        "unit": "meter",
+        "purchasable": true,
         "created_at": created_at
     }));
 
@@ -211,8 +224,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Bug Magnet",
             "image": image_id,
-            "price": 2.51,
-            "currency": "euro",
+            "sell_price": 2.51,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -224,8 +237,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Logic Drill",
             "image": image_id,
-            "price": 1.38,
-            "currency": "euro",
+            "sell_price": 1.38,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -237,8 +250,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Error Hammer",
             "image": image_id,
-            "price": 3.25,
-            "currency": "epicoin",
+            "sell_price": 3.25,
+            "sell_price_currency": "epicoin",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -250,8 +263,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Null Pointer Detector",
             "image": image_id,
-            "price": 0.99,
-            "currency": "epicoin",
+            "sell_price": 0.99,
+            "sell_price_currency": "epicoin",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -263,8 +276,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Memory Leak Sponge",
             "image": image_id,
-            "price": 4.99,
-            "currency": "euro",
+            "sell_price": 4.99,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -276,8 +289,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Infinite Loop Lasso",
             "image": image_id,
-            "price": 2.75,
-            "currency": "euro",
+            "sell_price": 2.75,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -289,8 +302,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Segmentation Fault Tape",
             "image": image_id,
-            "price": 1.65,
-            "currency": "euro",
+            "sell_price": 1.65,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -302,8 +315,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "404 Finder",
             "image": image_id,
-            "price": 3.10,
-            "currency": "euro",
+            "sell_price": 3.10,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -315,8 +328,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Crash Cushion",
             "image": image_id,
-            "price": 2.80,
-            "currency": "euro",
+            "sell_price": 2.80,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -328,8 +341,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Latency Compass",
             "image": image_id,
-            "price": 1.45,
-            "currency": "euro",
+            "sell_price": 1.45,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -341,8 +354,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Syntax Eraser",
             "image": image_id,
-            "price": 2.99,
-            "currency": "euro",
+            "sell_price": 2.99,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -354,8 +367,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Concurrent Thread Cutter",
             "image": image_id,
-            "price": 4.10,
-            "currency": "euro",
+            "sell_price": 4.10,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -367,8 +380,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Debugger Pliers",
             "image": image_id,
-            "price": 3.55,
-            "currency": "euro",
+            "sell_price": 3.55,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -380,8 +393,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Infinite Recursion Snips",
             "image": image_id,
-            "price": 5.99,
-            "currency": "euro",
+            "sell_price": 5.99,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -393,8 +406,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Garbage Collector Net",
             "image": image_id,
-            "price": 3.20,
-            "currency": "euro",
+            "sell_price": 3.20,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -406,8 +419,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Stack Overflow Helmet",
             "image": image_id,
-            "price": 2.80,
-            "currency": "euro",
+            "sell_price": 2.80,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -419,8 +432,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Off-By-One Ruler",
             "image": image_id,
-            "price": 1.99,
-            "currency": "euro",
+            "sell_price": 1.99,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -432,8 +445,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Deadlock Scissors",
             "image": image_id,
-            "price": 4.20,
-            "currency": "euro",
+            "sell_price": 4.20,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -445,8 +458,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Memory Dump Bag",
             "image": image_id,
-            "price": 2.40,
-            "currency": "euro",
+            "sell_price": 2.40,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -458,8 +471,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Heap Allocator Shovel",
             "image": image_id,
-            "price": 3.90,
-            "currency": "euro",
+            "sell_price": 3.90,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -471,8 +484,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Semaphore Semaphore",
             "image": image_id,
-            "price": 5.10,
-            "currency": "euro",
+            "sell_price": 5.10,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -484,8 +497,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Mutex Lock Keychain",
             "image": image_id,
-            "price": 1.75,
-            "currency": "euro",
+            "sell_price": 1.75,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -497,8 +510,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Timeout Timer",
             "image": image_id,
-            "price": 2.70,
-            "currency": "euro",
+            "sell_price": 2.70,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -508,23 +521,23 @@ async fn product_test_2() {
     let response = server
         .post("/product")
         .json(&json!({
-            "name": "Concurrency Gauge",
+            "name": "Consell_price_currency Gauge",
             "image": image_id,
-            "price": 3.15,
-            "currency": "euro",
+            "sell_price": 3.15,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
     response.assert_status(StatusCode::CREATED);
-    let concurrency_gauge_id = response.text();
+    let consell_price_currency_gauge_id = response.text();
 
     let response = server
         .post("/product")
         .json(&json!({
             "name": "Race Condition Stopwatch",
             "image": image_id,
-            "price": 2.60,
-            "currency": "euro",
+            "sell_price": 2.60,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -536,8 +549,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Event Queue Clipboard",
             "image": image_id,
-            "price": 3.75,
-            "currency": "euro",
+            "sell_price": 3.75,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -549,8 +562,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Uninitialized Pointer Bookmark",
             "image": image_id,
-            "price": 1.50,
-            "currency": "euro",
+            "sell_price": 1.50,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -562,8 +575,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Stack Trace Notepad",
             "image": image_id,
-            "price": 3.85,
-            "currency": "euro",
+            "sell_price": 3.85,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -575,8 +588,8 @@ async fn product_test_2() {
         .json(&json!({
             "name": "Compiler Warning Highlighter",
             "image": image_id,
-            "price": 1.95,
-            "currency": "euro",
+            "sell_price": 1.95,
+            "sell_price_currency": "euro",
         }))
         .add_cookie(cookies[0].clone())
         .await;
@@ -595,141 +608,141 @@ async fn product_test_2() {
                 "id": bug_magnet_id,
                 "name": "Bug Magnet",
                 "image": image_id,
-                "price": 2.51,
-                "currency": "euro",
+                "sell_price": 2.51,
+                "sell_price_currency": "euro",
             },
             {
                 "id": logic_drill_id,
                 "name": "Logic Drill",
                 "image": image_id,
-                "price": 1.38,
-                "currency": "euro",
+                "sell_price": 1.38,
+                "sell_price_currency": "euro",
             },
             {
                 "id": error_hammer_id,
                 "name": "Error Hammer",
                 "image": image_id,
-                "price": 3.25,
-                "currency": "epicoin",
+                "sell_price": 3.25,
+                "sell_price_currency": "epicoin",
             },
             {
                 "id": null_pointer_detector_id,
                 "name": "Null Pointer Detector",
                 "image": image_id,
-                "price": 0.99,
-                "currency": "epicoin",
+                "sell_price": 0.99,
+                "sell_price_currency": "epicoin",
             },
             {
                 "id": memory_leak_sponge_id,
                 "name": "Memory Leak Sponge",
                 "image": image_id,
-                "price": 4.99,
-                "currency": "euro",
+                "sell_price": 4.99,
+                "sell_price_currency": "euro",
             },
             {
                 "id": infinite_loop_lasso_id,
                 "name": "Infinite Loop Lasso",
                 "image": image_id,
-                "price": 2.75,
-                "currency": "euro",
+                "sell_price": 2.75,
+                "sell_price_currency": "euro",
             },
             {
                 "id": segfault_tape_id,
                 "name": "Segmentation Fault Tape",
                 "image": image_id,
-                "price": 1.65,
-                "currency": "euro",
+                "sell_price": 1.65,
+                "sell_price_currency": "euro",
             },
             {
                 "id": four_o_four_finder_id,
                 "name": "404 Finder",
                 "image": image_id,
-                "price": 3.10,
-                "currency": "euro",
+                "sell_price": 3.10,
+                "sell_price_currency": "euro",
             },
             {
                 "id": crash_cushion_id,
                 "name": "Crash Cushion",
                 "image": image_id,
-                "price": 2.80,
-                "currency": "euro",
+                "sell_price": 2.80,
+                "sell_price_currency": "euro",
             },
             {
                 "id": latency_compass_id,
                 "name": "Latency Compass",
                 "image": image_id,
-                "price": 1.45,
-                "currency": "euro",
+                "sell_price": 1.45,
+                "sell_price_currency": "euro",
             },
             {
                 "id": syntax_eraser_id,
                 "name": "Syntax Eraser",
                 "image": image_id,
-                "price": 2.99,
-                "currency": "euro",
+                "sell_price": 2.99,
+                "sell_price_currency": "euro",
             },
             {
                 "id": thread_cutter_id,
                 "name": "Concurrent Thread Cutter",
                 "image": image_id,
-                "price": 4.10,
-                "currency": "euro",
+                "sell_price": 4.10,
+                "sell_price_currency": "euro",
             },
             {
                 "id": debugger_pliers_id,
                 "name": "Debugger Pliers",
                 "image": image_id,
-                "price": 3.55,
-                "currency": "euro",
+                "sell_price": 3.55,
+                "sell_price_currency": "euro",
             },
             {
                 "id": recursion_snips_id,
                 "name": "Infinite Recursion Snips",
                 "image": image_id,
-                "price": 5.99,
-                "currency": "euro",
+                "sell_price": 5.99,
+                "sell_price_currency": "euro",
             },
             {
                 "id": gc_net_id,
                 "name": "Garbage Collector Net",
                 "image": image_id,
-                "price": 3.20,
-                "currency": "euro",
+                "sell_price": 3.20,
+                "sell_price_currency": "euro",
             },
             {
                 "id": so_helmet_id,
                 "name": "Stack Overflow Helmet",
                 "image": image_id,
-                "price": 2.80,
-                "currency": "euro",
+                "sell_price": 2.80,
+                "sell_price_currency": "euro",
             },
             {
                 "id": ruler_id,
                 "name": "Off-By-One Ruler",
                 "image": image_id,
-                "price": 1.99,
-                "currency": "euro",
+                "sell_price": 1.99,
+                "sell_price_currency": "euro",
             },
             {
                 "id": deadlock_scissors_id,
                 "name": "Deadlock Scissors",
                 "image": image_id,
-                "price": 4.20,
-                "currency": "euro",
+                "sell_price": 4.20,
+                "sell_price_currency": "euro",
             },
             {
                 "id": memory_dump_bag_id,
                 "name": "Memory Dump Bag",
                 "image": image_id,
-                "price": 2.40,
-                "currency": "euro",
+                "sell_price": 2.40,
+                "sell_price_currency": "euro",
             },
             {
                 "id": heap_shovel_id,
                 "name": "Heap Allocator Shovel",
                 "image": image_id,
-                "price": 3.90,
-                "currency": "euro",
+                "sell_price": 3.90,
+                "sell_price_currency": "euro",
             },
         ]
     }));
@@ -745,64 +758,64 @@ async fn product_test_2() {
                 "id": semaphore_semaphore_id,
                 "name": "Semaphore Semaphore",
                 "image": image_id,
-                "price": 5.10,
-                "currency": "euro",
+                "sell_price": 5.10,
+                "sell_price_currency": "euro",
             },
             {
                 "id": mutex_keychain_id,
                 "name": "Mutex Lock Keychain",
                 "image": image_id,
-                "price": 1.75,
-                "currency": "euro",
+                "sell_price": 1.75,
+                "sell_price_currency": "euro",
             },
             {
                 "id": timeout_timer_id,
                 "name": "Timeout Timer",
                 "image": image_id,
-                "price": 2.70,
-                "currency": "euro",
+                "sell_price": 2.70,
+                "sell_price_currency": "euro",
             },
             {
-                "id": concurrency_gauge_id,
-                "name": "Concurrency Gauge",
+                "id": consell_price_currency_gauge_id,
+                "name": "Consell_price_currency Gauge",
                 "image": image_id,
-                "price": 3.15,
-                "currency": "euro",
+                "sell_price": 3.15,
+                "sell_price_currency": "euro",
             },
             {
                 "id": race_stopwatch_id,
                 "name": "Race Condition Stopwatch",
                 "image": image_id,
-                "price": 2.60,
-                "currency": "euro",
+                "sell_price": 2.60,
+                "sell_price_currency": "euro",
             },
             {
                 "id": event_queue_clipboard_id,
                 "name": "Event Queue Clipboard",
                 "image": image_id,
-                "price": 3.75,
-                "currency": "euro",
+                "sell_price": 3.75,
+                "sell_price_currency": "euro",
             },
             {
                 "id": uninit_pointer_bookmark_id,
                 "name": "Uninitialized Pointer Bookmark",
                 "image": image_id,
-                "price": 1.50,
-                "currency": "euro",
+                "sell_price": 1.50,
+                "sell_price_currency": "euro",
             },
             {
                 "id": stack_trace_notepad_id,
                 "name": "Stack Trace Notepad",
                 "image": image_id,
-                "price": 3.85,
-                "currency": "euro",
+                "sell_price": 3.85,
+                "sell_price_currency": "euro",
             },
             {
                 "id": compiler_highlighter_id,
                 "name": "Compiler Warning Highlighter",
                 "image": image_id,
-                "price": 1.95,
-                "currency": "euro",
+                "sell_price": 1.95,
+                "sell_price_currency": "euro",
             }
         ]
     }
