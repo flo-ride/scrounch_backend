@@ -2,15 +2,16 @@
 
 use crate::utils::openapi::REFILL_TAG;
 use axum::{
-    extract::{Path, Query, State},
+    extract::{Path, State},
     Json,
 };
+use axum_extra::extract::Query;
 use entity::{
     error::AppError,
+    models::refill::RefillFilterQuery,
     response::refill::{RefillListResponse, RefillResponse, RefillResponseError},
 };
 use extractor::{profile::admin::Admin, query::Pagination};
-use sea_orm::{sea_query::IntoCondition, ColumnTrait};
 use service::Connection;
 
 /// Handles the request to fetch a refill by its unique identifier.
@@ -83,7 +84,8 @@ pub async fn get_refill(
     path = "",
     tag = REFILL_TAG,
     params(
-        Pagination
+        Pagination,
+        RefillFilterQuery
     ),
     responses(
         (status = 500, description = "An internal error, most likely related to the database, occurred."), 
@@ -95,25 +97,19 @@ pub async fn get_refill(
     )
 )]
 pub async fn get_all_refills(
-    admin: Option<Admin>,
+    _admin: Option<Admin>,
     Query(pagination): Query<Pagination>,
+    Query(filter): Query<RefillFilterQuery>,
     State(conn): State<Connection>,
 ) -> Result<Json<RefillListResponse>, AppError> {
     let page = pagination.page.unwrap_or(0);
     let per_page = pagination.per_page.unwrap_or(20);
 
-    let condition = if admin.is_some() {
-        service::every_condition().into_condition()
-    } else {
-        sea_orm::Condition::any().add(entity::models::refill::Column::Disabled.eq(false))
-    };
-
     let result =
-        service::Query::list_refills_with_condition(&conn, condition.clone(), page, per_page)
-            .await?;
+        service::Query::list_refills_with_condition(&conn, filter.clone(), page, per_page).await?;
 
     let total_page =
-        (service::Query::count_refills_with_condition(&conn, condition).await? / per_page) + 1;
+        (service::Query::count_refills_with_condition(&conn, filter).await? / per_page) + 1;
 
     let refills: Result<Vec<_>, RefillResponseError> =
         result.into_iter().map(TryInto::try_into).collect();

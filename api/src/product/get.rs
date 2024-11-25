@@ -2,15 +2,16 @@
 
 use crate::utils::openapi::PRODUCT_TAG;
 use axum::{
-    extract::{Path, Query, State},
+    extract::{Path, State},
     Json,
 };
+use axum_extra::extract::Query;
 use entity::{
     error::AppError,
+    models::product::ProductFilterQuery,
     response::product::{ProductListResponse, ProductResponse, ProductResponseError},
 };
 use extractor::{profile::admin::Admin, query::Pagination};
-use sea_orm::{sea_query::IntoCondition, ColumnTrait};
 use service::Connection;
 
 /// Handles the request to fetch a product by its unique identifier.
@@ -83,7 +84,8 @@ pub async fn get_product(
     path = "",
     tag = PRODUCT_TAG,
     params(
-        Pagination
+        Pagination,
+        ProductFilterQuery,
     ),
     responses(
        (status = 500, description = "An internal error, most likely related to the database, occurred."), 
@@ -94,23 +96,23 @@ pub async fn get_product(
 pub async fn get_all_products(
     admin: Option<Admin>,
     Query(pagination): Query<Pagination>,
+    Query(mut filter): Query<ProductFilterQuery>,
     State(conn): State<Connection>,
 ) -> Result<Json<ProductListResponse>, AppError> {
     let page = pagination.page.unwrap_or(0);
     let per_page = pagination.per_page.unwrap_or(20);
 
-    let condition = if admin.is_some() {
-        service::every_condition().into_condition()
-    } else {
-        sea_orm::Condition::any().add(entity::models::product::Column::Disabled.eq(false))
-    };
+    // Only Admin can view non purchasable product
+    if admin.is_none() {
+        filter.purchasable_eq = Some(true);
+        filter.purchasable_neq = None;
+    }
 
     let result =
-        service::Query::list_products_with_condition(&conn, condition.clone(), page, per_page)
-            .await?;
+        service::Query::list_products_with_condition(&conn, filter.clone(), page, per_page).await?;
 
     let total_page =
-        (service::Query::count_products_with_condition(&conn, condition).await? / per_page) + 1;
+        (service::Query::count_products_with_condition(&conn, filter).await? / per_page) + 1;
 
     let products = result
         .into_iter()

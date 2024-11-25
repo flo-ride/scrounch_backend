@@ -2,15 +2,16 @@
 
 use crate::utils::openapi::LOCATION_TAG;
 use axum::{
-    extract::{Path, Query, State},
+    extract::{Path, State},
     Json,
 };
+use axum_extra::extract::Query;
 use entity::{
     error::AppError,
+    models::location::LocationFilterQuery,
     response::location::{LocationListResponse, LocationResponse},
 };
 use extractor::{profile::admin::Admin, query::Pagination};
-use sea_orm::{sea_query::IntoCondition, ColumnTrait};
 use service::Connection;
 
 /// Handles the request to fetch a location by its unique identifier.
@@ -83,7 +84,8 @@ pub async fn get_location(
     path = "",
     tag = LOCATION_TAG,
     params(
-        Pagination
+        Pagination,
+        LocationFilterQuery
     ),
     responses(
         (status = 500, description = "An internal error, most likely related to the database, occurred."), 
@@ -96,25 +98,20 @@ pub async fn get_location(
     )
 )]
 pub async fn get_all_locations(
-    admin: Option<Admin>,
+    _admin: Option<Admin>,
     Query(pagination): Query<Pagination>,
+    Query(filter): Query<LocationFilterQuery>,
     State(conn): State<Connection>,
 ) -> Result<Json<LocationListResponse>, AppError> {
     let page = pagination.page.unwrap_or(0);
     let per_page = pagination.per_page.unwrap_or(20);
 
-    let condition = if admin.is_some() {
-        service::every_condition().into_condition()
-    } else {
-        sea_orm::Condition::any().add(entity::models::location::Column::Disabled.eq(false))
-    };
-
     let result =
-        service::Query::list_locations_with_condition(&conn, condition.clone(), page, per_page)
+        service::Query::list_locations_with_condition(&conn, filter.clone(), page, per_page)
             .await?;
 
     let total_page =
-        (service::Query::count_locations_with_condition(&conn, condition).await? / per_page) + 1;
+        (service::Query::count_locations_with_condition(&conn, filter).await? / per_page) + 1;
 
     let locations = result.into_iter().map(Into::into).collect();
     Ok(Json(LocationListResponse {

@@ -2,9 +2,11 @@
 
 use crate::utils::openapi::USER_TAG;
 use axum::{
-    extract::{Path, Query, State},
+    extract::{Path, State},
     Json,
 };
+use axum_extra::extract::Query;
+use entity::models::user::UserFilterQuery;
 use entity::{
     error::AppError,
     response::user::{UserListResponse, UserResponse},
@@ -13,7 +15,6 @@ use extractor::{
     profile::{admin::Admin, user::User},
     query::Pagination,
 };
-use sea_orm::sea_query::IntoCondition;
 use service::Connection;
 
 /// Handles the request to fetch a user by its unique identifier.
@@ -85,7 +86,8 @@ pub async fn get_user(
     path = "",
     tag = USER_TAG,
     params(
-        Pagination
+        Pagination,
+        UserFilterQuery
     ),
     responses(
         (status = 500, description = "An internal error, most likely related to the database, occurred."), 
@@ -99,18 +101,17 @@ pub async fn get_user(
 pub async fn get_all_users(
     _admin: Admin,
     Query(pagination): Query<Pagination>,
+    Query(filter): Query<UserFilterQuery>,
     State(conn): State<Connection>,
 ) -> Result<Json<UserListResponse>, AppError> {
     let page = pagination.page.unwrap_or(0);
     let per_page = pagination.per_page.unwrap_or(20);
 
-    let condition = service::every_condition().into_condition();
-
     let result =
-        service::Query::list_users_with_condition(&conn, condition.clone(), page, per_page).await?;
+        service::Query::list_users_with_condition(&conn, filter.clone(), page, per_page).await?;
 
     let total_page =
-        (service::Query::count_users_with_condition(&conn, condition).await? / per_page) + 1;
+        (service::Query::count_users_with_condition(&conn, filter).await? / per_page) + 1;
 
     let users = result.into_iter().map(|x| x.into()).collect();
     Ok(Json(UserListResponse {
