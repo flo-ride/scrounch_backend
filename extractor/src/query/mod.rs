@@ -9,7 +9,7 @@
 /// Represents pagination parameters for API requests.
 #[derive(Debug, Clone, PartialEq, serde::Deserialize, utoipa::IntoParams)]
 pub struct Pagination {
-    /// The page number to retrieve, starting from 1.
+    /// The page number to retrieve, starting from 0.
     pub page: Option<u64>,
 
     /// The number of items to return per page.
