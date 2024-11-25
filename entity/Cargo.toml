@@ -9,6 +9,8 @@ name = "entity"
 path = "src/lib.rs"
 
 [dependencies]
+proc = { path = "../proc" }
+
 ## Rest API
 axum = { version = "0.7.6", features = ["multipart"] }
 
