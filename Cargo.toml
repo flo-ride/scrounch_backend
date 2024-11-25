@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [workspace]
-members = [".", "migration", "entity", "service", "extractor", "api"]
+members = [".", "migration", "entity", "service", "extractor", "api", "proc"]
 
 # Enable high optimizations for dependencies:
 [profile.dev.package."*"]
