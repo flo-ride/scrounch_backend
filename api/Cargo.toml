@@ -11,6 +11,7 @@ extractor = { path = "../extractor" }
 
 ## Rest API
 axum = { version = "0.7.6", features = ["multipart"] }
+axum-extra = { version = "0.9.6", features = ["query"] }
 
 # Trace + Log
 log = "0.4.22"
