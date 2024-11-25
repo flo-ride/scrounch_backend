@@ -14,7 +14,7 @@ const RENAME_KEY: &str = "filter_rename";
 /// attribute keys for renaming the model name
 const MODEL_NAME_KEY: &str = "table_name";
 /// attribute keys for only equal/not_equal
-const ONLY_EQ_KEY: &str = "filter_only_eq";
+const PLUS_ORDER_KEY: &str = "filter_plus_order";
 /// attribute keys for single
 const SINGLE_KEY: &str = "filter_single";
 
@@ -47,8 +47,15 @@ pub fn derive_to_filter_query(input: TokenStream) -> TokenStream {
     };
 
     // Process each field, applying filters, overrides, and renames
-    let filter_fields = fields.iter().filter_map(|field| {
+    let map = fields.iter().filter_map(|field| {
         let field_name = &field.ident;
+        let column_name = format_ident!(
+            "{}",
+            field_name
+                .clone()
+                .unwrap()
+                .convert_case(Some(CaseStyle::PascalCase))
+        );
 
         // Check for `#[flo_orm(skip_filter)]`
         if field.attrs.iter().any(is_skip_filter) {
@@ -56,11 +63,12 @@ pub fn derive_to_filter_query(input: TokenStream) -> TokenStream {
         }
 
         // Check for `#[flo_orm(override = "type")]` and replace the type if present
+        let original_field_type = field.ty.clone();
         let field_type = field
             .attrs
             .iter()
             .find_map(get_override_type)
-            .unwrap_or_else(|| field.ty.clone());
+            .unwrap_or_else(|| original_field_type.clone());
 
         // Check for `#[flo_orm(rename = "name")]` and rename the field if present
         let output_name = field
@@ -76,18 +84,14 @@ pub fn derive_to_filter_query(input: TokenStream) -> TokenStream {
         let gte_name = format_ident!("{}_gte", output_name);
         let lte_name = format_ident!("{}_lte", output_name);
 
-        let eq_part = if field.attrs.iter().any(is_single_filter) {
-            quote! {
-                /// Field to filter for equality, allowing multiple values.
-                /// This creates a condition where the column matches the provided values.
-                pub #eq_name: Option<#field_type>,
+        let eq_name_string = eq_name.to_string();
+        let neq_name_string = neq_name.to_string();
+        let gt_name_string = gt_name.to_string();
+        let lt_name_string = lt_name.to_string();
+        let gte_name_string = gte_name.to_string();
+        let lte_name_string = lte_name.to_string();
 
-                /// Field to filter for inequality, allowing multiple values.
-                /// This excludes any results where the column matches the provided values.
-                pub #neq_name: Option<#field_type>,
-            }
-        } else {
-            quote! {
+        let mut struct_part = quote! {
                 /// Field to filter for equality, allowing multiple values.
                 /// This creates a condition where the column matches any of the provided values.
                 #[serde(default)]
@@ -97,17 +101,45 @@ pub fn derive_to_filter_query(input: TokenStream) -> TokenStream {
                 /// This excludes any results where the column matches one of the provided values.
                 #[serde(default)]
                 pub #neq_name: Vec<#field_type>,
-            }
-        };
+            };
+
+        let mut debug_part = quote! {
+                if  !self.#eq_name.is_empty() { res.push(format!("{}={:?}", #eq_name_string, self.#eq_name)) }
+                if  !self.#neq_name.is_empty() { res.push(format!("{}={:?}", #neq_name_string, self.#neq_name)) }
+            };
+
+        let mut filter_part = quote! {
+                .add_option({ if self.#eq_name.is_empty() { None } else { Some(Column::#column_name.is_in(self.#eq_name.into_iter().map(Into::<#original_field_type>::into))) }})
+                .add_option({ if self.#neq_name.is_empty() { None } else { Some(Column::#column_name.is_not_in(self.#neq_name.into_iter().map(Into::<#original_field_type>::into))) }})
+            };
+
+        if field.attrs.iter().any(is_single_filter) {
+            struct_part = quote! {
+                /// Field to filter for equality, allowing multiple values.
+                /// This creates a condition where the column matches the provided values.
+                pub #eq_name: Option<#field_type>,
+
+                /// Field to filter for inequality, allowing multiple values.
+                /// This excludes any results where the column matches the provided values.
+                pub #neq_name: Option<#field_type>,
+            };
+
+            debug_part = quote! {
+                if let Some(x) = self.#eq_name.clone() { res.push(format!("{}={x:?}", #eq_name_string)) }
+                if let Some(x) = self.#neq_name.clone() { res.push(format!("{}={x:?}", #neq_name_string)) }
+            };
+
+            filter_part = quote! {
+                .add_option(self.#eq_name.map(|x| Column::#column_name.eq(Into::<#original_field_type>::into(x))))
+                .add_option(self.#neq_name.map(|x| Column::#column_name.ne(Into::<#original_field_type>::into(x))))
+            };
+        }
+
 
         // Check for `#[flo_orm(filter_only_eq)]`
-        if field.attrs.iter().any(is_only_filter) {
-            Some(quote! {
-                #eq_part
-            })
-        } else {
-            Some(quote! {
-                #eq_part
+        if field.attrs.iter().any(is_plus_order) {
+            struct_part = quote! {
+                #struct_part
 
                 /// Field to filter for #field_type greater than the specified value.
                 /// Useful for range-based queries (e.g., prices above a threshold).
@@ -124,133 +156,47 @@ pub fn derive_to_filter_query(input: TokenStream) -> TokenStream {
                 /// Field to filter for #field_type less than or equal to the specified value.
                 /// Similar to `lt`, but includes the boundary value in the results.
                 pub #lte_name: Option<#field_type>,
-            })
-        }
-    });
+            };
 
-    // Process each field, applying filters, overrides, and renames
-    let filter_impl = fields.iter().filter_map(|field| {
-        let field_name = &field.ident;
-        let column_name = format_ident!(
-            "{}",
-            field_name
-                .clone()
-                .unwrap()
-                .convert_case(Some(CaseStyle::PascalCase))
-        );
-
-        // Check for `#[flo_orm(skip_filter)]`
-        if field.attrs.iter().any(is_skip_filter) {
-            return None;
-        }
-
-        // Check for `#[flo_orm(override = "type")]` and replace the type if present
-        let field_type = field.ty.clone();
-
-        // Check for `#[flo_orm(rename = "name")]` and rename the field if present
-        let output_name = field
-            .attrs
-            .iter()
-            .find_map(get_rename_name)
-            .unwrap_or_else(|| field_name.clone().unwrap());
-
-        let eq_name = format_ident!("{}_eq", output_name);
-        let neq_name = format_ident!("{}_neq", output_name);
-        let gt_name = format_ident!("{}_gt", output_name);
-        let lt_name = format_ident!("{}_lt", output_name);
-        let gte_name = format_ident!("{}_gte", output_name);
-        let lte_name = format_ident!("{}_lte", output_name);
-
-        let eq_part = if field.attrs.iter().any(is_single_filter) {
-            quote! {
-                .add_option(self.#eq_name.map(|x| Column::#column_name.eq(Into::<#field_type>::into(x))))
-                .add_option(self.#neq_name.map(|x| Column::#column_name.ne(Into::<#field_type>::into(x))))
-            }
-        } else {
-            quote! {
-                .add_option({ if self.#eq_name.is_empty() { None } else { Some(Column::#column_name.is_in(self.#eq_name.into_iter().map(Into::<#field_type>::into))) }})
-                .add_option({ if self.#neq_name.is_empty() { None } else { Some(Column::#column_name.is_not_in(self.#neq_name.into_iter().map(Into::<#field_type>::into))) }})
-            }
-        };
-
-        // Check for `#[flo_orm(filter_only_eq)]`
-        if field.attrs.iter().any(is_only_filter) {
-            Some(quote! {
-                #eq_part
-            })
-        } else {
-            Some(quote! {
-                #eq_part
-                .add_option(self.#gt_name.map(|x| Column::#column_name.gt(Into::<#field_type>::into(x))))
-                .add_option(self.#lt_name.map(|x| Column::#column_name.lt(Into::<#field_type>::into(x))))
-                .add_option(self.#gte_name.map(|x| Column::#column_name.gte(Into::<#field_type>::into(x))))
-                .add_option(self.#lte_name.map(|x| Column::#column_name.lte(Into::<#field_type>::into(x))))
-            })
-        }
-    });
-
-    let debug_impl = fields.iter().filter_map(|field| {
-        let field_name = &field.ident;
-
-        // Check for `#[flo_orm(skip_filter)]`
-        if field.attrs.iter().any(is_skip_filter) {
-            return None;
-        }
-
-        // Check for `#[flo_orm(rename = "name")]` and rename the field if present
-        let output_name = field
-            .attrs
-            .iter()
-            .find_map(get_rename_name)
-            .unwrap_or_else(|| field_name.clone().unwrap());
-
-        let eq_name = format_ident!("{}_eq", output_name);
-        let eq_name_string = eq_name.to_string();
-        let neq_name = format_ident!("{}_neq", output_name);
-        let neq_name_string = neq_name.to_string();
-        let gt_name = format_ident!("{}_gt", output_name);
-        let gt_name_string = gt_name.to_string();
-        let lt_name = format_ident!("{}_lt", output_name);
-        let lt_name_string = lt_name.to_string();
-        let gte_name = format_ident!("{}_gte", output_name);
-        let gte_name_string = gte_name.to_string();
-        let lte_name = format_ident!("{}_lte", output_name);
-        let lte_name_string = lte_name.to_string();
-
-        let eq_part = if field.attrs.iter().any(is_single_filter) {
-            quote! {
-                if let Some(x) = self.#eq_name.clone() { res.push(format!("{}={x:?}", #eq_name_string)) }
-                if let Some(x) = self.#neq_name.clone() { res.push(format!("{}={x:?}", #neq_name_string)) }
-            }
-        } else {
-            quote! {
-                if  !self.#eq_name.is_empty() { res.push(format!("{}={:?}", #eq_name_string, self.#eq_name)) }
-                if  !self.#neq_name.is_empty() { res.push(format!("{}={:?}", #neq_name_string, self.#neq_name)) }
-            }
-        };
-
-        // Check for `#[flo_orm(filter_only_eq)]`
-        if field.attrs.iter().any(is_only_filter) {
-            Some(quote! {
-                #eq_part
-            })
-        } else {
-            Some(quote! {
-                #eq_part
+            debug_part = quote! {
+                #debug_part
                 if let Some(x) = self.#gt_name.clone() { res.push(format!("{}={x:?}", #gt_name_string)) }
                 if let Some(x) = self.#lt_name.clone() { res.push(format!("{}={x:?}", #lt_name_string)) }
                 if let Some(x) = self.#gte_name.clone() { res.push(format!("{}={x:?}", #gte_name_string)) }
                 if let Some(x) = self.#lte_name.clone() { res.push(format!("{}={x:?}", #lte_name_string)) }
-            })
+            };
+
+            filter_part = quote! {
+                #filter_part
+                .add_option(self.#gt_name.map(|x| Column::#column_name.gt(Into::<#original_field_type>::into(x))))
+                .add_option(self.#lt_name.map(|x| Column::#column_name.lt(Into::<#original_field_type>::into(x))))
+                .add_option(self.#gte_name.map(|x| Column::#column_name.gte(Into::<#original_field_type>::into(x))))
+                .add_option(self.#lte_name.map(|x| Column::#column_name.lte(Into::<#original_field_type>::into(x))))
+            };
         }
+
+        Some((struct_part, debug_part, filter_part))
     });
+
+    let iter_map = map.into_iter();
+    let struct_impl: Vec<_> = iter_map
+        .clone()
+        .map(|(struct_part, _, _)| struct_part.clone())
+        .collect();
+    let debug_impl: Vec<_> = iter_map
+        .clone()
+        .map(|(_, debug_part, _)| debug_part.clone())
+        .collect();
+    let filter_impl: Vec<_> = iter_map
+        .map(|(_, _, filter_part)| filter_part.clone())
+        .collect();
 
     // Generate the output token stream
     let expanded = quote! {
         /// Generated by DeriveToFilterQuery macro for flo_orm
         #[derive(Clone, serde::Deserialize, utoipa::IntoParams)]
         pub struct #filter_struct_name {
-            #(#filter_fields)*
+            #(#struct_impl)*
         }
 
         impl std::fmt::Debug for #filter_struct_name {
@@ -300,11 +246,11 @@ fn is_skip_filter(attr: &Attribute) -> bool {
     result
 }
 
-fn is_only_filter(attr: &Attribute) -> bool {
+fn is_plus_order(attr: &Attribute) -> bool {
     let mut result = false;
     if attr.path().is_ident(FLO_ORM_NAMESPACE) {
         attr.parse_nested_meta(|meta| {
-            if meta.path.is_ident(ONLY_EQ_KEY) {
+            if meta.path.is_ident(PLUS_ORDER_KEY) {
                 result = true;
             } else {
                 // Reads the value expression to advance the parse stream.
