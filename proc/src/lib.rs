@@ -7,6 +7,7 @@
 
 mod filter;
 mod helper;
+mod sort;
 
 /// Derives a filter query struct for the given struct, generating fields for various filter operations.
 ///
@@ -15,4 +16,13 @@ mod helper;
 #[proc_macro_derive(DeriveToFilterQuery, attributes(sea_orm))]
 pub fn derive_to_filter_query(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     filter::derive_to_filter_query(input)
+}
+
+/// Derives a sort query struct for the given struct, generating fields for various sort operations.
+///
+/// This procedural macro generates a sort query struct for SeaORM entities, adding fields to sort based on
+/// asc or desc.
+#[proc_macro_derive(DeriveToSortQuery, attributes(sea_orm))]
+pub fn derive_to_sort_query(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    sort::derive_to_sort_query(input)
 }
