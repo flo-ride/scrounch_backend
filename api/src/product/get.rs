@@ -26,7 +26,7 @@ use service::Connection;
 ///   - `500 Internal Server Error`: An internal error, most likely related to the database, occurred.
 ///
 /// - **Permissions**:  
-///   If the product is disabled, only an admin can retrieve it.
+///   If the product is hidden, only an admin can retrieve it.
 #[utoipa::path(get, path = "/{id}", 
     tag = PRODUCT_TAG,
     params(
@@ -52,7 +52,7 @@ pub async fn get_product(
 
     match result {
         Some(product) => {
-            if product.disabled && admin.is_none() {
+            if product.hidden && admin.is_none() {
                 return Err(AppError::NotFound(format!(
                     "The product with id: {id} doesn't exist"
                 )));
@@ -78,7 +78,7 @@ pub async fn get_product(
 ///   - `500 Internal Server Error`: An internal error, most likely related to the database, occurred.
 ///
 /// - **Permissions**:  
-///   Non-admin users will only see products that are not disabled.
+///   Non-admin users will only see products that are not hidden.
 #[utoipa::path(
     get,
     path = "",
@@ -104,10 +104,13 @@ pub async fn get_all_products(
     let page = pagination.page.unwrap_or(0);
     let per_page = pagination.per_page.unwrap_or(20);
 
-    // Only Admin can view non purchasable product
+    // Only Admin can view non purchasable/hidden product
     if admin.is_none() {
         filter.purchasable_eq = Some(true);
         filter.purchasable_neq = None;
+
+        filter.hidden_eq = Some(false);
+        filter.hidden_neq = None;
     }
 
     let result =

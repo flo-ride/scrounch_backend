@@ -26,7 +26,7 @@ use service::Connection;
 ///   - `500 Internal Server Error`: An internal error, most likely related to the database, occurred.
 ///
 /// - **Permissions**:  
-///   If the refill is disabled, only an admin can retrieve it.
+///   If the refill is hidden, only an admin can retrieve it.
 #[utoipa::path(
     get,
     path = "/{id}", 
@@ -53,7 +53,7 @@ pub async fn get_refill(
 
     match result {
         Some(refill) => {
-            if refill.disabled && admin.is_none() {
+            if refill.hidden && admin.is_none() {
                 return Err(AppError::NotFound(format!(
                     "The refill with id: {id} doesn't exist"
                 )));
@@ -78,7 +78,7 @@ pub async fn get_refill(
 ///   - `500 Internal Server Error`: An internal error, most likely related to the database, occurred.
 ///
 /// - **Permissions**:  
-///   Only Admin can view disabled refill
+///   Only Admin can view hidden refill
 #[utoipa::path(
     get,
     path = "",
@@ -98,14 +98,19 @@ pub async fn get_refill(
     )
 )]
 pub async fn get_all_refills(
-    _admin: Option<Admin>,
+    admin: Option<Admin>,
     Query(pagination): Query<Pagination>,
-    Query(filter): Query<RefillFilterQuery>,
+    Query(mut filter): Query<RefillFilterQuery>,
     Query(sort): Query<RefillSortQuery>,
     State(conn): State<Connection>,
 ) -> Result<Json<RefillListResponse>, AppError> {
     let page = pagination.page.unwrap_or(0);
     let per_page = pagination.per_page.unwrap_or(20);
+
+    if admin.is_none() {
+        filter.hidden_eq = Some(false);
+        filter.hidden_neq = None;
+    }
 
     let result =
         service::Query::list_refills_with_condition(&conn, filter.clone(), sort, page, per_page)

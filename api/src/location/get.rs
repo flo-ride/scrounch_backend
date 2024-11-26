@@ -26,7 +26,7 @@ use service::Connection;
 ///   - `500 Internal Server Error`: An internal error, most likely related to the database, occurred.
 ///
 /// - **Permissions**:  
-///   If the location is disabled, only an admin can retrieve it.
+///   If the location is hidden, only an admin can retrieve it.
 #[utoipa::path(
     get,
     path = "/{id}", 
@@ -53,7 +53,7 @@ pub async fn get_location(
 
     match result {
         Some(location) => {
-            if location.disabled && admin.is_none() {
+            if location.hidden && admin.is_none() {
                 return Err(AppError::NotFound(format!(
                     "The location with id: {id} doesn't exist"
                 )));
@@ -78,7 +78,7 @@ pub async fn get_location(
 ///   - `500 Internal Server Error`: An internal error, most likely related to the database, occurred.
 ///
 /// - **Permissions**:  
-///   Only Admin can view disabled location
+///   Only Admin can view hidden location
 #[utoipa::path(
     get,
     path = "",
@@ -99,14 +99,19 @@ pub async fn get_location(
     )
 )]
 pub async fn get_all_locations(
-    _admin: Option<Admin>,
+    admin: Option<Admin>,
     Query(pagination): Query<Pagination>,
-    Query(filter): Query<LocationFilterQuery>,
+    Query(mut filter): Query<LocationFilterQuery>,
     Query(sort): Query<LocationSortQuery>,
     State(conn): State<Connection>,
 ) -> Result<Json<LocationListResponse>, AppError> {
     let page = pagination.page.unwrap_or(0);
     let per_page = pagination.per_page.unwrap_or(20);
+
+    if admin.is_none() {
+        filter.hidden_eq = Some(false);
+        filter.hidden_eq = None;
+    }
 
     let result =
         service::Query::list_locations_with_condition(&conn, filter.clone(), sort, page, per_page)
