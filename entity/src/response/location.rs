@@ -47,6 +47,9 @@ pub struct LocationResponse {
     /// The timestamp indicating when the location was created.
     pub created_at: chrono::DateTime<chrono::Utc>,
 
+    /// Indicates whether the location is hidden.
+    pub hidden: Option<bool>,
+
     /// Indicates whether the location is disabled.
     pub disabled: bool,
 }
@@ -58,6 +61,10 @@ impl From<crate::models::location::Model> for LocationResponse {
             name: value.name,
             category: value.category.map(Into::into),
             created_at: value.created_at.into(),
+            hidden: match value.hidden {
+                true => Some(true),
+                false => None,
+            },
             disabled: value.disabled,
         }
     }

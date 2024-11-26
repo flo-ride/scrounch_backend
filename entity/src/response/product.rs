@@ -75,9 +75,6 @@ pub struct ProductResponse {
     /// Represent the unit type of Product, if it's a liquid -> Liter, etc...
     unit: UnitResponse,
 
-    /// Is the product purchasable
-    purchasable: bool,
-
     /// Optional SMA code associated with the product.
     sma_code: Option<String>,
 
@@ -87,8 +84,14 @@ pub struct ProductResponse {
     /// Creation timestamp of the product.
     created_at: chrono::DateTime<chrono::Utc>,
 
-    /// Optional flag indicating if the product is disabled.
-    disabled: Option<bool>,
+    /// Is the product purchasable
+    purchasable: Option<bool>,
+
+    /// Is the product can be seen by simple user
+    hidden: Option<bool>,
+
+    /// indicating if the product is disabled.
+    disabled: bool,
 }
 
 impl TryFrom<crate::models::product::Model> for ProductResponse {
@@ -115,15 +118,19 @@ impl TryFrom<crate::models::product::Model> for ProductResponse {
                 ),
                 None => None,
             },
-            purchasable: value.purchasable,
             unit: value.unit.into(),
             sma_code: value.sma_code,
             inventree_code: value.inventree_code,
             created_at: value.created_at.into(),
-            disabled: match value.disabled {
+            purchasable: match value.purchasable {
                 true => Some(true),
                 false => None,
             },
+            hidden: match value.hidden {
+                true => Some(true),
+                false => None,
+            },
+            disabled: value.disabled,
         })
     }
 }

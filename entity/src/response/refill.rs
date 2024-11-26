@@ -67,6 +67,9 @@ pub struct RefillResponse {
     /// The timestamp indicating when the refill was created.
     pub created_at: chrono::DateTime<chrono::Utc>,
 
+    /// Indicates whether the refill is currently hidden.
+    pub hidden: Option<bool>,
+
     /// Indicates whether the refill is currently disabled.
     pub disabled: bool,
 }
@@ -96,6 +99,10 @@ impl TryFrom<crate::models::refill::Model> for RefillResponse {
                 }
             },
             credit_currency: value.credit_currency.into(),
+            hidden: match value.hidden {
+                true => Some(true),
+                false => None,
+            },
             disabled: value.disabled,
             created_at: value.created_at.into(),
         })
