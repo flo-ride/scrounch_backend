@@ -21,6 +21,7 @@ use serde::{Deserialize, Serialize};
     Serialize,
     Deserialize,
     proc::DeriveToFilterQuery,
+    proc::DeriveToSortQuery,
 )]
 #[sea_orm(table_name = "user")]
 pub struct Model {

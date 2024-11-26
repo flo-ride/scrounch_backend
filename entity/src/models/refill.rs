@@ -18,6 +18,7 @@ use super::sea_orm_active_enums::Currency;
     Serialize,
     Deserialize,
     proc::DeriveToFilterQuery,
+    proc::DeriveToSortQuery,
 )]
 #[sea_orm(table_name = "refill")]
 pub struct Model {
