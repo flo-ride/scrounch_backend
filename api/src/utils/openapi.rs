@@ -46,7 +46,11 @@ impl utoipa::Modify for AxumOidcSecurity {
 #[openapi(
     modifiers(&AxumOidcSecurity),
     components(
-        schemas(FileType)
+        schemas(FileType),
+        schemas(entity::models::product::ProductSortEnum),
+        schemas(entity::models::refill::RefillSortEnum),
+        schemas(entity::models::location::LocationSortEnum),
+        schemas(entity::models::user::UserSortEnum),
     ),
 )]
 pub struct ApiDoc;

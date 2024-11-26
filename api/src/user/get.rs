@@ -6,7 +6,7 @@ use axum::{
     Json,
 };
 use axum_extra::extract::Query;
-use entity::models::user::UserFilterQuery;
+use entity::models::user::{UserFilterQuery, UserSortQuery};
 use entity::{
     error::AppError,
     response::user::{UserListResponse, UserResponse},
@@ -87,7 +87,8 @@ pub async fn get_user(
     tag = USER_TAG,
     params(
         Pagination,
-        UserFilterQuery
+        UserFilterQuery,
+        UserSortQuery,
     ),
     responses(
         (status = 500, description = "An internal error, most likely related to the database, occurred."), 
@@ -102,13 +103,15 @@ pub async fn get_all_users(
     _admin: Admin,
     Query(pagination): Query<Pagination>,
     Query(filter): Query<UserFilterQuery>,
+    Query(sort): Query<UserSortQuery>,
     State(conn): State<Connection>,
 ) -> Result<Json<UserListResponse>, AppError> {
     let page = pagination.page.unwrap_or(0);
     let per_page = pagination.per_page.unwrap_or(20);
 
     let result =
-        service::Query::list_users_with_condition(&conn, filter.clone(), page, per_page).await?;
+        service::Query::list_users_with_condition(&conn, filter.clone(), sort, page, per_page)
+            .await?;
 
     let total_page =
         (service::Query::count_users_with_condition(&conn, filter).await? / per_page) + 1;

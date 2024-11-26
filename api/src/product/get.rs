@@ -8,7 +8,7 @@ use axum::{
 use axum_extra::extract::Query;
 use entity::{
     error::AppError,
-    models::product::ProductFilterQuery,
+    models::product::{ProductFilterQuery, ProductSortQuery},
     response::product::{ProductListResponse, ProductResponse, ProductResponseError},
 };
 use extractor::{profile::admin::Admin, query::Pagination};
@@ -86,6 +86,7 @@ pub async fn get_product(
     params(
         Pagination,
         ProductFilterQuery,
+        ProductSortQuery
     ),
     responses(
        (status = 500, description = "An internal error, most likely related to the database, occurred."), 
@@ -97,6 +98,7 @@ pub async fn get_all_products(
     admin: Option<Admin>,
     Query(pagination): Query<Pagination>,
     Query(mut filter): Query<ProductFilterQuery>,
+    Query(sort): Query<ProductSortQuery>,
     State(conn): State<Connection>,
 ) -> Result<Json<ProductListResponse>, AppError> {
     let page = pagination.page.unwrap_or(0);
@@ -109,7 +111,8 @@ pub async fn get_all_products(
     }
 
     let result =
-        service::Query::list_products_with_condition(&conn, filter.clone(), page, per_page).await?;
+        service::Query::list_products_with_condition(&conn, filter.clone(), sort, page, per_page)
+            .await?;
 
     let total_page =
         (service::Query::count_products_with_condition(&conn, filter).await? / per_page) + 1;

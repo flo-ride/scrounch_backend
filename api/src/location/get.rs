@@ -8,7 +8,7 @@ use axum::{
 use axum_extra::extract::Query;
 use entity::{
     error::AppError,
-    models::location::LocationFilterQuery,
+    models::location::{LocationFilterQuery, LocationSortQuery},
     response::location::{LocationListResponse, LocationResponse},
 };
 use extractor::{profile::admin::Admin, query::Pagination};
@@ -85,7 +85,8 @@ pub async fn get_location(
     tag = LOCATION_TAG,
     params(
         Pagination,
-        LocationFilterQuery
+        LocationFilterQuery,
+        LocationSortQuery,
     ),
     responses(
         (status = 500, description = "An internal error, most likely related to the database, occurred."), 
@@ -101,13 +102,14 @@ pub async fn get_all_locations(
     _admin: Option<Admin>,
     Query(pagination): Query<Pagination>,
     Query(filter): Query<LocationFilterQuery>,
+    Query(sort): Query<LocationSortQuery>,
     State(conn): State<Connection>,
 ) -> Result<Json<LocationListResponse>, AppError> {
     let page = pagination.page.unwrap_or(0);
     let per_page = pagination.per_page.unwrap_or(20);
 
     let result =
-        service::Query::list_locations_with_condition(&conn, filter.clone(), page, per_page)
+        service::Query::list_locations_with_condition(&conn, filter.clone(), sort, page, per_page)
             .await?;
 
     let total_page =

@@ -8,7 +8,7 @@ use axum::{
 use axum_extra::extract::Query;
 use entity::{
     error::AppError,
-    models::refill::RefillFilterQuery,
+    models::refill::{RefillFilterQuery, RefillSortQuery},
     response::refill::{RefillListResponse, RefillResponse, RefillResponseError},
 };
 use extractor::{profile::admin::Admin, query::Pagination};
@@ -85,7 +85,8 @@ pub async fn get_refill(
     tag = REFILL_TAG,
     params(
         Pagination,
-        RefillFilterQuery
+        RefillFilterQuery,
+        RefillSortQuery,
     ),
     responses(
         (status = 500, description = "An internal error, most likely related to the database, occurred."), 
@@ -100,13 +101,15 @@ pub async fn get_all_refills(
     _admin: Option<Admin>,
     Query(pagination): Query<Pagination>,
     Query(filter): Query<RefillFilterQuery>,
+    Query(sort): Query<RefillSortQuery>,
     State(conn): State<Connection>,
 ) -> Result<Json<RefillListResponse>, AppError> {
     let page = pagination.page.unwrap_or(0);
     let per_page = pagination.per_page.unwrap_or(20);
 
     let result =
-        service::Query::list_refills_with_condition(&conn, filter.clone(), page, per_page).await?;
+        service::Query::list_refills_with_condition(&conn, filter.clone(), sort, page, per_page)
+            .await?;
 
     let total_page =
         (service::Query::count_refills_with_condition(&conn, filter).await? / per_page) + 1;
