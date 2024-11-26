@@ -94,7 +94,8 @@ async fn product_test_1() {
                 "sell_price_currency": "euro",
                 "unit": "unit",
                 "purchasable": true,
-                "created_at": created_at
+                "created_at": created_at,
+                "disabled": false,
             }
         ]
     }));
@@ -111,7 +112,8 @@ async fn product_test_1() {
         "sell_price_currency": "euro",
         "unit": "unit",
         "purchasable": true,
-        "created_at": created_at
+        "created_at": created_at,
+        "disabled": false,
     }));
 
     let response = server
@@ -141,7 +143,8 @@ async fn product_test_1() {
         "sell_price_currency": "euro",
         "unit": "meter",
         "purchasable": true,
-        "created_at": created_at
+        "created_at": created_at,
+        "disabled": false,
     }));
 
     let response = server
@@ -166,7 +169,8 @@ async fn product_test_1() {
         "max_quantity_per_command": 2,
         "unit": "meter",
         "purchasable": true,
-        "created_at": created_at
+        "created_at": created_at,
+        "disabled": false,
     }));
 
     let response = server
