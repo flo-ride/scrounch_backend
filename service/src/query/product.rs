@@ -43,31 +43,43 @@ impl Query {
 
     pub async fn list_products_with_condition<
         F: sea_query::IntoCondition + std::fmt::Debug + Clone,
+        S: IntoIterator<Item = (impl IntoSimpleExpr, Order)> + std::fmt::Debug + Clone,
         A: Into<u64> + Copy,
         P: Into<u64> + Copy,
     >(
         conn: &Connection,
         filter: F,
+        sort: S,
         page: A,
         per_page: P,
     ) -> Result<Vec<product::Model>, DbErr> {
         #[cfg(feature = "cache")]
         cache_mget!(
             conn,
-            format!("products:{filter:?}-{}/{}", page.into(), per_page.into()),
+            format!(
+                "products:{filter:?}-{sort:?}-{}/{}",
+                page.into(),
+                per_page.into()
+            ),
             product::Model
         );
 
-        let result = Product::find()
-            .filter(filter.clone())
-            .paginate(&conn.db_connection, per_page.into())
-            .fetch_page(page.into())
-            .await?;
+        let mut query = Product::find().filter(filter.clone());
+        for (column, order) in sort.clone() {
+            query = query.order_by_with_nulls(column, order, sea_query::NullOrdering::Last);
+        }
+        let query = query.paginate(&conn.db_connection, per_page.into());
+
+        let result = query.fetch_page(page.into()).await?;
 
         #[cfg(feature = "cache")]
         cache_mset!(
             conn,
-            format!("products:{filter:?}-{}/{}", page.into(), per_page.into()),
+            format!(
+                "products:{filter:?}-{sort:?}-{}/{}",
+                page.into(),
+                per_page.into()
+            ),
             result,
             60 * 60 * 3,
             "product:"

@@ -14,6 +14,7 @@ mod utils;
 pub use mutation::Mutation;
 pub use query::Query;
 pub use utils::every_condition;
+pub use utils::every_sort;
 
 pub use sea_orm;
 
