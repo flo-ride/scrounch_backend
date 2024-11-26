@@ -32,6 +32,7 @@ impl MigrationTrait for Migration {
                         Currency,
                         CurrencyVariant::iter(),
                     ))
+                    .col(boolean(Refill::Hidden).default(false))
                     .col(boolean(Refill::Disabled).default(false))
                     .to_owned(),
             )
@@ -55,5 +56,6 @@ pub enum Refill {
     Credit,
     CreditCurrency,
     CreatedAt,
+    Hidden,
     Disabled,
 }

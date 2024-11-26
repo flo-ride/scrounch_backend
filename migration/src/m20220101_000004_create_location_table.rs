@@ -41,6 +41,7 @@ impl MigrationTrait for Migration {
                         LocationCategory,
                         LocationCategoryVariant::iter(),
                     ))
+                    .col(boolean(Location::Hidden).default(false))
                     .col(boolean(Location::Disabled).default(false))
                     .to_owned(),
             )
@@ -72,6 +73,7 @@ pub enum Location {
     Name,
     CreatedAt,
     Category,
+    Hidden,
     Disabled,
 }
 

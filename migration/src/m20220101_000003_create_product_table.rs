@@ -27,8 +27,9 @@ impl MigrationTrait for Migration {
                         CurrencyVariant::iter(),
                     ))
                     .col(small_integer_null(Product::MaxQuantityPerCommand))
-                    .col(boolean(Product::Purchasable).default(true))
                     .col(enumeration(Product::Unit, Unit, UnitVariant::iter()))
+                    .col(boolean(Product::Purchasable).default(true))
+                    .col(boolean(Product::Hidden).default(false))
                     .col(boolean(Product::Disabled).default(false))
                     .col(
                         timestamp_with_time_zone(Product::CreatedAt)
@@ -67,9 +68,10 @@ pub enum Product {
     // TODO: BuyPrice,
     // TODO: BuyPriceCurrency,
     MaxQuantityPerCommand,
-    Purchasable,
     Unit,
 
+    Purchasable,
+    Hidden,
     Disabled,
 
     CreatedAt,
