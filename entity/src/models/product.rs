@@ -121,20 +121,14 @@ impl ActiveModelBehavior for ActiveModel {
                 }
             }
 
-            // A non purchasable product MUST be disabled + hidden
+            // A non purchasable product MUST be hidden
             if let Set(false) = self.purchasable {
                 self.hidden = Set(true);
-                self.disabled = Set(true);
             }
 
-            // An hidden product MUST be disabled
-            if let Set(true) = self.hidden {
-                self.disabled = Set(true);
-            }
-
-            // An non disabled product CANNOT be hidden
-            if let Set(false) = self.disabled {
-                self.hidden = Set(false);
+            // An non hidden product SHOULD be purchasable
+            if let Set(false) = self.hidden {
+                self.purchasable = Set(true);
             }
 
             Ok(self)

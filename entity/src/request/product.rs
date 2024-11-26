@@ -324,7 +324,6 @@ impl TryFrom<EditProductRequest> for ActiveModel {
                 Some(purchasable) => {
                     if !purchasable {
                         value.hidden = Some(true);
-                        value.disabled = Some(true);
                     }
                     Set(purchasable)
                 }
@@ -332,8 +331,8 @@ impl TryFrom<EditProductRequest> for ActiveModel {
             },
             hidden: match value.hidden {
                 Some(hidden) => {
-                    if hidden {
-                        value.disabled = Some(true);
+                    if !hidden {
+                        value.purchasable = Some(true);
                     }
                     Set(hidden)
                 }
