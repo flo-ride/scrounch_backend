@@ -129,6 +129,7 @@ impl TryFrom<NewRefillRequest> for ActiveModel {
                 }
             },
             credit_currency: Set(value.credit_currency.into()),
+            hidden: Set(false),
             disabled: Set(false), // Default value for disabled is set to false.
             created_at: Set(chrono::offset::Local::now().into()), // Capture current time as creation timestamp.
         })
@@ -153,6 +154,9 @@ pub struct EditRefillRequest {
     /// Optional currency type for the new refill credit.
     pub credit_currency: Option<CurrencyRequest>,
 
+    /// Optional hidden status for the refill.
+    pub hidden: Option<bool>,
+
     /// Optional new disabled status for the refill.
     pub disabled: Option<bool>,
 }
@@ -162,7 +166,7 @@ pub struct EditRefillRequest {
 impl TryFrom<EditRefillRequest> for ActiveModel {
     type Error = RefillRequestError;
 
-    fn try_from(value: EditRefillRequest) -> Result<Self, Self::Error> {
+    fn try_from(mut value: EditRefillRequest) -> Result<Self, Self::Error> {
         Ok(ActiveModel {
             id: NotSet, // ID is not updated during edits.
             name: match value.name {
@@ -219,6 +223,16 @@ impl TryFrom<EditRefillRequest> for ActiveModel {
             },
             credit_currency: match value.credit_currency {
                 Some(currency) => Set(currency.into()),
+                None => NotSet,
+            },
+            hidden: match value.hidden {
+                Some(hidden) => {
+                    if hidden {
+                        value.disabled = Some(true);
+                    }
+
+                    Set(hidden)
+                }
                 None => NotSet,
             },
             disabled: match value.disabled {

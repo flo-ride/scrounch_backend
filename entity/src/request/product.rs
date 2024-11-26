@@ -94,8 +94,13 @@ pub struct NewProductRequest {
     pub sell_price: f64,
     /// Currency of the product.
     pub sell_price_currency: CurrencyRequest,
-    /// If the product is purchasable or if it's just an ingredients
+    /// If the product is purchasable or if it's just an ingredients, if it's not it's
+    /// automatically hidden
     pub purchasable: Option<bool>,
+    /// If the product is hidden from user, if true, it's automatically disable
+    pub hidden: Option<bool>,
+    /// If the product is disabled from user (can't create new order with it)
+    pub disabled: Option<bool>,
     /// Represent the unit type of Product, if it's a liquid -> Liter, etc..., the default is Unit
     pub unit: Option<UnitRequest>,
     /// Optional maximum quantity per command, limited to a certain maximum.
@@ -108,7 +113,7 @@ pub struct NewProductRequest {
 
 impl TryFrom<NewProductRequest> for ActiveModel {
     type Error = ProductRequestError;
-    fn try_from(value: NewProductRequest) -> Result<Self, Self::Error> {
+    fn try_from(mut value: NewProductRequest) -> Result<Self, Self::Error> {
         Ok(ActiveModel {
             id: Set(uuid::Uuid::new_v4()),
             image: Set(value.image),
@@ -141,7 +146,6 @@ impl TryFrom<NewProductRequest> for ActiveModel {
                 }
             },
             sell_price_currency: Set(value.sell_price_currency.into()),
-            purchasable: Set(value.purchasable.unwrap_or(true)),
             unit: Set(value.unit.unwrap_or(UnitRequest::Unit).into()),
             max_quantity_per_command: match value.max_quantity_per_command {
                 Some(max) => {
@@ -164,7 +168,28 @@ impl TryFrom<NewProductRequest> for ActiveModel {
             },
             sma_code: Set(value.sma_code),
             inventree_code: Set(value.inventree_code),
-            disabled: Set(false),
+            purchasable: match value.purchasable {
+                Some(purchasable) => {
+                    if !purchasable {
+                        value.hidden = Some(true);
+                        value.disabled = Some(true);
+                    }
+
+                    Set(purchasable)
+                }
+                None => Set(true),
+            },
+            hidden: match value.hidden {
+                Some(hidden) => {
+                    if hidden {
+                        value.disabled = Some(true);
+                    }
+
+                    Set(hidden)
+                }
+                None => Set(false),
+            },
+            disabled: Set(value.disabled.unwrap_or(false)),
             created_at: Set(chrono::offset::Local::now().into()),
         })
     }
@@ -193,13 +218,15 @@ pub struct EditProductRequest {
     pub sma_code: Option<Option<String>>,
     /// Optional Inventree IPN, can be `None` if specified.
     pub inventree_code: Option<Option<String>>,
+    /// Optional field to hide the product.
+    pub hidden: Option<bool>,
     /// Optional field to disable or enable the product.
     pub disabled: Option<bool>,
 }
 
 impl TryFrom<EditProductRequest> for ActiveModel {
     type Error = ProductRequestError;
-    fn try_from(value: EditProductRequest) -> Result<Self, Self::Error> {
+    fn try_from(mut value: EditProductRequest) -> Result<Self, Self::Error> {
         Ok(ActiveModel {
             id: NotSet,
             image: match value.image {
@@ -275,10 +302,6 @@ impl TryFrom<EditProductRequest> for ActiveModel {
                 },
                 None => NotSet,
             },
-            purchasable: match value.purchasable {
-                Some(purchasable) => Set(purchasable),
-                None => NotSet,
-            },
             unit: match value.unit {
                 Some(unit) => Set(unit.into()),
                 None => NotSet,
@@ -295,6 +318,25 @@ impl TryFrom<EditProductRequest> for ActiveModel {
                     Some(inventree_code) => Set(Some(inventree_code)),
                     None => Set(None),
                 },
+                None => NotSet,
+            },
+            purchasable: match value.purchasable {
+                Some(purchasable) => {
+                    if !purchasable {
+                        value.hidden = Some(true);
+                        value.disabled = Some(true);
+                    }
+                    Set(purchasable)
+                }
+                None => NotSet,
+            },
+            hidden: match value.hidden {
+                Some(hidden) => {
+                    if hidden {
+                        value.disabled = Some(true);
+                    }
+                    Set(hidden)
+                }
                 None => NotSet,
             },
             disabled: match value.disabled {

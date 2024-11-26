@@ -98,6 +98,7 @@ impl TryFrom<NewLocationRequest> for ActiveModel {
                 Some(category) => Set(Some(category.into())),
                 None => NotSet,
             },
+            hidden: Set(false),
             disabled: Set(false),
             created_at: Set(chrono::offset::Local::now().into()),
         })
@@ -112,7 +113,9 @@ pub struct EditLocationRequest {
     pub name: Option<String>,
     /// The category of the location, which may be optional.
     pub category: Option<Option<LocationCategoryRequest>>,
-    /// Optional field to disable or enable the product.
+    /// Optional field to hide or show the location.
+    pub hidden: Option<bool>,
+    /// Optional field to disable or enable the location.
     pub disabled: Option<bool>,
 }
 
@@ -120,7 +123,7 @@ impl TryFrom<EditLocationRequest> for ActiveModel {
     type Error = LocationRequestError;
 
     /// Converts a `EditLocationRequest` into an `ActiveModel`, performing validation on fields.
-    fn try_from(value: EditLocationRequest) -> Result<Self, Self::Error> {
+    fn try_from(mut value: EditLocationRequest) -> Result<Self, Self::Error> {
         Ok(ActiveModel {
             id: NotSet,
             name: match value.name {
@@ -143,6 +146,15 @@ impl TryFrom<EditLocationRequest> for ActiveModel {
                     Some(category) => Set(Some(category.into())),
                     None => Set(None),
                 },
+                None => NotSet,
+            },
+            hidden: match value.hidden {
+                Some(hidden) => {
+                    if hidden {
+                        value.disabled = Some(true);
+                    }
+                    Set(hidden)
+                }
                 None => NotSet,
             },
             disabled: match value.disabled {
