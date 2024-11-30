@@ -72,8 +72,12 @@ pub async fn edit_product(
                 let (_result, _code) = s3
                     .head_object(format!("{}/{}", FileType::Product, image))
                     .await
-                    .map_err(|_| {
-                        entity::request::product::ProductRequestError::ImageDoesNotExist(image)
+                    .map_err(|err| match err {
+                        s3::error::S3Error::HttpFailWithBody(404, _body) => AppError::BadRequest(
+                            entity::request::product::ProductRequestError::ImageDoesNotExist(image)
+                                .into(),
+                        ),
+                        _ => err.into(),
                     })?;
             }
 
