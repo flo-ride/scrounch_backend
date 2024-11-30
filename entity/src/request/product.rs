@@ -83,6 +83,18 @@ impl std::fmt::Display for ProductRequestError {
 
 impl_bad_request_app_error!(ProductRequestError);
 
+impl From<ProductRequestError> for crate::error::ErrorResponse {
+    fn from(value: ProductRequestError) -> Self {
+        let kind: &'static str = value.clone().into();
+        Self {
+            status: 400,
+            error: "Bad Request".to_string(),
+            kind: kind.to_string(),
+            message: value.to_string(),
+        }
+    }
+}
+
 /// Request structure for creating a new product, including validation rules.
 #[derive(Debug, Clone, PartialEq, serde::Deserialize, utoipa::ToSchema)]
 pub struct NewProductRequest {
