@@ -59,6 +59,32 @@ pub struct Realm {
     pub users: Vec<User>,
 }
 
+impl Default for Realm {
+    fn default() -> Self {
+        Self {
+            name: "realm_test".to_string(),
+            clients: vec![Client::default()],
+            users: vec![
+                User {
+                    username: "admin".to_string(),
+                    email: "admin@example.com".to_string(),
+                    ..Default::default()
+                },
+                User {
+                    username: "user_1".to_string(),
+                    email: "user_1@example.com".to_string(),
+                    ..Default::default()
+                },
+                User {
+                    username: "user_2".to_string(),
+                    email: "user_2@example.com".to_string(),
+                    ..Default::default()
+                },
+            ],
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct Client {
     pub client_id: String,
