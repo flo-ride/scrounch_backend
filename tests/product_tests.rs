@@ -2,37 +2,13 @@ mod utils;
 
 use axum::http::StatusCode;
 use serde_json::{json, Value};
-use utils::{
-    containers::keycloak::User, create_basic_session, create_realm_session,
-    generation::get_multipart_random_image,
-};
+use utils::{create_basic_session, create_realm_session, generation::get_multipart_random_image};
 
-use crate::utils::containers::keycloak::{Client, Realm};
+use crate::utils::containers::keycloak::Realm;
 
-#[tokio::test(flavor = "multi_thread")]
+#[tokio::test]
 async fn product_test_1() {
-    let realm = Realm {
-        name: "product_test".to_string(),
-        clients: vec![Client::default()],
-        users: vec![
-            User {
-                username: "user_1".to_string(),
-                email: "user_1@example.com".to_string(),
-                ..Default::default()
-            },
-            User {
-                username: "user_2".to_string(),
-                email: "user_2@example.com".to_string(),
-                ..Default::default()
-            },
-            User {
-                username: "user_3".to_string(),
-                email: "user_3@example.com".to_string(),
-                ..Default::default()
-            },
-        ],
-    };
-
+    let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
     let cookies = create_realm_session(&mut server, realm.users).await;
 
@@ -183,30 +159,9 @@ async fn product_test_1() {
     response.assert_status_not_found();
 }
 
-#[tokio::test(flavor = "multi_thread")]
+#[tokio::test]
 async fn product_test_2() {
-    let realm = Realm {
-        name: "product_test".to_string(),
-        clients: vec![Client::default()],
-        users: vec![
-            User {
-                username: "user_1".to_string(),
-                email: "user_1@example.com".to_string(),
-                ..Default::default()
-            },
-            User {
-                username: "user_2".to_string(),
-                email: "user_2@example.com".to_string(),
-                ..Default::default()
-            },
-            User {
-                username: "user_3".to_string(),
-                email: "user_3@example.com".to_string(),
-                ..Default::default()
-            },
-        ],
-    };
-
+    let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
     let cookies = create_realm_session(&mut server, realm.users).await;
 
@@ -824,4 +779,597 @@ async fn product_test_2() {
         ]
     }
         ));
+}
+
+#[tokio::test]
+async fn product_create_name() {
+    let realm = Realm::default();
+    let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
+    let cookies = create_realm_session(&mut server, realm.users).await;
+
+    // New product with Ok name
+    let response = server
+        .post("/product")
+        .json(&json!({
+            "name": "Bug Magnet",
+            "sell_price": 0.01,
+            "sell_price_currency": "euro",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status(StatusCode::CREATED);
+    let id = response.text();
+
+    let response = server.get(&format!("/product/{id}")).await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "name": "Bug Magnet",
+    }));
+
+    let response = server.get("/product").await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "products": [
+            {
+                "name": "Bug Magnet"
+            },
+        ]
+    }));
+}
+
+#[tokio::test]
+async fn product_create_missing_name() {
+    let realm = Realm::default();
+    let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
+    let cookies = create_realm_session(&mut server, realm.users).await;
+
+    let response = server
+        .post("/product")
+        .json(&json!({
+            "sell_price": 0.01,
+            "sell_price_currency": "euro",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_bad_request();
+
+    let response = server.get("/product").await;
+    response.assert_status_ok();
+    response.assert_json(&json!({
+        "current_page": 0,
+        "total_page": 1,
+        "products": []
+    }));
+}
+
+#[tokio::test]
+async fn product_create_empty_name() {
+    let realm = Realm::default();
+    let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
+    let cookies = create_realm_session(&mut server, realm.users).await;
+
+    let response = server
+        .post("/product")
+        .json(&json!({
+            "name": "",
+            "sell_price": 0.01,
+            "sell_price_currency": "euro",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_bad_request();
+
+    let response = server.get("/product").await;
+    response.assert_status_ok();
+    response.assert_json(&json!({
+        "current_page": 0,
+        "total_page": 1,
+        "products": []
+    }));
+}
+
+#[tokio::test]
+async fn product_create_too_long_name() {
+    let realm = Realm::default();
+    let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
+    let cookies = create_realm_session(&mut server, realm.users).await;
+
+    let response = server
+        .post("/product")
+        .json(&json!({
+            "name": "A Name Very very long, like too long, you understand ? If you don't think about it, do you want a product name containing like 300 characters ? Me ... no",
+            "sell_price": 0.01,
+            "sell_price_currency": "euro",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_bad_request();
+
+    let response = server.get("/product").await;
+    response.assert_status_ok();
+    response.assert_json(&json!({
+        "current_page": 0,
+        "total_page": 1,
+        "products": []
+    }));
+}
+
+#[tokio::test]
+async fn product_create_not_name() {
+    let realm = Realm::default();
+    let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
+    let cookies = create_realm_session(&mut server, realm.users).await;
+
+    let response = server
+        .post("/product")
+        .json(&json!({
+            "name": 12,
+            "sell_price": 0.01,
+            "sell_price_currency": "euro",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_bad_request();
+
+    let response = server.get("/product").await;
+    response.assert_status_ok();
+    response.assert_json(&json!({
+        "current_page": 0,
+        "total_page": 1,
+        "products": []
+    }));
+
+    let response = server
+        .post("/product")
+        .json(&json!({
+            "name": ["1234"],
+            "sell_price": 0.01,
+            "sell_price_currency": "euro",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_bad_request();
+
+    let response = server.get("/product").await;
+    response.assert_status_ok();
+    response.assert_json(&json!({
+        "current_page": 0,
+        "total_page": 1,
+        "products": []
+    }));
+
+    let response = server
+        .post("/product")
+        .json(&json!({
+            "name": { "name": "Yes" },
+            "sell_price": 0.01,
+            "sell_price_currency": "euro",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_bad_request();
+
+    let response = server.get("/product").await;
+    response.assert_status_ok();
+    response.assert_json(&json!({
+        "current_page": 0,
+        "total_page": 1,
+        "products": []
+    }));
+}
+
+#[tokio::test]
+async fn product_edit_name() {
+    let realm = Realm::default();
+    let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
+    let cookies = create_realm_session(&mut server, realm.users).await;
+
+    // New product with Ok name
+    let response = server
+        .post("/product")
+        .json(&json!({
+            "name": "Bug Magnet",
+            "sell_price": 0.01,
+            "sell_price_currency": "euro",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status(StatusCode::CREATED);
+    let id = response.text();
+
+    let response = server
+        .put(&format!("/product/{id}"))
+        .json(&json!({
+            "name": "Buggy Magnet",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status(StatusCode::CREATED);
+
+    let response = server.get(&format!("/product/{id}")).await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "name": "Buggy Magnet",
+    }));
+
+    let response = server.get("/product").await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "products": [
+            {
+                "name": "Buggy Magnet",
+            },
+        ]
+    }));
+}
+
+#[tokio::test]
+async fn product_edit_empty_name() {
+    let realm = Realm::default();
+    let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
+    let cookies = create_realm_session(&mut server, realm.users).await;
+
+    // New product with Ok name
+    let response = server
+        .post("/product")
+        .json(&json!({
+            "name": "Bug Magnet",
+            "sell_price": 0.01,
+            "sell_price_currency": "euro",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status(StatusCode::CREATED);
+    let id = response.text();
+
+    let response = server
+        .put(&format!("/product/{id}"))
+        .json(&json!({
+            "name": "",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_bad_request();
+
+    let response = server.get(&format!("/product/{id}")).await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "name": "Bug Magnet",
+    }));
+
+    let response = server.get("/product").await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "products": [
+            {
+                "name": "Bug Magnet",
+            },
+        ]
+    }));
+}
+
+#[tokio::test]
+async fn product_edit_too_long_name() {
+    let realm = Realm::default();
+    let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
+    let cookies = create_realm_session(&mut server, realm.users).await;
+
+    // New product with Ok name
+    let response = server
+        .post("/product")
+        .json(&json!({
+            "name": "Bug Magnet",
+            "sell_price": 0.01,
+            "sell_price_currency": "euro",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status(StatusCode::CREATED);
+    let id = response.text();
+
+    let response = server
+        .put(&format!("/product/{id}"))
+        .json(&json!({
+            "name": "A Name Very very long, like too long, you understand ? If you don't think about it, do you want a product name containing like 300 characters ? Me ... no",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_bad_request();
+
+    let response = server.get(&format!("/product/{id}")).await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "name": "Bug Magnet",
+    }));
+
+    let response = server.get("/product").await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "products": [
+            {
+                "name": "Bug Magnet",
+            },
+        ]
+    }));
+}
+
+#[tokio::test]
+async fn product_create_image() {
+    let realm = Realm::default();
+    let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
+    let cookies = create_realm_session(&mut server, realm.users).await;
+
+    let response = server
+        .post("/upload")
+        .multipart(get_multipart_random_image("bug_magnet", "random_name").await)
+        .add_query_param("type", "product")
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_ok();
+    let json: Vec<(String, String)> = response.json();
+    assert_eq!(json[0].0, "bug_magnet.jpeg");
+    let image_id = json[0].1.clone();
+
+    // New product with Ok name
+    let response = server
+        .post("/product")
+        .json(&json!({
+            "image": image_id,
+            "name": "Bug Magnet",
+            "sell_price": 0.01,
+            "sell_price_currency": "euro",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status(StatusCode::CREATED);
+    let id = response.text();
+
+    let response = server.get(&format!("/product/{id}")).await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "image": image_id,
+    }));
+
+    let response = server.get("/product").await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "products": [
+            {
+                "image": image_id,
+            },
+        ]
+    }));
+
+    let response = server
+        .get(&format!("/download/{image_id}"))
+        .add_query_param("type", "product")
+        .await;
+    response.assert_status_ok();
+}
+
+#[tokio::test]
+async fn product_create_image_doesnt_exit() {
+    let realm = Realm::default();
+    let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
+    let cookies = create_realm_session(&mut server, realm.users).await;
+
+    // New product with Ok name
+    let response = server
+        .post("/product")
+        .json(&json!({
+            "image": "00000-91994943-13929301-94919.jpg", // Some fake id
+            "name": "Bug Magnet",
+            "sell_price": 0.01,
+            "sell_price_currency": "euro",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_bad_request()
+}
+
+#[tokio::test]
+async fn product_edit_image() {
+    let realm = Realm::default();
+    let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
+    let cookies = create_realm_session(&mut server, realm.users).await;
+
+    let response = server
+        .post("/upload")
+        .multipart(get_multipart_random_image("bug_magnet", "random_name").await)
+        .add_query_param("type", "product")
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_ok();
+    let json: Vec<(String, String)> = response.json();
+    assert_eq!(json[0].0, "bug_magnet.jpeg");
+    let image_id = json[0].1.clone();
+
+    // New product with Ok name
+    let response = server
+        .post("/product")
+        .json(&json!({
+            "image": image_id,
+            "name": "Bug Magnet",
+            "sell_price": 0.01,
+            "sell_price_currency": "euro",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status(StatusCode::CREATED);
+    let id = response.text();
+
+    let response = server
+        .post("/upload")
+        .multipart(get_multipart_random_image("bug_magnet_2", "random_name_2").await)
+        .add_query_param("type", "product")
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_ok();
+    let json: Vec<(String, String)> = response.json();
+    assert_eq!(json[0].0, "bug_magnet_2.jpeg");
+    let new_image_id = json[0].1.clone();
+
+    let response = server
+        .put(&format!("/product/{id}"))
+        .json(&json!({
+            "image": new_image_id
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_ok();
+
+    let response = server.get(&format!("/product/{id}")).await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "image": new_image_id,
+    }));
+
+    let response = server.get("/product").await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "products": [
+            {
+                "image": new_image_id,
+            },
+        ]
+    }));
+
+    let response = server
+        .get(&format!("/download/{image_id}"))
+        .add_query_param("type", "product")
+        .await;
+    response.assert_status_not_found();
+
+    let response = server
+        .get(&format!("/download/{new_image_id}"))
+        .add_query_param("type", "product")
+        .await;
+    response.assert_status_ok();
+}
+
+#[tokio::test]
+async fn product_edit_image_doesnt_exist() {
+    let realm = Realm::default();
+    let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
+    let cookies = create_realm_session(&mut server, realm.users).await;
+
+    let response = server
+        .post("/upload")
+        .multipart(get_multipart_random_image("bug_magnet", "random_name").await)
+        .add_query_param("type", "product")
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_ok();
+    let json: Vec<(String, String)> = response.json();
+    assert_eq!(json[0].0, "bug_magnet.jpeg");
+    let image_id = json[0].1.clone();
+
+    // New product with Ok name
+    let response = server
+        .post("/product")
+        .json(&json!({
+            "image": image_id,
+            "name": "Bug Magnet",
+            "sell_price": 0.01,
+            "sell_price_currency": "euro",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status(StatusCode::CREATED);
+    let id = response.text();
+
+    let response = server
+        .put(&format!("/product/{id}"))
+        .json(&json!({
+            "image": "00000-91994943-94919.jpg",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_bad_request();
+
+    let response = server.get(&format!("/product/{id}")).await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "image": image_id,
+    }));
+
+    let response = server.get("/product").await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "products": [
+            {
+                "image": image_id,
+            },
+        ]
+    }));
+
+    // The previous image is not deleted for now
+    let response = server
+        .get(&format!("/download/{image_id}"))
+        .add_query_param("type", "product")
+        .await;
+    response.assert_status_ok();
+}
+
+#[tokio::test]
+async fn product_append_image_after_creation() {
+    let realm = Realm::default();
+    let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
+    let cookies = create_realm_session(&mut server, realm.users).await;
+
+    // New product with Ok name
+    let response = server
+        .post("/product")
+        .json(&json!({
+            "name": "Bug Magnet",
+            "sell_price": 0.01,
+            "sell_price_currency": "euro",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status(StatusCode::CREATED);
+    let id = response.text();
+
+    let response = server
+        .post("/upload")
+        .multipart(get_multipart_random_image("bug_magnet", "random_name").await)
+        .add_query_param("type", "product")
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_ok();
+
+    let json: Vec<(String, String)> = response.json();
+    assert_eq!(json[0].0, "bug_magnet.jpeg");
+    let image_id = json[0].1.clone();
+
+    let response = server
+        .put(&format!("/product/{id}"))
+        .json(&json!({
+            "image": image_id
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_ok();
+
+    let response = server.get(&format!("/product/{id}")).await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "image": image_id,
+    }));
+
+    let response = server.get("/product").await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "products": [
+            {
+                "image": image_id,
+            },
+        ]
+    }));
+
+    let response = server
+        .get(&format!("/download/{image_id}"))
+        .add_query_param("type", "product")
+        .await;
+    response.assert_status_ok();
 }
