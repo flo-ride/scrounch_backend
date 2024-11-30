@@ -71,7 +71,7 @@ impl Query {
             ),
             result,
             60 * 15,
-            "user:"
+            |x: &user::Model| format!("user:{}", x.id)
         );
 
         Ok(result)

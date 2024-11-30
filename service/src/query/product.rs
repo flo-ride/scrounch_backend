@@ -82,7 +82,7 @@ impl Query {
             ),
             result,
             60 * 60 * 3,
-            "product:"
+            |x: &product::Model| format!("product:{}", x.id)
         );
 
         Ok(result)

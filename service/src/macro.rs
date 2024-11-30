@@ -115,14 +115,11 @@ macro_rules! cache_mset {
                 let cache_conn = conn.clone();
                 let id = $id.to_owned();
                 let result = $result.to_owned();
-                let prefix = $prefix.to_owned();
+                let prefix = $prefix.clone();
                 tokio::spawn(async move {
-                    if let Ok(value) = serde_json::to_value(
-                        result
-                            .iter()
-                            .map(|x| format!("{prefix}{}", x.id))
-                            .collect::<Vec<_>>(),
-                    ) {
+                    if let Ok(value) =
+                        serde_json::to_value(result.iter().map(prefix).collect::<Vec<_>>())
+                    {
                         let _ = cache_conn
                             .set::<fred::bytes::Bytes, _, _>(
                                 id,
@@ -134,9 +131,9 @@ macro_rules! cache_mset {
                             .await;
                     }
 
-                    for user in result {
-                        let key = format!("{prefix}{}", user.id);
-                        if let Ok(value) = serde_json::to_string(&user) {
+                    for res in result {
+                        let key = $prefix(&res);
+                        if let Ok(value) = serde_json::to_string(&res) {
                             let _ = cache_conn
                                 .set::<fred::bytes::Bytes, _, _>(
                                     key,

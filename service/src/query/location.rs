@@ -73,7 +73,7 @@ impl Query {
             ),
             result,
             60 * 15,
-            "location:"
+            |x: &location::Model| format!("location:{}", x.id)
         );
 
         Ok(result)

@@ -73,7 +73,7 @@ impl Query {
             ),
             result,
             60 * 15,
-            "refill:"
+            |x: &refill::Model| format!("refill:{}", x.id)
         );
 
         Ok(result)
