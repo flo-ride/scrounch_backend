@@ -367,7 +367,9 @@ async fn create_or_update_sma_product(
                         ))
                     })?;
 
-                if price != existing_product.sell_price {
+                if existing_product.sell_price.is_none()
+                    || price != existing_product.sell_price.unwrap()
+                {
                     let u64_price = price.try_into().map_err(|err| {
                         AppError::InternalError(format!(
                             "Cannot convert price into u64: {price} - {err}"
@@ -375,7 +377,7 @@ async fn create_or_update_sma_product(
                     })?;
                     is_change = true;
                     changes.price = Some(u64_price);
-                    edited_product.sell_price = price;
+                    edited_product.sell_price = Some(price);
                 }
             }
 
@@ -426,15 +428,18 @@ async fn create_or_update_sma_product(
 
                 image: Set(filename),
 
-                sell_price: Set(sea_orm::prelude::Decimal::from_str_exact(&product.price)
-                    .map_err(|err| {
+                sell_price: Set(Some(
+                    sea_orm::prelude::Decimal::from_str_exact(&product.price).map_err(|err| {
                         AppError::InternalError(format!(
                             "Cannot convert price: {} - {err}",
                             product.price
                         ))
-                    })?),
+                    })?,
+                )),
 
-                sell_price_currency: Set(entity::models::sea_orm_active_enums::Currency::Euro),
+                sell_price_currency: Set(Some(
+                    entity::models::sea_orm_active_enums::Currency::Euro,
+                )),
 
                 unit: Set(entity::models::sea_orm_active_enums::Unit::Unit),
 
