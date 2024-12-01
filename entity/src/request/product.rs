@@ -103,9 +103,9 @@ pub struct NewProductRequest {
     /// Name of the product, required and validated for length.
     pub name: String,
     /// Price of the product, required and must be positive.
-    pub sell_price: f64,
+    pub sell_price: Option<f64>,
     /// Currency of the product.
-    pub sell_price_currency: CurrencyRequest,
+    pub sell_price_currency: Option<CurrencyRequest>,
     /// If the product is purchasable or if it's just an ingredients, if it's not it's
     /// automatically hidden
     pub purchasable: Option<bool>,
@@ -143,21 +143,36 @@ impl TryFrom<NewProductRequest> for ActiveModel {
                 Set(name)
             },
             display_order: Set(0),
-            sell_price: {
-                let price = value.sell_price;
-                if price <= 0.0 {
-                    return Err(Self::Error::PriceCannotBeNegativeOrNull(price));
-                }
+            sell_price: match value.sell_price {
+                Some(price) => {
+                    if price <= 0.0 {
+                        return Err(Self::Error::PriceCannotBeNegativeOrNull(price));
+                    }
 
-                let price = price.to_string();
-                match Decimal::from_str_exact(&price) {
-                    Ok(price) => Set(price),
-                    Err(err) => {
-                        return Err(Self::Error::PriceCannotBeConvertedInDecimal(price, err))
+                    let price = price.to_string();
+                    match Decimal::from_str_exact(&price) {
+                        Ok(price) => Set(Some(price)),
+                        Err(err) => {
+                            return Err(Self::Error::PriceCannotBeConvertedInDecimal(price, err))
+                        }
                     }
                 }
+                None => {
+                    value.purchasable = Some(false);
+                    value.hidden = Some(true);
+
+                    Set(None)
+                }
             },
-            sell_price_currency: Set(value.sell_price_currency.into()),
+            sell_price_currency: match value.sell_price_currency {
+                Some(sell_price_currency) => Set(sell_price_currency.into()),
+                None => {
+                    value.purchasable = Some(false);
+                    value.hidden = Some(true);
+
+                    Set(None)
+                }
+            },
             unit: Set(value.unit.unwrap_or(UnitRequest::Unit).into()),
             max_quantity_per_command: match value.max_quantity_per_command {
                 Some(max) => {
@@ -217,7 +232,7 @@ pub struct EditProductRequest {
     /// Display Order of the product inside of lists, 0 is last + default
     pub display_order: Option<u64>,
     /// Optional price of the product, required to be positive if present.
-    pub sell_price: Option<f64>,
+    pub sell_price: Option<Option<f64>>,
     /// Optional price of the product, required to be positive if present.
     pub sell_price_currency: Option<CurrencyRequest>,
     /// If the product is purchasable or if it's just an ingredients
@@ -271,19 +286,29 @@ impl TryFrom<EditProductRequest> for ActiveModel {
                 Set(display_order_i32)
             },
             sell_price: match value.sell_price {
-                Some(price) => {
-                    if price <= 0.0 {
-                        return Err(Self::Error::PriceCannotBeNegativeOrNull(price));
-                    }
+                Some(sell_price) => match sell_price {
+                    Some(price) => {
+                        if price <= 0.0 {
+                            return Err(Self::Error::PriceCannotBeNegativeOrNull(price));
+                        }
 
-                    let price = price.to_string();
-                    match Decimal::from_str_exact(&price) {
-                        Ok(price) => Set(price),
-                        Err(err) => {
-                            return Err(Self::Error::PriceCannotBeConvertedInDecimal(price, err))
+                        let price = price.to_string();
+                        match Decimal::from_str_exact(&price) {
+                            Ok(price) => Set(Some(price)),
+                            Err(err) => {
+                                return Err(Self::Error::PriceCannotBeConvertedInDecimal(
+                                    price, err,
+                                ))
+                            }
                         }
                     }
-                }
+                    None => {
+                        value.purchasable = Some(false);
+                        value.hidden = Some(true);
+
+                        Set(None)
+                    }
+                },
                 None => NotSet,
             },
             sell_price_currency: match value.sell_price_currency {

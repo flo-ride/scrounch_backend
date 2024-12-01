@@ -24,6 +24,12 @@ impl From<CurrencyRequest> for Currency {
     }
 }
 
+impl From<CurrencyRequest> for Option<Currency> {
+    fn from(value: CurrencyRequest) -> Self {
+        Some(value.into())
+    }
+}
+
 /// Represents the different type of Unit an Product or Else can have
 #[derive(Debug, PartialEq, Clone, Copy, serde::Deserialize, serde::Serialize, utoipa::ToSchema)]
 #[serde(rename_all = "lowercase")]
