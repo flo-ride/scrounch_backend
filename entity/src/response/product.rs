@@ -64,10 +64,10 @@ pub struct ProductResponse {
     display_order: u64,
 
     /// Price of the product.
-    sell_price: f64,
+    sell_price: Option<f64>,
 
     /// Currency of the product price.
-    sell_price_currency: CurrencyResponse,
+    sell_price_currency: Option<CurrencyResponse>,
 
     /// Optional maximum quantity allowed per command.
     max_quantity_per_command: Option<u64>,
@@ -106,11 +106,15 @@ impl TryFrom<crate::models::product::Model> for ProductResponse {
             display_order: value.display_order.try_into().map_err(|err| {
                 Self::Error::DisplayOrderCannotBeConverted(value.display_order, err)
             })?,
-            sell_price: value
-                .sell_price
-                .try_into()
-                .map_err(|err| Self::Error::PriceCannotBeConverted(value.sell_price, err))?,
-            sell_price_currency: value.sell_price_currency.into(),
+            sell_price: match value.sell_price {
+                Some(sell_price) => Some(
+                    sell_price
+                        .try_into()
+                        .map_err(|err| Self::Error::PriceCannotBeConverted(sell_price, err))?,
+                ),
+                None => None,
+            },
+            sell_price_currency: value.sell_price_currency.map(Into::into),
             max_quantity_per_command: match value.max_quantity_per_command {
                 Some(x) => Some(
                     x.try_into()
