@@ -20,14 +20,23 @@ impl MigrationTrait for Migration {
                     .col(string_null(Product::Image))
                     .col(string(Product::Name))
                     .col(integer(Product::DisplayOrder).default(0))
-                    .col(decimal_len(Product::SellPrice, 10, 2))
-                    .col(enumeration(
-                        Product::SellPriceCurrency,
-                        Currency,
-                        CurrencyVariant::iter(),
-                    ))
+                    .col(
+                        decimal_len_null(Product::SellPrice, 10, 2)
+                            .default(sea_orm::prelude::Decimal::new(1, 2)),
+                    )
+                    .col(
+                        enumeration_null(
+                            Product::SellPriceCurrency,
+                            Currency,
+                            CurrencyVariant::iter(),
+                        )
+                        .default(CurrencyVariant::Euro.into_iden().to_string()),
+                    )
                     .col(small_integer_null(Product::MaxQuantityPerCommand))
-                    .col(enumeration(Product::Unit, Unit, UnitVariant::iter()))
+                    .col(
+                        enumeration(Product::Unit, Unit, UnitVariant::iter())
+                            .default(UnitVariant::Unit.into_iden().to_string()),
+                    )
                     .col(boolean(Product::Purchasable).default(true))
                     .col(boolean(Product::Hidden).default(false))
                     .col(boolean(Product::Disabled).default(false))
