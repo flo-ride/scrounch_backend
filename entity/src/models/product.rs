@@ -39,12 +39,12 @@ pub struct Model {
 
     /// Selling Price of the product, stored as a decimal with up to 10 digits
     /// and 2 decimal places.
-    #[sea_orm(column_type = "Decimal(Some((10, 2)))")]
-    pub sell_price: Decimal,
+    #[sea_orm(column_type = "Decimal(Some((10, 2)))", nullable)]
+    pub sell_price: Option<Decimal>,
 
     /// Selling Price Currency for the product,
     #[sea_orm(filter_override = "crate::request::r#enum::CurrencyRequest")]
-    pub sell_price_currency: Currency,
+    pub sell_price_currency: Option<Currency>,
 
     /// Represent the unit type of Product, if it's a liquid -> Liter, etc..., the default is Unit
     #[sea_orm(filter_override = "crate::request::r#enum::UnitRequest")]
@@ -88,8 +88,8 @@ pub enum Relation {}
 impl ActiveModelBehavior for ActiveModel {
     fn before_save<'life0, 'async_trait, C>(
         mut self,
-        _db: &'life0 C,
-        _insert: bool,
+        db: &'life0 C,
+        insert: bool,
     ) -> core::pin::Pin<
         Box<
             dyn core::future::Future<Output = Result<Self, DbErr>>
@@ -107,11 +107,24 @@ impl ActiveModelBehavior for ActiveModel {
             // TODO: Add name product safety
 
             if let Set(price) = self.sell_price {
-                if price.is_zero() || price.is_sign_negative() {
-                    return Err(DbErr::Custom(
-                        "Sell Price cannot be null or negative".to_string(),
-                    ));
+                match price {
+                    Some(price) => {
+                        if price.is_zero() || price.is_sign_negative() {
+                            return Err(DbErr::Custom(
+                                "Sell Price cannot be null or negative".to_string(),
+                            ));
+                        }
+                    }
+                    None => {
+                        self.purchasable = Set(false);
+                        self.hidden = Set(true);
+                    }
                 }
+            }
+
+            if let Set(None) = self.sell_price_currency {
+                self.purchasable = Set(false);
+                self.hidden = Set(true);
             }
 
             // Display Order cannot be negative
@@ -121,9 +134,34 @@ impl ActiveModelBehavior for ActiveModel {
                 }
             }
 
-            // A non purchasable product MUST be hidden
-            if let Set(false) = self.purchasable {
-                self.hidden = Set(true);
+            if let Set(purchasable) = self.purchasable {
+                match purchasable {
+                    true => {
+                        let price_is_null = Set(None) == self.sell_price;
+                        let currency_is_null = Set(None) == self.sell_price_currency;
+                        let price_is_not_set = !self.sell_price.is_set();
+                        let currency_is_not_set = !self.sell_price_currency.is_set();
+                        let is_edit = !insert;
+
+                        if price_is_null || currency_is_null {
+                            self.purchasable = Set(false);
+                            self.hidden = Set(true);
+                        } else if is_edit && (price_is_not_set || currency_is_not_set) {
+                            let id = self.id.clone().unwrap(); // ERROR SHOULD NEVER HAPPENED
+                            let result = Entity::find_by_id(id)
+                                .one(db)
+                                .await?
+                                .expect("Cannot find model in edition ?");
+
+                            if result.sell_price.is_none() || result.sell_price_currency.is_none() {
+                                self.purchasable = Set(false);
+                                self.hidden = Set(true);
+                            }
+                        }
+                    }
+                    // A non purchasable product MUST be hidden
+                    false => self.hidden = Set(true),
+                }
             }
 
             // An non hidden product SHOULD be purchasable
