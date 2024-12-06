@@ -4,6 +4,7 @@
 pub mod r#enum;
 pub mod location;
 pub mod product;
+pub mod recipe;
 pub mod refill;
 pub mod sma;
 pub mod user;
