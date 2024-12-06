@@ -83,7 +83,29 @@ pub struct Model {
 /// Currently, there are no defined relations for the `Product` entity,
 /// but this enum can be expanded in the future if needed.
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {}
+pub enum Relation {
+    /// For the Recipe
+    #[sea_orm(has_many = "super::recipe::Entity")]
+    Recipe,
+    /// For the Recipe Ingredients
+    #[sea_orm(has_many = "super::recipe_ingredients::Entity")]
+    RecipeIngredients,
+}
+
+impl Related<super::recipe_ingredients::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::RecipeIngredients.def()
+    }
+}
+
+impl Related<super::recipe::Entity> for Entity {
+    fn to() -> RelationDef {
+        super::recipe_ingredients::Relation::Recipe.def()
+    }
+    fn via() -> Option<RelationDef> {
+        Some(super::recipe_ingredients::Relation::Product.def().rev())
+    }
+}
 
 impl ActiveModelBehavior for ActiveModel {
     fn before_save<'life0, 'async_trait, C>(

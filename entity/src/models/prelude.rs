@@ -2,5 +2,7 @@
 
 pub use super::location::Entity as Location;
 pub use super::product::Entity as Product;
+pub use super::recipe::Entity as Recipe;
+pub use super::recipe_ingredients::Entity as RecipeIngredients;
 pub use super::refill::Entity as Refill;
 pub use super::user::Entity as User;
