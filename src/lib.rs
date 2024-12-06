@@ -205,6 +205,15 @@ fn auth_optional_routes(path: &str) -> OpenApiRouter<state::AppState> {
                     .routes(routes!(api::refill::new::post_new_refill))
                     .routes(routes!(api::refill::edit::edit_refill))
                     .routes(routes!(api::refill::delete::delete_refill)),
+            )
+            .nest(
+                "/recipe",
+                OpenApiRouter::new()
+                    .routes(routes!(api::recipe::get::get_recipe))
+                    .routes(routes!(api::recipe::get::get_all_recipes))
+                    .routes(routes!(api::recipe::new::post_new_recipe))
+                    .routes(routes!(api::recipe::edit::edit_recipe))
+                    .routes(routes!(api::recipe::delete::delete_recipe)),
             ),
     )
 }
