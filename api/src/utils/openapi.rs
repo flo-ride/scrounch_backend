@@ -67,6 +67,9 @@ pub const PRODUCT_TAG: &str = "product";
 /// Tag used to categorize API endpoints focused on refills and related operations.
 pub const REFILL_TAG: &str = "refill";
 
+/// Tag used to categorize API endpoints focused on recipe and related operations.
+pub const RECIPE_TAG: &str = "recipe";
+
 /// Tag used to categorize miscellaneous API endpoints that do not fit into other categories.
 pub const MISC_TAG: &str = "misc";
 
