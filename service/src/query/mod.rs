@@ -7,6 +7,7 @@
 
 mod location;
 mod product;
+mod recipe;
 mod refill;
 mod user;
 
