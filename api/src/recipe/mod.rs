@@ -4,6 +4,7 @@
 //! It includes operations for creating, retrieving, updating, and deleting recipes as well as
 //! interacting with external sources to sync or modify recipe data.
 
+pub mod delete;
 pub mod edit;
 pub mod get;
 pub mod new;
