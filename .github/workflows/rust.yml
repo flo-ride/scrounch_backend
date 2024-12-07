@@ -14,7 +14,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - run: cargo check --verbose --workspace
+      - uses: taiki-e/install-action@cargo-hack
+      - run: cargo hack check --each-feature --workspace --verbose --keep-going
 
   test:
     name: test
@@ -23,7 +24,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - run: cargo test --all-features --workspace
+      - uses: taiki-e/install-action@cargo-hack
+      - run: cargo hack test --each-feature --clean-per-run --workspace
 
   clippy:
     name: linter
