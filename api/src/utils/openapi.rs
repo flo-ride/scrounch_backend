@@ -51,6 +51,7 @@ impl utoipa::Modify for AxumOidcSecurity {
         schemas(entity::models::refill::RefillSortEnum),
         schemas(entity::models::location::LocationSortEnum),
         schemas(entity::models::user::UserSortEnum),
+        schemas(entity::models::recipe::RecipeSortEnum),
     ),
 )]
 pub struct ApiDoc;
