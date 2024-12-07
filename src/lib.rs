@@ -45,12 +45,14 @@ pub async fn app(arguments: Arguments) -> axum::Router {
         .expect("Migration couldn't proceed correctly");
 
     let mut state = state::AppState {
-        arguments: arguments.clone(),
+        arguments: Arguments::default(),
         db_pool,
         #[cfg(feature = "cache")]
         cache_pool: None,
         s3_bucket,
     };
+
+    state.arguments = arguments.clone();
 
     #[cfg(feature = "cache")]
     if let Some(cache_url) = arguments.cache_url.clone() {
