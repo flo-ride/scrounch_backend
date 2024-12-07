@@ -49,6 +49,8 @@
             cargo-deny
             cargo-edit
             cargo-watch
+            cargo-msrv
+            cargo-hack
             cargo-nextest
             rust-analyzer
             lldb
