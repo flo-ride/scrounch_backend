@@ -4,7 +4,7 @@ use containers::keycloak::{Keycloak, Realm, User};
 use futures::future::join_all;
 use scrounch_backend::app;
 use testcontainers::{runners::AsyncRunner, ContainerAsync};
-use testcontainers_modules::{minio::MinIO, postgres::Postgres};
+use testcontainers_modules::{minio::MinIO, postgres::Postgres, redis::Redis};
 
 use crate::utils;
 
@@ -18,7 +18,12 @@ pub async fn create_basic_session(
 ) -> (
     TestServer,
     Vec<std::string::String>,
-    (Keycloak, ContainerAsync<Postgres>, ContainerAsync<MinIO>),
+    (
+        Keycloak,
+        ContainerAsync<Postgres>,
+        ContainerAsync<MinIO>,
+        Option<ContainerAsync<Redis>>,
+    ),
 ) {
     let keycloak = Keycloak::start(vec![Realm {
         name: realm.name.clone(),
@@ -53,6 +58,15 @@ pub async fn create_basic_session(
     let minio_user = "minioadmin";
     let minio_pass = "minioadmin";
 
+    #[allow(unused_assignments)]
+    let mut redis_node_opt = None;
+
+    #[cfg(feature = "cache")]
+    let redis_node = testcontainers_modules::redis::Redis::default()
+        .start()
+        .await
+        .unwrap();
+
     let mut arguments = scrounch_backend::Arguments::default();
     arguments.openid_issuer = issuer.clone();
     arguments.openid_client_id = realm.clients[0].client_id.clone();
@@ -66,6 +80,15 @@ pub async fn create_basic_session(
     arguments.aws_endpoint_url = minio_url.to_string();
     arguments.aws_s3_bucket = "miniobucket".to_string();
 
+    #[cfg(feature = "cache")]
+    {
+        arguments.cache_url = Some(format!(
+            "redis://127.0.0.1:{}",
+            redis_node.get_host_port_ipv4(6379).await.unwrap()
+        ));
+        redis_node_opt = Some(redis_node);
+    }
+
     let app = app(arguments).await;
 
     let server = TestServerBuilder::new()
@@ -73,7 +96,7 @@ pub async fn create_basic_session(
         .build(app)
         .unwrap();
 
-    (server, ids, (keycloak, db_node, minio_node))
+    (server, ids, (keycloak, db_node, minio_node, redis_node_opt))
 }
 
 #[allow(dead_code)]
