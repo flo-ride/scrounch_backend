@@ -20,7 +20,7 @@ features = ["precommit-hook", "run-cargo-check", "run-cargo-clippy", "run-cargo-
 http-body-util = { version = "0.1.0" }
 tower = { version = "0.5.1", features = ["util"] }
 testcontainers = "0.22.0"
-testcontainers-modules = { version = "0.10.0", features = ["postgres", "minio"] }
+testcontainers-modules = { version = "0.10.0", features = ["postgres", "minio", "redis"] }
 regex = "1.10.6"
 axum-test = "16.2.0"
 
