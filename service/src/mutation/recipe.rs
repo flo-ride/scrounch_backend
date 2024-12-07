@@ -1,8 +1,6 @@
-use crate::{
-    mutation::Mutation,
-    r#macro::{cache_del, cache_mdel},
-    Connection,
-};
+#[cfg(feature = "cache")]
+use crate::r#macro::{cache_del, cache_mdel};
+use crate::{mutation::Mutation, Connection};
 use ::entity::models::{prelude::*, recipe, recipe_ingredients};
 use sea_orm::*;
 

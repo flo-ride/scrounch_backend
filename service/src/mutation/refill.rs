@@ -1,8 +1,6 @@
-use crate::{
-    mutation::Mutation,
-    r#macro::{cache_del, cache_mdel, cache_set},
-    Connection,
-};
+#[cfg(feature = "cache")]
+use crate::r#macro::{cache_del, cache_mdel, cache_set};
+use crate::{mutation::Mutation, Connection};
 use ::entity::models::{refill, refill::Entity as Refill};
 use sea_orm::*;
 use sqlx::types::Uuid;

@@ -5,11 +5,9 @@
 //! These services provide a layer of abstraction over database mutations, ensuring that changes
 //! to user data are handled efficiently and consistently.
 
-use crate::{
-    mutation::Mutation,
-    r#macro::{cache_del, cache_mdel, cache_set},
-    Connection,
-};
+#[cfg(feature = "cache")]
+use crate::r#macro::{cache_del, cache_mdel, cache_set};
+use crate::{mutation::Mutation, Connection};
 use ::entity::models::{user, user::Entity as User};
 use sea_orm::*;
 use sqlx::types::Uuid;

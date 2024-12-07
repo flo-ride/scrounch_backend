@@ -1,8 +1,6 @@
-use crate::{
-    query::Query,
-    r#macro::{cache_get, cache_mget, cache_mset, cache_set},
-    Connection,
-};
+#[cfg(feature = "cache")]
+use crate::r#macro::{cache_get, cache_mget, cache_mset, cache_set};
+use crate::{query::Query, Connection};
 use ::entity::models::{
     prelude::{Recipe, RecipeIngredients},
     recipe, recipe_ingredients,

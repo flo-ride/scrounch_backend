@@ -5,11 +5,9 @@
 //! criteria such as user ID, username, or email. These services provide a layer of abstraction
 //! over database interactions, allowing for efficient and consistent data retrieval related to users.
 
-use crate::{
-    query::Query,
-    r#macro::{cache_get, cache_mget, cache_mset, cache_set},
-    Connection,
-};
+#[cfg(feature = "cache")]
+use crate::r#macro::{cache_get, cache_mget, cache_mset, cache_set};
+use crate::{query::Query, Connection};
 use ::entity::models::{user, user::Entity as User};
 use sea_orm::*;
 

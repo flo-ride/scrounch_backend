@@ -6,11 +6,9 @@
 //! over database interactions, allowing for efficient and consistent data retrieval related to
 //! locations.
 
-use crate::{
-    query::Query,
-    r#macro::{cache_get, cache_mget, cache_mset, cache_set},
-    Connection,
-};
+#[cfg(feature = "cache")]
+use crate::r#macro::{cache_get, cache_mget, cache_mset, cache_set};
+use crate::{query::Query, Connection};
 use ::entity::models::{location, location::Entity as Location};
 use sea_orm::*;
 

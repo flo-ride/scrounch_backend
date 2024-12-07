@@ -216,9 +216,15 @@ macro_rules! cache_mdel {
     }};
 }
 
+#[cfg(feature = "cache")]
 pub(crate) use cache_del;
+#[cfg(feature = "cache")]
 pub(crate) use cache_get;
+#[cfg(feature = "cache")]
 pub(crate) use cache_mdel;
+#[cfg(feature = "cache")]
 pub(crate) use cache_mget;
+#[cfg(feature = "cache")]
 pub(crate) use cache_mset;
+#[cfg(feature = "cache")]
 pub(crate) use cache_set;
