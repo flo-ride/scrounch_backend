@@ -48,12 +48,25 @@ pub async fn post_new_recipe(
     let recipe_model: ActiveModel = recipe.clone().try_into()?;
 
     // Verifiy that every product exist before mutating anything
-    service::Query::find_product_by_id(&conn, recipe.product)
+    let result_product = service::Query::find_product_by_id(&conn, recipe.product)
         .await?
         .ok_or(RecipeRequestError::ProductCannotBeFound(recipe.product))?;
 
+    if result_product.unit != entity::models::sea_orm_active_enums::Unit::Unit {
+        return Err(RecipeRequestError::ResultingProductIsNotUnit(
+            result_product.id,
+            result_product.unit.into(),
+        )
+        .into());
+    }
+
     for ingredient in recipe.ingredients.clone() {
         TryInto::<recipe_ingredients::ActiveModel>::try_into(ingredient.clone())?;
+        if ingredient.product == recipe.product {
+            return Err(
+                RecipeRequestError::IngredientCannotBeResultingProduct(ingredient.product).into(),
+            );
+        }
 
         service::Query::find_product_by_id(&conn, ingredient.product)
             .await?

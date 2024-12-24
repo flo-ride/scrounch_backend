@@ -32,6 +32,10 @@ pub enum RecipeRequestError {
     ProductCannotBeFound(uuid::Uuid),
     /// Error if the ingredient product can't be found in the database.
     IngredientCannotBeFound(uuid::Uuid),
+    /// Error if the ingredient product is the same as the resulting product.
+    IngredientCannotBeResultingProduct(uuid::Uuid),
+    /// Error if the resulting Product unit is not an Unit.
+    ResultingProductIsNotUnit(uuid::Uuid, crate::response::r#enum::UnitResponse),
     /// Error if the recipe can't be found in the database.
     RecipeCannotBeFound(uuid::Uuid),
 }
@@ -58,6 +62,15 @@ impl std::fmt::Display for RecipeRequestError {
             }
             RecipeRequestError::IngredientCannotBeFound(product) => {
                 write!(f, "Ingredient \"{product}\" cannot be found")
+            }
+            RecipeRequestError::IngredientCannotBeResultingProduct(product) => {
+                write!(
+                    f,
+                    "Ingredient \"{product}\" cannot be the same as the resulting product"
+                )
+            }
+            RecipeRequestError::ResultingProductIsNotUnit(product, unit) => {
+                write!(f, "Product \"{product}\" unit cannot be {unit:?}")
             }
             RecipeRequestError::RecipeCannotBeFound(recipe) => {
                 write!(f, "Recipe \"{recipe}\" cannot be found")

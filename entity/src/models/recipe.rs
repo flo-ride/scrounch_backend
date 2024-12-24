@@ -21,7 +21,6 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false, filter_single)]
     pub id: Uuid,
     /// Foreign key referencing the `product` table.
-    #[sea_orm(filter_single)]
     pub result_product_id: Uuid,
     /// Optional name of the recipe.
     pub name: Option<String>,
