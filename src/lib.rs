@@ -62,9 +62,7 @@ pub async fn app(arguments: Arguments) -> axum::Router {
             .expect("Cache URL is not correctly formatted");
         let mut builder = fred::types::Builder::from_config(config);
         builder
-            .set_policy(fred::types::ReconnectPolicy::new_exponential(
-                0, 100, 10_000, 2,
-            ))
+            .set_policy(fred::types::ReconnectPolicy::new_constant(4, 1500))
             .with_config(|c| {
                 c.fail_fast = false;
                 c.tracing.enabled = true;
