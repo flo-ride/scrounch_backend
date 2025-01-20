@@ -58,14 +58,8 @@ pub async fn create_basic_session(
     let minio_user = "minioadmin";
     let minio_pass = "minioadmin";
 
-    #[allow(unused_assignments)]
+    #[allow(unused_assignments, unused_mut)]
     let mut redis_node_opt = None;
-
-    #[cfg(feature = "cache")]
-    let redis_node = testcontainers_modules::redis::Redis::default()
-        .start()
-        .await
-        .unwrap();
 
     let mut arguments = scrounch_backend::Arguments::default();
     arguments.openid_issuer = issuer.clone();
@@ -82,9 +76,16 @@ pub async fn create_basic_session(
 
     #[cfg(feature = "cache")]
     {
+        let redis_node = testcontainers_modules::redis::Redis::default()
+            .start()
+            .await
+            .unwrap();
         arguments.cache_url = Some(format!(
             "redis://127.0.0.1:{}",
-            redis_node.get_host_port_ipv4(6379).await.unwrap()
+            redis_node
+                .get_host_port_ipv4(testcontainers_modules::redis::REDIS_PORT)
+                .await
+                .unwrap()
         ));
         redis_node_opt = Some(redis_node);
     }
