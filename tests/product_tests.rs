@@ -984,7 +984,7 @@ async fn product_edit_name() {
         }))
         .add_cookie(cookies[0].clone())
         .await;
-    response.assert_status(StatusCode::CREATED);
+    response.assert_status_ok();
 
     let response = server.get(&format!("/product/{id}")).await;
     response.assert_status_ok();
