@@ -831,7 +831,7 @@ async fn product_create_missing_name() {
         }))
         .add_cookie(cookies[0].clone())
         .await;
-    response.assert_status_bad_request();
+    response.assert_status_unprocessable_entity();
 
     let response = server.get("/product").await;
     response.assert_status_ok();
@@ -909,7 +909,7 @@ async fn product_create_not_name() {
         }))
         .add_cookie(cookies[0].clone())
         .await;
-    response.assert_status_bad_request();
+    response.assert_status_unprocessable_entity();
 
     let response = server.get("/product").await;
     response.assert_status_ok();
@@ -928,7 +928,7 @@ async fn product_create_not_name() {
         }))
         .add_cookie(cookies[0].clone())
         .await;
-    response.assert_status_bad_request();
+    response.assert_status_unprocessable_entity();
 
     let response = server.get("/product").await;
     response.assert_status_ok();
@@ -947,7 +947,7 @@ async fn product_create_not_name() {
         }))
         .add_cookie(cookies[0].clone())
         .await;
-    response.assert_status_bad_request();
+    response.assert_status_unprocessable_entity();
 
     let response = server.get("/product").await;
     response.assert_status_ok();
