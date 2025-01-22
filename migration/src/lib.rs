@@ -6,6 +6,7 @@ mod m20220101_000003_create_product_table;
 mod m20220101_000004_create_location_table;
 mod m20220101_000005_create_refill_table;
 mod m20220101_000006_create_recipe_table;
+mod m20220101_000007_create_warehouse_table;
 
 pub struct Migrator;
 
@@ -19,6 +20,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20220101_000004_create_location_table::Migration),
             Box::new(m20220101_000005_create_refill_table::Migration),
             Box::new(m20220101_000006_create_recipe_table::Migration),
+            Box::new(m20220101_000007_create_warehouse_table::Migration),
         ]
     }
 }
