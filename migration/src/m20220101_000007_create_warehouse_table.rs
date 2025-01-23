@@ -12,7 +12,7 @@ impl MigrationTrait for Migration {
                     .table(Warehouse::Table)
                     .if_not_exists()
                     .col(uuid(Warehouse::Id).primary_key())
-                    .col(string_null(Warehouse::Name))
+                    .col(string(Warehouse::Name))
                     .col(uuid_null(Warehouse::Parent))
                     .foreign_key(
                         ForeignKey::create()
