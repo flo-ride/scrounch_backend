@@ -61,6 +61,8 @@ impl TryFrom<NewWarehouseRequest> for ActiveModel {
                 }
                 Set(name)
             },
+            disabled: Set(false),
+            created_at: Set(chrono::offset::Local::now().into()),
         })
     }
 }
@@ -70,6 +72,9 @@ impl TryFrom<NewWarehouseRequest> for ActiveModel {
 pub struct EditWarehouseRequest {
     /// New name for the Warehouse.
     pub name: Option<String>,
+
+    /// Optional new disabled status for the warehouse.
+    pub disabled: Option<bool>,
 }
 
 /// Converts `EditWarehouseRequest` into `ActiveModel` with validation.
@@ -95,6 +100,11 @@ impl TryFrom<EditWarehouseRequest> for ActiveModel {
                 }
                 None => NotSet,
             },
+            disabled: match value.disabled {
+                Some(disabled) => Set(disabled),
+                None => NotSet,
+            },
+            ..Default::default()
         })
     }
 }

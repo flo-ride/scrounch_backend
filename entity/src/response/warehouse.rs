@@ -16,6 +16,12 @@ pub struct WarehouseResponse {
 
     /// Name of the warehouse.
     name: String,
+
+    /// The timestamp indicating when the warehouse was created.
+    pub created_at: chrono::DateTime<chrono::Utc>,
+
+    /// Indicates whether the warehouse is currently disabled.
+    pub disabled: bool,
 }
 
 impl From<crate::models::warehouse::Model> for WarehouseResponse {
@@ -24,6 +30,8 @@ impl From<crate::models::warehouse::Model> for WarehouseResponse {
         Self {
             id: value.id,
             name: value.name,
+            created_at: value.created_at.into(),
+            disabled: value.disabled,
         }
     }
 }
@@ -38,6 +46,7 @@ impl From<crate::models::warehouse::Model> for WarehouseResponse {
             {
                 "id": "1a731f58-18f1-4c95-8de5-611bde07f4f1",
                 "name": "Warehouse Central", 
+                "disabled": false,
                 "creation_time": "2024-10-09T17:55:30.795279Z"
             }
         ]

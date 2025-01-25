@@ -13,6 +13,11 @@ impl MigrationTrait for Migration {
                     .if_not_exists()
                     .col(uuid(Warehouse::Id).primary_key())
                     .col(string(Warehouse::Name))
+                    .col(boolean(Warehouse::Disabled).default(false))
+                    .col(
+                        timestamp_with_time_zone(Warehouse::CreatedAt)
+                            .default(Expr::current_timestamp()),
+                    )
                     .to_owned(),
             )
             .await
@@ -30,4 +35,6 @@ pub enum Warehouse {
     Table,
     Id,
     Name,
+    Disabled,
+    CreatedAt,
 }

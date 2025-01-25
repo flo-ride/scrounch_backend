@@ -24,6 +24,12 @@ pub struct Model {
     pub id: Uuid,
     /// The name of the warehouse
     pub name: String,
+    /// Indicates whether the warehouse is disabled.
+    #[sea_orm(filter_single)]
+    pub disabled: bool,
+    /// Timestamp for when the warehouse was created.
+    #[sea_orm(filter_override = "chrono::DateTime<chrono::Utc>", filter_plus_order)]
+    pub created_at: DateTimeWithTimeZone,
 }
 
 /// Enum representing the relationships of the `warehouse` entity in SeaORM.
