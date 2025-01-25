@@ -100,8 +100,8 @@ pub async fn get_all_warehouses(
         service::Query::list_warehouses_with_condition(&conn, filter.clone(), sort, page, per_page)
             .await?;
 
-    let total_page =
-        (service::Query::count_warehouses_with_condition(&conn, filter).await? / per_page) + 1;
+    let total_warehouses = service::Query::count_warehouses_with_condition(&conn, filter).await?;
+    let total_page = ((total_warehouses.max(1) - 1) / per_page) + 1;
 
     let warehouses = result.into_iter().map(Into::into).collect();
     Ok(Json(WarehouseListResponse {

@@ -116,8 +116,8 @@ pub async fn get_all_refills(
         service::Query::list_refills_with_condition(&conn, filter.clone(), sort, page, per_page)
             .await?;
 
-    let total_page =
-        (service::Query::count_refills_with_condition(&conn, filter).await? / per_page) + 1;
+    let total_refills = service::Query::count_refills_with_condition(&conn, filter).await?;
+    let total_page = ((total_refills.max(1) - 1) / per_page) + 1;
 
     let refills: Result<Vec<_>, RefillResponseError> =
         result.into_iter().map(TryInto::try_into).collect();

@@ -100,8 +100,8 @@ pub async fn get_all_recipes(
         service::Query::list_recipes_with_condition(&conn, filter.clone(), sort, page, per_page)
             .await?;
 
-    let total_page =
-        (service::Query::count_recipes_with_condition(&conn, filter).await? / per_page) + 1;
+    let total_recipes = service::Query::count_recipes_with_condition(&conn, filter).await?;
+    let total_page = ((total_recipes.max(1) - 1) / per_page) + 1;
 
     let recipes = result
         .into_iter()

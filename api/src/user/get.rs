@@ -113,8 +113,8 @@ pub async fn get_all_users(
         service::Query::list_users_with_condition(&conn, filter.clone(), sort, page, per_page)
             .await?;
 
-    let total_page =
-        (service::Query::count_users_with_condition(&conn, filter).await? / per_page) + 1;
+    let total_users = service::Query::count_users_with_condition(&conn, filter).await?;
+    let total_page = ((total_users.max(1) - 1) / per_page) + 1;
 
     let users = result.into_iter().map(|x| x.into()).collect();
     Ok(Json(UserListResponse {

@@ -117,8 +117,8 @@ pub async fn get_all_products(
         service::Query::list_products_with_condition(&conn, filter.clone(), sort, page, per_page)
             .await?;
 
-    let total_page =
-        (service::Query::count_products_with_condition(&conn, filter).await? / per_page) + 1;
+    let total_products = service::Query::count_products_with_condition(&conn, filter).await?;
+    let total_page = ((total_products.max(1) - 1) / per_page) + 1;
 
     let products = result
         .into_iter()
