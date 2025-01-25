@@ -8,3 +8,4 @@ pub mod recipe;
 pub mod refill;
 pub mod sma;
 pub mod user;
+pub mod warehouse;
