@@ -214,6 +214,15 @@ fn auth_optional_routes(path: &str) -> OpenApiRouter<state::AppState> {
                     .routes(routes!(api::recipe::new::post_new_recipe))
                     .routes(routes!(api::recipe::edit::edit_recipe))
                     .routes(routes!(api::recipe::delete::delete_recipe)),
+            )
+            .nest(
+                "/warehouse",
+                OpenApiRouter::new()
+                    .routes(routes!(api::warehouse::get::get_warehouse))
+                    .routes(routes!(api::warehouse::get::get_all_warehouses))
+                    .routes(routes!(api::warehouse::new::post_new_warehouse))
+                    .routes(routes!(api::warehouse::edit::edit_warehouse))
+                    .routes(routes!(api::warehouse::delete::delete_warehouse)),
             ),
     )
 }

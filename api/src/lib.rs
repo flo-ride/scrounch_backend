@@ -18,3 +18,4 @@ pub mod recipe;
 pub mod refill;
 pub mod user;
 pub mod utils;
+pub mod warehouse;
