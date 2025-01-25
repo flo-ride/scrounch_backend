@@ -9,7 +9,7 @@ use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use entity::{
     error::{AppError, ErrorResponse},
     models::warehouse::ActiveModel,
-    request::warehouse::{NewWarehouseRequest, WarehouseRequestError},
+    request::warehouse::NewWarehouseRequest,
 };
 use extractor::profile::admin::Admin;
 use service::Connection;
@@ -46,13 +46,6 @@ pub async fn post_new_warehouse(
     Json(warehouse): Json<NewWarehouseRequest>,
 ) -> Result<impl IntoResponse, AppError> {
     let warehouse_model: ActiveModel = warehouse.clone().try_into()?;
-
-    // Verifiy that every warehouse exist before mutating anything
-    if let Some(parent) = warehouse.parent {
-        service::Query::find_warehouse_by_id(&conn, parent)
-            .await?
-            .ok_or(WarehouseRequestError::ParentDoesntExist(parent))?;
-    }
 
     let result = service::Mutation::create_warehouse(&conn, warehouse_model).await?;
     let id = result.id;

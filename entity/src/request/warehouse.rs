@@ -16,12 +16,6 @@ pub enum WarehouseRequestError {
     NameCannotBeEmpty,
     /// Error when the warehouse name exceeds the allowed maximum length.
     NameCannotBeLongerThan(String, usize),
-    /// Error when the parent  doesn't exist
-    ParentDoesntExist(uuid::Uuid),
-    /// Error when the parent of a given warehouse is self
-    ParentCannotBeSelf(uuid::Uuid),
-    /// Error when the parents of multiple are circularly connected
-    ParentCannotHaveCircularReference(uuid::Uuid, uuid::Uuid, Vec<uuid::Uuid>),
 }
 
 impl std::error::Error for WarehouseRequestError {}
@@ -34,19 +28,6 @@ impl std::fmt::Display for WarehouseRequestError {
             Self::NameCannotBeLongerThan(name, max) => {
                 write!(f, "Name \"{name}\" is longer than {max} characters")
             }
-            Self::ParentDoesntExist(parent) => {
-                write!(f, "Parent \"{parent}\" doesn't exist")
-            }
-            Self::ParentCannotBeSelf(parent) => {
-                write!(
-                    f,
-                    "Parent \"{parent}\" of warehouse \"{parent}\" canno't be self"
-                )
-            }
-            Self::ParentCannotHaveCircularReference(warehouse, parent, circular) => {
-                let circular_string = circular.iter().map(ToString::to_string).collect::<Vec<_>>();
-                write!(f, "Warehouse \"{warehouse}\" cannot have \"{parent}\" has parent, it would create a circular reference: \"{}\"", circular_string.join("->"))
-            }
         }
     }
 }
@@ -57,9 +38,6 @@ impl_bad_request_app_error!(WarehouseRequestError);
 pub struct NewWarehouseRequest {
     /// Name of the warehouse, required and validated for length.
     pub name: String,
-
-    /// Name of the parent warehouse
-    pub parent: Option<uuid::Uuid>,
 }
 
 /// Converts `NewWarehouseRequest` into `ActiveModel` with validation.
@@ -83,7 +61,6 @@ impl TryFrom<NewWarehouseRequest> for ActiveModel {
                 }
                 Set(name)
             },
-            parent: Set(value.parent),
         })
     }
 }
@@ -93,9 +70,6 @@ impl TryFrom<NewWarehouseRequest> for ActiveModel {
 pub struct EditWarehouseRequest {
     /// New name for the Warehouse.
     pub name: Option<String>,
-
-    /// Optional New Parent for the Warehouse
-    pub parent: Option<Option<uuid::Uuid>>,
 }
 
 /// Converts `EditWarehouseRequest` into `ActiveModel` with validation.
@@ -119,10 +93,6 @@ impl TryFrom<EditWarehouseRequest> for ActiveModel {
                     }
                     Set(name)
                 }
-                None => NotSet,
-            },
-            parent: match value.parent {
-                Some(parent_opt) => Set(parent_opt),
                 None => NotSet,
             },
         })

@@ -7,13 +7,8 @@ use axum::{
     response::IntoResponse,
     Json,
 };
-use entity::{
-    error::AppError,
-    models::warehouse,
-    request::warehouse::{EditWarehouseRequest, WarehouseRequestError},
-};
+use entity::{error::AppError, models::warehouse, request::warehouse::EditWarehouseRequest};
 use extractor::profile::admin::Admin;
-use sea_orm::ActiveValue::Set;
 use service::Connection;
 
 /// Edit an existing warehouse by ID in the store.
@@ -50,19 +45,6 @@ pub async fn edit_warehouse(
     match result {
         Some(_existing_warehouse) => {
             let edit_warehouse_model: warehouse::ActiveModel = edit_warehouse.clone().try_into()?;
-
-            if let Set(Some(parent)) = edit_warehouse_model.parent {
-                if parent == id {
-                    return Err(WarehouseRequestError::ParentCannotBeSelf(id).into());
-                }
-                if service::Query::find_warehouse_by_id(&conn, parent)
-                    .await?
-                    .is_none()
-                {
-                    return Err(WarehouseRequestError::ParentDoesntExist(id).into());
-                }
-                // TODO: Add safety checks for CIRCULAR reference in Warehouse
-            }
 
             let result =
                 service::Mutation::update_warehouse(&conn, id, edit_warehouse_model).await?;

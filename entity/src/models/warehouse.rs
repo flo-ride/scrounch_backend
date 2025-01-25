@@ -24,23 +24,11 @@ pub struct Model {
     pub id: Uuid,
     /// The name of the warehouse
     pub name: String,
-    /// The parent warehouse ID, forming a self-referencing relationship.
-    pub parent: Option<Uuid>,
 }
 
 /// Enum representing the relationships of the `warehouse` entity in SeaORM.
 /// Defines how `warehouse` is related to other entities, enabling query joins.
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-    /// Defines a self-referential relationship where a warehouse may have a parent warehouse.
-    #[sea_orm(
-        belongs_to = "Entity",
-        from = "Column::Parent",
-        to = "Column::Id",
-        on_update = "Cascade",
-        on_delete = "SetNull"
-    )]
-    SelfRef,
-}
+pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}

@@ -13,14 +13,6 @@ impl MigrationTrait for Migration {
                     .if_not_exists()
                     .col(uuid(Warehouse::Id).primary_key())
                     .col(string(Warehouse::Name))
-                    .col(uuid_null(Warehouse::Parent))
-                    .foreign_key(
-                        ForeignKey::create()
-                            .from(Warehouse::Table, Warehouse::Parent)
-                            .to(Warehouse::Table, Warehouse::Id)
-                            .on_delete(ForeignKeyAction::SetNull)
-                            .on_update(ForeignKeyAction::Cascade),
-                    )
                     .to_owned(),
             )
             .await
@@ -38,5 +30,4 @@ pub enum Warehouse {
     Table,
     Id,
     Name,
-    Parent,
 }

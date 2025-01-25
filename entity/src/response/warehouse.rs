@@ -16,9 +16,6 @@ pub struct WarehouseResponse {
 
     /// Name of the warehouse.
     name: String,
-
-    /// Parent of the warehouse
-    parent: Option<uuid::Uuid>,
 }
 
 /// Response structure for a warehouse ingredient, including its details.
@@ -51,7 +48,6 @@ impl From<crate::models::warehouse::Model> for WarehouseResponse {
         Self {
             id: value.id,
             name: value.name,
-            parent: value.parent,
         }
     }
 }
