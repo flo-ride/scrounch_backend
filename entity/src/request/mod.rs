@@ -15,3 +15,4 @@ pub mod product;
 pub mod recipe;
 pub mod refill;
 pub mod user;
+pub mod warehouse;
