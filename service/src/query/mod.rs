@@ -10,5 +10,6 @@ mod product;
 mod recipe;
 mod refill;
 mod user;
+mod warehouse;
 
 pub struct Query;
