@@ -1,8 +1,8 @@
 mod utils;
 
 use axum::http::StatusCode;
-use serde_json::{json, Value};
-use utils::{create_basic_session, create_realm_session, generation::get_multipart_random_image};
+use serde_json::json;
+use utils::{create_basic_session, create_realm_session};
 
 use crate::utils::containers::keycloak::Realm;
 
@@ -23,13 +23,19 @@ async fn warehouse_create_name() {
     response.assert_status(StatusCode::CREATED);
     let id = response.text();
 
-    let response = server.get(&format!("/warehouse/{id}")).await;
+    let response = server
+        .get(&format!("/warehouse/{id}"))
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "name": "Warehouse 1",
     }));
 
-    let response = server.get("/warehouse").await;
+    let response = server
+        .get("/warehouse")
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "warehouses": [
@@ -53,7 +59,10 @@ async fn warehouse_create_missing_name() {
         .await;
     response.assert_status_unprocessable_entity();
 
-    let response = server.get("/warehouse").await;
+    let response = server
+        .get("/warehouse")
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json(&json!({
         "current_page": 0,
@@ -77,7 +86,10 @@ async fn warehouse_create_empty_name() {
         .await;
     response.assert_status_bad_request();
 
-    let response = server.get("/warehouse").await;
+    let response = server
+        .get("/warehouse")
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json(&json!({
         "current_page": 0,
@@ -101,7 +113,10 @@ async fn warehouse_create_too_long_name() {
         .await;
     response.assert_status_bad_request();
 
-    let response = server.get("/warehouse").await;
+    let response = server
+        .get("/warehouse")
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json(&json!({
         "current_page": 0,
@@ -125,7 +140,10 @@ async fn warehouse_create_not_name() {
         .await;
     response.assert_status_unprocessable_entity();
 
-    let response = server.get("/warehouse").await;
+    let response = server
+        .get("/warehouse")
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json(&json!({
         "current_page": 0,
@@ -142,7 +160,10 @@ async fn warehouse_create_not_name() {
         .await;
     response.assert_status_unprocessable_entity();
 
-    let response = server.get("/warehouse").await;
+    let response = server
+        .get("/warehouse")
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json(&json!({
         "current_page": 0,
@@ -159,7 +180,10 @@ async fn warehouse_create_not_name() {
         .await;
     response.assert_status_unprocessable_entity();
 
-    let response = server.get("/warehouse").await;
+    let response = server
+        .get("/warehouse")
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json(&json!({
         "current_page": 0,
@@ -194,13 +218,19 @@ async fn warehouse_edit_name() {
         .await;
     response.assert_status_ok();
 
-    let response = server.get(&format!("/warehouse/{id}")).await;
+    let response = server
+        .get(&format!("/warehouse/{id}"))
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "name": "Warehouse 2",
     }));
 
-    let response = server.get("/warehouse").await;
+    let response = server
+        .get("/warehouse")
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "warehouses": [
@@ -237,13 +267,19 @@ async fn warehouse_edit_empty_name() {
         .await;
     response.assert_status_bad_request();
 
-    let response = server.get(&format!("/warehouse/{id}")).await;
+    let response = server
+        .get(&format!("/warehouse/{id}"))
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "name": "Warehouse 1",
     }));
 
-    let response = server.get("/warehouse").await;
+    let response = server
+        .get("/warehouse")
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "warehouses": [
@@ -280,13 +316,19 @@ async fn warehouse_edit_too_long_name() {
         .await;
     response.assert_status_bad_request();
 
-    let response = server.get(&format!("/warehouse/{id}")).await;
+    let response = server
+        .get(&format!("/warehouse/{id}"))
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "name": "Warehouse 1",
     }));
 
-    let response = server.get("/warehouse").await;
+    let response = server
+        .get("/warehouse")
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "warehouses": [
@@ -325,14 +367,20 @@ async fn warehouse_create_parent() {
     response.assert_status(StatusCode::CREATED);
     let id_lesser = response.text();
 
-    let response = server.get(&format!("/warehouse/{id_lesser}")).await;
+    let response = server
+        .get(&format!("/warehouse/{id_lesser}"))
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "name": "Lesser Warehouse 1",
         "parent": id_bigger,
     }));
 
-    let response = server.get("/warehouse").await;
+    let response = server
+        .get("/warehouse")
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "warehouses": [
@@ -360,13 +408,16 @@ async fn warehouse_create_wrong_parent() {
         .post("/warehouse")
         .json(&json!({
             "name": "Warehouse 1",
-            "parent": "123-doesnt-exist-321"
+            "parent": "c855c6d9-6115-4028-bb7a-0d00604d6d78"
         }))
         .add_cookie(cookies[0].clone())
         .await;
     response.assert_status_bad_request();
 
-    let response = server.get("/warehouse").await;
+    let response = server
+        .get("/warehouse")
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "warehouses": []
@@ -407,17 +458,22 @@ async fn warehouse_add_parent() {
         }))
         .add_cookie(cookies[0].clone())
         .await;
-    response.assert_status(StatusCode::CREATED);
-    let id_lesser = response.text();
+    response.assert_status_ok();
 
-    let response = server.get(&format!("/warehouse/{id_lesser}")).await;
+    let response = server
+        .get(&format!("/warehouse/{id_lesser}"))
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "name": "Lesser Warehouse 1",
         "parent": id_bigger,
     }));
 
-    let response = server.get("/warehouse").await;
+    let response = server
+        .get("/warehouse")
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "warehouses": [
@@ -464,21 +520,25 @@ async fn warehouse_add_wrong_parent() {
     let response = server
         .put(&format!("/warehouse/{id_lesser}"))
         .json(&json!({
-            "parent": "123-norealid-456",
+            "parent": "aef04bca-1141-4d87-9b40-5de19fa70542",
         }))
         .add_cookie(cookies[0].clone())
         .await;
-    response.assert_status(StatusCode::CREATED);
-    let id_lesser = response.text();
+    response.assert_status_bad_request();
 
-    let response = server.get(&format!("/warehouse/{id_lesser}")).await;
+    let response = server
+        .get(&format!("/warehouse/{id_lesser}"))
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "name": "Lesser Warehouse 1",
-        "parent": null,
     }));
 
-    let response = server.get("/warehouse").await;
+    let response = server
+        .get("/warehouse")
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "warehouses": [
@@ -489,7 +549,6 @@ async fn warehouse_add_wrong_parent() {
             {
                 "id": id_lesser,
                 "name": "Lesser Warehouse 1",
-                "parent": null
             },
         ]
     }));
@@ -530,17 +589,22 @@ async fn warehouse_remove_parent() {
         }))
         .add_cookie(cookies[0].clone())
         .await;
-    response.assert_status(StatusCode::CREATED);
-    let id_lesser = response.text();
+    response.assert_status_ok();
 
-    let response = server.get(&format!("/warehouse/{id_lesser}")).await;
+    let response = server
+        .get(&format!("/warehouse/{id_lesser}"))
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "name": "Lesser Warehouse 1",
         "parent": null,
     }));
 
-    let response = server.get("/warehouse").await;
+    let response = server
+        .get("/warehouse")
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "warehouses": [
@@ -601,23 +665,32 @@ async fn warehouse_edit_parent() {
         }))
         .add_cookie(cookies[0].clone())
         .await;
-    response.assert_status(StatusCode::CREATED);
-    let id_lesser = response.text();
+    response.assert_status_ok();
 
-    let response = server.get(&format!("/warehouse/{id_lesser}")).await;
+    let response = server
+        .get(&format!("/warehouse/{id_lesser}"))
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "name": "Lesser Warehouse 1",
         "parent": id_bigger_2,
     }));
 
-    let response = server.get("/warehouse").await;
+    let response = server
+        .get("/warehouse")
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "warehouses": [
             {
                 "id":  id_bigger_1,
                 "name": "Bigger Warehouse 1"
+            },
+            {
+                "id":  id_bigger_2,
+                "name": "Bigger Warehouse 2"
             },
             {
                 "id": id_lesser,
@@ -658,21 +731,26 @@ async fn warehouse_edit_wrong_parent() {
     let response = server
         .put(&format!("/warehouse/{id_lesser}"))
         .json(&json!({
-            "parent": "123-notvalid-456",
+            "parent": "3f6461e1-42f1-46d3-a5c1-283d2df6df3a",
         }))
         .add_cookie(cookies[0].clone())
         .await;
-    response.assert_status(StatusCode::CREATED);
-    let id_lesser = response.text();
+    response.assert_status_bad_request();
 
-    let response = server.get(&format!("/warehouse/{id_lesser}")).await;
+    let response = server
+        .get(&format!("/warehouse/{id_lesser}"))
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "name": "Lesser Warehouse 1",
         "parent": id_bigger,
     }));
 
-    let response = server.get("/warehouse").await;
+    let response = server
+        .get("/warehouse")
+        .add_cookie(cookies[0].clone())
+        .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "warehouses": [
@@ -684,6 +762,132 @@ async fn warehouse_edit_wrong_parent() {
                 "id": id_lesser,
                 "name": "Lesser Warehouse 1",
                 "parent": id_bigger
+            },
+        ]
+    }));
+}
+
+#[tokio::test]
+async fn warehouse_self_parent() {
+    let realm = Realm::default();
+    let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
+    let cookies = create_realm_session(&mut server, realm.users).await;
+
+    let response = server
+        .post("/warehouse")
+        .json(&json!({
+            "name": "Warehouse 1",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status(StatusCode::CREATED);
+    let id = response.text();
+
+    let response = server
+        .put(&format!("/warehouse/{id}"))
+        .json(&json!({
+            "parent": id,
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_bad_request();
+
+    let response = server
+        .get(&format!("/warehouse/{id}"))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "name": "Warehouse 1",
+        "parent": null,
+    }));
+
+    let response = server
+        .get("/warehouse")
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "warehouses": [
+            {
+                "id":  id,
+                "name": "Warehouse 1"
+            },
+        ]
+    }));
+}
+
+#[tokio::test]
+async fn warehouse_one_cyclic_parent() {
+    let realm = Realm::default();
+    let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
+    let cookies = create_realm_session(&mut server, realm.users).await;
+
+    let response = server
+        .post("/warehouse")
+        .json(&json!({
+            "name": "Warehouse 1",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status(StatusCode::CREATED);
+    let id_1 = response.text();
+
+    let response = server
+        .post("/warehouse")
+        .json(&json!({
+            "name": "Warehouse 2",
+            "parent": id_1
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status(StatusCode::CREATED);
+    let id_2 = response.text();
+
+    let response = server
+        .put(&format!("/warehouse/{id_1}"))
+        .json(&json!({
+            "parent": id_2,
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_bad_request();
+
+    let response = server
+        .get(&format!("/warehouse/{id_1}"))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "name": "Warehouse 1",
+        "parent": null,
+    }));
+
+    let response = server
+        .get(&format!("/warehouse/{id_2}"))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "name": "Warehouse 2",
+        "parent": id_1,
+    }));
+
+    let response = server
+        .get("/warehouse")
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "warehouses": [
+            {
+                "id":  id_1,
+                "name": "Warehouse 1"
+            },
+            {
+                "id": id_2,
+                "name": "Warehouse 2",
+                "parent": id_1
             },
         ]
     }));
