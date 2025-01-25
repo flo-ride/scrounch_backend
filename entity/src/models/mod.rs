@@ -9,3 +9,4 @@ pub mod recipe_ingredients;
 pub mod refill;
 pub mod sea_orm_active_enums;
 pub mod user;
+pub mod warehouse;
