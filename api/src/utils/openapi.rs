@@ -52,6 +52,7 @@ impl utoipa::Modify for AxumOidcSecurity {
         schemas(entity::models::location::LocationSortEnum),
         schemas(entity::models::user::UserSortEnum),
         schemas(entity::models::recipe::RecipeSortEnum),
+        schemas(entity::models::warehouse::WarehouseSortEnum),
     ),
 )]
 pub struct ApiDoc;
@@ -70,6 +71,9 @@ pub const REFILL_TAG: &str = "refill";
 
 /// Tag used to categorize API endpoints focused on recipe and related operations.
 pub const RECIPE_TAG: &str = "recipe";
+
+/// Tag used to categorize API endpoints focused on warehouse and related operations.
+pub const WAREHOUSE_TAG: &str = "warehouse";
 
 /// Tag used to categorize miscellaneous API endpoints that do not fit into other categories.
 pub const MISC_TAG: &str = "misc";
