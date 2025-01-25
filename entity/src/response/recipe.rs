@@ -53,6 +53,9 @@ pub struct RecipeResponse {
 
     /// indicating if the recipe is disabled.
     disabled: bool,
+
+    /// The timestamp indicating when the recipe was created.
+    pub created_at: chrono::DateTime<chrono::Utc>,
 }
 
 /// Response structure for a recipe ingredient, including its details.
@@ -90,6 +93,7 @@ impl TryFrom<crate::models::recipe::Model> for RecipeResponse {
             product: value.result_product_id,
             ingredients: vec![],
             disabled: value.disabled,
+            created_at: value.created_at.into(),
         })
     }
 }
@@ -142,6 +146,7 @@ impl
             name: recipe.name,
             product: recipe.result_product_id,
             ingredients,
+            created_at: recipe.created_at.into(),
             disabled: recipe.disabled,
         })
     }
