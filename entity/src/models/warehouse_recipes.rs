@@ -25,6 +25,13 @@ pub struct Model {
     /// The unique identifier for the recipe.
     #[sea_orm(primary_key, auto_increment = false)]
     pub recipe_id: Uuid,
+
+    /// The priority of application for warehouse recipes
+    pub priority: i32,
+
+    /// Timestamp for when the link was created.
+    #[sea_orm(filter_override = "chrono::DateTime<chrono::Utc>", filter_plus_order)]
+    pub created_at: DateTimeWithTimeZone,
 }
 
 /// Enum representing the relationships of the `warehouse_recipes` entity in SeaORM.

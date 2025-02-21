@@ -25,6 +25,9 @@ pub struct Model {
     /// The unique identifier for the product.
     #[sea_orm(primary_key, auto_increment = false)]
     pub product_id: Uuid,
+    /// Timestamp for when the link was created.
+    #[sea_orm(filter_override = "chrono::DateTime<chrono::Utc>", filter_plus_order)]
+    pub created_at: DateTimeWithTimeZone,
 }
 
 /// Enum representing the relationships of the `warehouse_products` entity in SeaORM.
@@ -40,6 +43,7 @@ pub enum Relation {
         on_delete = "Cascade"
     )]
     Product,
+
     /// Represent the warehouse of this many/many relation
     #[sea_orm(
         belongs_to = "super::warehouse::Entity",
