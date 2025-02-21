@@ -10,3 +10,5 @@ pub mod refill;
 pub mod sea_orm_active_enums;
 pub mod user;
 pub mod warehouse;
+pub mod warehouse_products;
+pub mod warehouse_recipes;
