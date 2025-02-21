@@ -47,12 +47,22 @@ pub enum Relation {
     /// Relationship: A `recipe` has many `recipe_ingredients`.
     #[sea_orm(has_many = "super::recipe_ingredients::Entity")]
     RecipeIngredients,
+
+    /// Relationship: A `warehouse` has many `recipes`.
+    #[sea_orm(has_many = "super::warehouse_recipes::Entity")]
+    WarehouseRecipes,
 }
 
 impl Related<super::recipe_ingredients::Entity> for Entity {
     /// Defines the direct relationship between `recipe` and `recipe_ingredients`.
     fn to() -> RelationDef {
         Relation::RecipeIngredients.def()
+    }
+}
+
+impl Related<super::warehouse_recipes::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::WarehouseRecipes.def()
     }
 }
 
@@ -64,6 +74,15 @@ impl Related<super::product::Entity> for Entity {
     /// Specifies the intermediary relationship through `recipe_ingredients`.
     fn via() -> Option<RelationDef> {
         Some(super::recipe_ingredients::Relation::Recipe.def().rev())
+    }
+}
+
+impl Related<super::warehouse::Entity> for Entity {
+    fn to() -> RelationDef {
+        super::warehouse_recipes::Relation::Warehouse.def()
+    }
+    fn via() -> Option<RelationDef> {
+        Some(super::warehouse_recipes::Relation::Recipe.def().rev())
     }
 }
 
