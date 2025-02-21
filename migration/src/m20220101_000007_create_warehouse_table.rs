@@ -33,6 +33,10 @@ impl MigrationTrait for Migration {
                     .if_not_exists()
                     .col(uuid(WarehouseProducts::WarehouseId))
                     .col(uuid(WarehouseProducts::ProductId))
+                    .col(
+                        timestamp_with_time_zone(WarehouseProducts::CreatedAt)
+                            .default(Expr::current_timestamp()),
+                    )
                     .primary_key(
                         Index::create()
                             .col(WarehouseProducts::WarehouseId)
@@ -63,6 +67,11 @@ impl MigrationTrait for Migration {
                     .if_not_exists()
                     .col(uuid(WarehouseRecipes::WarehouseId))
                     .col(uuid(WarehouseRecipes::RecipeId))
+                    .col(integer(WarehouseRecipes::Priority).default(0))
+                    .col(
+                        timestamp_with_time_zone(WarehouseRecipes::CreatedAt)
+                            .default(Expr::current_timestamp()),
+                    )
                     .primary_key(
                         Index::create()
                             .col(WarehouseRecipes::WarehouseId)
@@ -116,6 +125,7 @@ pub enum WarehouseProducts {
     Table,
     WarehouseId,
     ProductId,
+    CreatedAt,
 }
 
 #[derive(DeriveIden)]
@@ -123,4 +133,6 @@ pub enum WarehouseRecipes {
     Table,
     WarehouseId,
     RecipeId,
+    Priority,
+    CreatedAt,
 }
