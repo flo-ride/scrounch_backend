@@ -1,9 +1,13 @@
 #[cfg(feature = "cache")]
 use crate::r#macro::{cache_get, cache_mget, cache_mset, cache_set};
 use crate::{query::Query, Connection};
-use ::entity::models::{warehouse, warehouse::Entity as Warehouse};
+use ::entity::models::{
+    prelude::{Product, WarehouseProducts},
+    product,
+    warehouse::{self, Entity as Warehouse},
+    warehouse_products,
+};
 use sea_orm::*;
-
 impl Query {
     pub async fn find_warehouse_by_id(
         conn: &Connection,
@@ -77,5 +81,89 @@ impl Query {
             .filter(filter)
             .count(&conn.db_connection)
             .await
+    }
+
+    pub async fn find_warehouse_products_by_id<
+        Filter: sea_query::IntoCondition + std::fmt::Debug + Clone,
+        Sort: IntoIterator<Item = (impl IntoSimpleExpr, Order)> + std::fmt::Debug + Clone,
+        Page: Into<u64> + Copy,
+        PerPage: Into<u64> + Copy,
+    >(
+        conn: &Connection,
+        id: uuid::Uuid,
+        filter: Filter,
+        sort: Sort,
+        page: Page,
+        per_page: PerPage,
+    ) -> Result<Vec<(warehouse_products::Model, product::Model)>, DbErr> {
+        #[cfg(feature = "cache")]
+        cache_mget!(
+            conn,
+            format!(
+                "warehouse_products:{filter:?}-{sort:?}-{}/{}",
+                page.into(),
+                per_page.into()
+            ),
+            (warehouse_products::Model, product::Model)
+        );
+
+        let warehouse = Self::find_warehouse_by_id(conn, id).await?;
+        match warehouse {
+            Some(warehouse) => {
+                let mut query = warehouse
+                    .find_related(WarehouseProducts)
+                    .find_also_related(Product)
+                    .filter(filter.clone());
+                for (column, order) in sort.clone() {
+                    query = query.order_by_with_nulls(column, order, sea_query::NullOrdering::Last);
+                }
+                let query = query.paginate(&conn.db_connection, per_page.into());
+
+                let result = query.fetch_page(page.into()).await?;
+                let result = result
+                    .into_iter()
+                    .filter_map(|(warehouse_product, product)| {
+                        let product = product?;
+                        Some((warehouse_product, product))
+                    })
+                    .collect::<Vec<_>>();
+
+                #[cfg(feature = "cache")]
+                cache_mset!(
+                    conn,
+                    format!(
+                        "warehouse_products:{filter:?}-{sort:?}-{}/{}",
+                        page.into(),
+                        per_page.into()
+                    ),
+                    result,
+                    60 * 60 * 3,
+                    |x: &(warehouse_products::Model, product::Model)| format!(
+                        "warehouse_product:{}/{}",
+                        x.0.warehouse_id, x.0.product_id
+                    )
+                );
+
+                Ok(result)
+            }
+            // Maybe Add Error here instead
+            None => Ok(Vec::new()),
+        }
+    }
+
+    pub async fn count_warehouse_products_with_condition<Filter: sea_query::IntoCondition>(
+        conn: &Connection,
+        id: uuid::Uuid,
+        filter: Filter,
+    ) -> Result<u64, DbErr> {
+        let warehouse = Self::find_warehouse_by_id(conn, id).await?;
+        match warehouse {
+            Some(warehouse) => Ok(warehouse
+                .find_related(Product)
+                .filter(filter)
+                .count(&conn.db_connection)
+                .await?),
+            None => Ok(0),
+        }
     }
 }
