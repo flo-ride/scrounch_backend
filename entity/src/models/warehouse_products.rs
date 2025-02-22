@@ -25,6 +25,10 @@ pub struct Model {
     /// The unique identifier for the product.
     #[sea_orm(primary_key, auto_increment = false)]
     pub product_id: Uuid,
+
+    /// The quantity of this product in this warehouse
+    pub quantity: i32,
+
     /// Timestamp for when the link was created.
     #[sea_orm(filter_override = "chrono::DateTime<chrono::Utc>", filter_plus_order)]
     pub created_at: DateTimeWithTimeZone,
