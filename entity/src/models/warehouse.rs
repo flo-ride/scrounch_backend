@@ -35,6 +35,44 @@ pub struct Model {
 /// Enum representing the relationships of the `warehouse` entity in SeaORM.
 /// Defines how `warehouse` is related to other entities, enabling query joins.
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {}
+pub enum Relation {
+    /// Represent the products of this warehouse
+    #[sea_orm(has_many = "super::warehouse_products::Entity")]
+    WarehouseProducts,
+
+    /// Represent the recipes of this warehouse
+    #[sea_orm(has_many = "super::warehouse_recipes::Entity")]
+    WarehouseRecipes,
+}
+
+impl Related<super::warehouse_products::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::WarehouseProducts.def()
+    }
+}
+
+impl Related<super::warehouse_recipes::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::WarehouseRecipes.def()
+    }
+}
+
+impl Related<super::product::Entity> for Entity {
+    fn to() -> RelationDef {
+        super::warehouse_products::Relation::Product.def()
+    }
+    fn via() -> Option<RelationDef> {
+        Some(super::warehouse_products::Relation::Warehouse.def().rev())
+    }
+}
+
+impl Related<super::recipe::Entity> for Entity {
+    fn to() -> RelationDef {
+        super::warehouse_recipes::Relation::Recipe.def()
+    }
+    fn via() -> Option<RelationDef> {
+        Some(super::warehouse_recipes::Relation::Warehouse.def().rev())
+    }
+}
 
 impl ActiveModelBehavior for ActiveModel {}
