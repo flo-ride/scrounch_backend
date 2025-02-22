@@ -33,6 +33,7 @@ impl MigrationTrait for Migration {
                     .if_not_exists()
                     .col(uuid(WarehouseProducts::WarehouseId))
                     .col(uuid(WarehouseProducts::ProductId))
+                    .col(integer(WarehouseProducts::Quantity).default(0))
                     .col(
                         timestamp_with_time_zone(WarehouseProducts::CreatedAt)
                             .default(Expr::current_timestamp()),
@@ -125,6 +126,7 @@ pub enum WarehouseProducts {
     Table,
     WarehouseId,
     ProductId,
+    Quantity,
     CreatedAt,
 }
 
