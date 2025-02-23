@@ -2,7 +2,10 @@
 //! This module defines the structures and associated logic for handling warehouse requests in the system,
 //! including both the creation and editing of warehouses.
 
-use crate::{error::impl_bad_request_app_error, models::warehouse::ActiveModel};
+use crate::{
+    error::impl_bad_request_app_error,
+    models::{warehouse, warehouse_products},
+};
 use sea_orm::ActiveValue::{NotSet, Set};
 
 /// The maximum allowed length for a warehouse name.
@@ -42,11 +45,11 @@ pub struct NewWarehouseRequest {
 
 /// Converts `NewWarehouseRequest` into `ActiveModel` with validation.
 /// Errors are returned if validation fails.
-impl TryFrom<NewWarehouseRequest> for ActiveModel {
+impl TryFrom<NewWarehouseRequest> for warehouse::ActiveModel {
     type Error = WarehouseRequestError;
 
     fn try_from(value: NewWarehouseRequest) -> Result<Self, Self::Error> {
-        Ok(ActiveModel {
+        Ok(warehouse::ActiveModel {
             id: Set(uuid::Uuid::new_v4()), // Automatically generate a new UUID for the ID.
             name: {
                 let name = value.name;
@@ -79,11 +82,11 @@ pub struct EditWarehouseRequest {
 
 /// Converts `EditWarehouseRequest` into `ActiveModel` with validation.
 /// Only fields present in the request are updated.
-impl TryFrom<EditWarehouseRequest> for ActiveModel {
+impl TryFrom<EditWarehouseRequest> for warehouse::ActiveModel {
     type Error = WarehouseRequestError;
 
     fn try_from(value: EditWarehouseRequest) -> Result<Self, Self::Error> {
-        Ok(ActiveModel {
+        Ok(warehouse::ActiveModel {
             id: NotSet, // ID is not updated during edits.
             name: match value.name {
                 Some(name) => {
@@ -105,6 +108,43 @@ impl TryFrom<EditWarehouseRequest> for ActiveModel {
                 None => NotSet,
             },
             ..Default::default()
+        })
+    }
+}
+
+/// Enum representing potential errors in the warehouse request validation process.
+#[derive(Debug, PartialEq, Clone, strum_macros::IntoStaticStr)]
+pub enum WarehouseProductRequestError {
+    /// Error when the quantity cannot be converted
+    QuantityCannotBeNegative,
+}
+
+/// Request structure for creating a new warehouse, including validation rules.
+#[derive(Debug, Clone, PartialEq, serde::Deserialize, utoipa::ToSchema)]
+#[schema(example = json!({
+    "quantity": 1.4,
+}))]
+pub struct NewWarehouseProductRequest {
+    /// Name of the warehouse, required and validated for length.
+    pub quantity: rust_decimal::Decimal,
+}
+
+/// Converts `NewWarehouseProductRequest` into `ActiveModel` with validation.
+/// Errors are returned if validation fails.
+impl TryFrom<NewWarehouseProductRequest> for warehouse_products::ActiveModel {
+    type Error = WarehouseProductRequestError;
+    fn try_from(value: NewWarehouseProductRequest) -> Result<Self, Self::Error> {
+        Ok(warehouse_products::ActiveModel {
+            warehouse_id: NotSet,
+            product_id: NotSet,
+            quantity: {
+                if value.quantity < rust_decimal::Decimal::ZERO {
+                    return Err(Self::Error::QuantityCannotBeNegative);
+                }
+
+                Set(value.quantity)
+            },
+            created_at: Set(chrono::offset::Local::now().into()),
         })
     }
 }
