@@ -7,5 +7,5 @@ pub use super::recipe_ingredients::Entity as RecipeIngredients;
 pub use super::refill::Entity as Refill;
 pub use super::user::Entity as User;
 pub use super::warehouse::Entity as Warehouse;
-pub use super::warehouse_products::Entity as WarehouseProducts;
-pub use super::warehouse_recipes::Entity as WarehouseRecipes;
+pub use super::warehouse_product::Entity as WarehouseProduct;
+pub use super::warehouse_recipe::Entity as WarehouseRecipe;

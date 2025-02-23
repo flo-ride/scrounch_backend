@@ -37,21 +37,21 @@ pub struct Model {
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     /// Represent the products of this warehouse
-    #[sea_orm(has_many = "super::warehouse_products::Entity")]
+    #[sea_orm(has_many = "super::warehouse_product::Entity")]
     WarehouseProducts,
 
     /// Represent the recipes of this warehouse
-    #[sea_orm(has_many = "super::warehouse_recipes::Entity")]
+    #[sea_orm(has_many = "super::warehouse_recipe::Entity")]
     WarehouseRecipes,
 }
 
-impl Related<super::warehouse_products::Entity> for Entity {
+impl Related<super::warehouse_product::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::WarehouseProducts.def()
     }
 }
 
-impl Related<super::warehouse_recipes::Entity> for Entity {
+impl Related<super::warehouse_recipe::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::WarehouseRecipes.def()
     }
@@ -59,19 +59,19 @@ impl Related<super::warehouse_recipes::Entity> for Entity {
 
 impl Related<super::product::Entity> for Entity {
     fn to() -> RelationDef {
-        super::warehouse_products::Relation::Product.def()
+        super::warehouse_product::Relation::Product.def()
     }
     fn via() -> Option<RelationDef> {
-        Some(super::warehouse_products::Relation::Warehouse.def().rev())
+        Some(super::warehouse_product::Relation::Warehouse.def().rev())
     }
 }
 
 impl Related<super::recipe::Entity> for Entity {
     fn to() -> RelationDef {
-        super::warehouse_recipes::Relation::Recipe.def()
+        super::warehouse_recipe::Relation::Recipe.def()
     }
     fn via() -> Option<RelationDef> {
-        Some(super::warehouse_recipes::Relation::Warehouse.def().rev())
+        Some(super::warehouse_recipe::Relation::Warehouse.def().rev())
     }
 }
 

@@ -29,30 +29,30 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table(WarehouseProducts::Table)
+                    .table(WarehouseProduct::Table)
                     .if_not_exists()
-                    .col(uuid(WarehouseProducts::WarehouseId))
-                    .col(uuid(WarehouseProducts::ProductId))
-                    .col(decimal_len(WarehouseProducts::Quantity, 10, 2).default(0.0))
+                    .col(uuid(WarehouseProduct::WarehouseId))
+                    .col(uuid(WarehouseProduct::ProductId))
+                    .col(decimal_len(WarehouseProduct::Quantity, 10, 2).default(0.0))
                     .col(
-                        timestamp_with_time_zone(WarehouseProducts::CreatedAt)
+                        timestamp_with_time_zone(WarehouseProduct::CreatedAt)
                             .default(Expr::current_timestamp()),
                     )
                     .primary_key(
                         Index::create()
-                            .col(WarehouseProducts::WarehouseId)
-                            .col(WarehouseProducts::ProductId),
+                            .col(WarehouseProduct::WarehouseId)
+                            .col(WarehouseProduct::ProductId),
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .from(WarehouseProducts::Table, WarehouseProducts::WarehouseId)
+                            .from(WarehouseProduct::Table, WarehouseProduct::WarehouseId)
                             .to(Warehouse::Table, Warehouse::Id)
                             .on_delete(ForeignKeyAction::Cascade)
                             .on_update(ForeignKeyAction::Cascade),
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .from(WarehouseProducts::Table, WarehouseProducts::ProductId)
+                            .from(WarehouseProduct::Table, WarehouseProduct::ProductId)
                             .to(Product::Table, Product::Id)
                             .on_delete(ForeignKeyAction::Cascade)
                             .on_update(ForeignKeyAction::Cascade),
@@ -64,30 +64,30 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table(WarehouseRecipes::Table)
+                    .table(WarehouseRecipe::Table)
                     .if_not_exists()
-                    .col(uuid(WarehouseRecipes::WarehouseId))
-                    .col(uuid(WarehouseRecipes::RecipeId))
-                    .col(integer(WarehouseRecipes::Priority).default(0))
+                    .col(uuid(WarehouseRecipe::WarehouseId))
+                    .col(uuid(WarehouseRecipe::RecipeId))
+                    .col(integer(WarehouseRecipe::Priority).default(0))
                     .col(
-                        timestamp_with_time_zone(WarehouseRecipes::CreatedAt)
+                        timestamp_with_time_zone(WarehouseRecipe::CreatedAt)
                             .default(Expr::current_timestamp()),
                     )
                     .primary_key(
                         Index::create()
-                            .col(WarehouseRecipes::WarehouseId)
-                            .col(WarehouseRecipes::RecipeId),
+                            .col(WarehouseRecipe::WarehouseId)
+                            .col(WarehouseRecipe::RecipeId),
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .from(WarehouseRecipes::Table, WarehouseRecipes::WarehouseId)
+                            .from(WarehouseRecipe::Table, WarehouseRecipe::WarehouseId)
                             .to(Warehouse::Table, Warehouse::Id)
                             .on_delete(ForeignKeyAction::Cascade)
                             .on_update(ForeignKeyAction::Cascade),
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .from(WarehouseRecipes::Table, WarehouseRecipes::RecipeId)
+                            .from(WarehouseRecipe::Table, WarehouseRecipe::RecipeId)
                             .to(Recipe::Table, Recipe::Id)
                             .on_delete(ForeignKeyAction::Cascade)
                             .on_update(ForeignKeyAction::Cascade),
@@ -99,11 +99,11 @@ impl MigrationTrait for Migration {
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
-            .drop_table(Table::drop().table(WarehouseRecipes::Table).to_owned())
+            .drop_table(Table::drop().table(WarehouseRecipe::Table).to_owned())
             .await?;
 
         manager
-            .drop_table(Table::drop().table(WarehouseProducts::Table).to_owned())
+            .drop_table(Table::drop().table(WarehouseProduct::Table).to_owned())
             .await?;
 
         manager
@@ -122,7 +122,7 @@ pub enum Warehouse {
 }
 
 #[derive(DeriveIden)]
-pub enum WarehouseProducts {
+pub enum WarehouseProduct {
     Table,
     WarehouseId,
     ProductId,
@@ -131,7 +131,7 @@ pub enum WarehouseProducts {
 }
 
 #[derive(DeriveIden)]
-pub enum WarehouseRecipes {
+pub enum WarehouseRecipe {
     Table,
     WarehouseId,
     RecipeId,

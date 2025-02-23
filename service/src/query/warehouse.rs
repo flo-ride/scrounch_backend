@@ -2,8 +2,8 @@
 use crate::r#macro::{cache_get, cache_mget, cache_mset, cache_set};
 use crate::{query::Query, Connection};
 use ::entity::models::{
-    prelude::{Product, Recipe, Warehouse, WarehouseProducts, WarehouseRecipes},
-    product, recipe, warehouse, warehouse_products, warehouse_recipes,
+    prelude::{Product, Recipe, Warehouse, WarehouseProduct, WarehouseRecipe},
+    product, recipe, warehouse, warehouse_product, warehouse_recipe,
 };
 use sea_orm::*;
 impl Query {
@@ -93,7 +93,7 @@ impl Query {
         sort: Sort,
         page: Page,
         per_page: PerPage,
-    ) -> Result<Vec<(warehouse_products::Model, product::Model)>, DbErr> {
+    ) -> Result<Vec<(warehouse_product::Model, product::Model)>, DbErr> {
         #[cfg(feature = "cache")]
         cache_mget!(
             conn,
@@ -102,14 +102,14 @@ impl Query {
                 page.into(),
                 per_page.into()
             ),
-            (warehouse_products::Model, product::Model)
+            (warehouse_product::Model, product::Model)
         );
 
         let warehouse = Self::find_warehouse_by_id(conn, warehouse_id).await?;
         match warehouse {
             Some(warehouse) => {
                 let mut query = warehouse
-                    .find_related(WarehouseProducts)
+                    .find_related(WarehouseProduct)
                     .find_also_related(Product)
                     .filter(filter.clone());
                 for (column, order) in sort.clone() {
@@ -136,7 +136,7 @@ impl Query {
                     ),
                     result,
                     60 * 60 * 3,
-                    |x: &(warehouse_products::Model, product::Model)| format!(
+                    |x: &(warehouse_product::Model, product::Model)| format!(
                         "warehouse_product:{}/{}",
                         x.0.warehouse_id, x.0.product_id
                     )
@@ -177,7 +177,7 @@ impl Query {
         sort: Sort,
         page: Page,
         per_page: PerPage,
-    ) -> Result<Vec<(warehouse_recipes::Model, recipe::Model)>, DbErr> {
+    ) -> Result<Vec<(warehouse_recipe::Model, recipe::Model)>, DbErr> {
         #[cfg(feature = "cache")]
         cache_mget!(
             conn,
@@ -186,14 +186,14 @@ impl Query {
                 page.into(),
                 per_page.into()
             ),
-            (warehouse_recipes::Model, recipe::Model)
+            (warehouse_recipe::Model, recipe::Model)
         );
 
         let warehouse = Self::find_warehouse_by_id(conn, warehouse_id).await?;
         match warehouse {
             Some(warehouse) => {
                 let mut query = warehouse
-                    .find_related(WarehouseRecipes)
+                    .find_related(WarehouseRecipe)
                     .find_also_related(Recipe)
                     .filter(filter.clone());
                 for (column, order) in sort.clone() {
@@ -220,7 +220,7 @@ impl Query {
                     ),
                     result,
                     60 * 60 * 3,
-                    |x: &(warehouse_recipes::Model, recipe::Model)| format!(
+                    |x: &(warehouse_recipe::Model, recipe::Model)| format!(
                         "warehouse_recipe:{}/{}",
                         x.0.warehouse_id, x.0.recipe_id
                     )

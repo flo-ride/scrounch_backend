@@ -4,7 +4,7 @@
 
 use crate::{
     error::impl_bad_request_app_error,
-    models::{warehouse, warehouse_products},
+    models::{warehouse, warehouse_product},
 };
 use sea_orm::ActiveValue::{NotSet, Set};
 
@@ -155,10 +155,10 @@ pub struct NewWarehouseProductRequest {
 
 /// Converts `NewWarehouseProductRequest` into `ActiveModel` with validation.
 /// Errors are returned if validation fails.
-impl TryFrom<NewWarehouseProductRequest> for warehouse_products::ActiveModel {
+impl TryFrom<NewWarehouseProductRequest> for warehouse_product::ActiveModel {
     type Error = WarehouseProductRequestError;
     fn try_from(value: NewWarehouseProductRequest) -> Result<Self, Self::Error> {
-        Ok(warehouse_products::ActiveModel {
+        Ok(warehouse_product::ActiveModel {
             warehouse_id: NotSet,
             product_id: NotSet,
             quantity: {

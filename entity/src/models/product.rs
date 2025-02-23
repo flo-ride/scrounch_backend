@@ -91,8 +91,8 @@ pub enum Relation {
     #[sea_orm(has_many = "super::recipe_ingredients::Entity")]
     RecipeIngredients,
     /// For the Warehouse Products
-    #[sea_orm(has_many = "super::warehouse_products::Entity")]
-    WarehouseProducts,
+    #[sea_orm(has_many = "super::warehouse_product::Entity")]
+    WarehouseProduct,
 }
 
 impl Related<super::recipe_ingredients::Entity> for Entity {
@@ -101,9 +101,9 @@ impl Related<super::recipe_ingredients::Entity> for Entity {
     }
 }
 
-impl Related<super::warehouse_products::Entity> for Entity {
+impl Related<super::warehouse_product::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::WarehouseProducts.def()
+        Relation::WarehouseProduct.def()
     }
 }
 
@@ -118,10 +118,10 @@ impl Related<super::recipe::Entity> for Entity {
 
 impl Related<super::warehouse::Entity> for Entity {
     fn to() -> RelationDef {
-        super::warehouse_products::Relation::Warehouse.def()
+        super::warehouse_product::Relation::Warehouse.def()
     }
     fn via() -> Option<RelationDef> {
-        Some(super::warehouse_products::Relation::Product.def().rev())
+        Some(super::warehouse_product::Relation::Product.def().rev())
     }
 }
 

@@ -3,8 +3,8 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-/// Struct representing the `warehouse_recipes` table model in SeaORM.
-/// Contains fields corresponding to the columns in the `warehouse_recipes` table.
+/// Struct representing the `warehouse_products` table model in SeaORM.
+/// Contains fields corresponding to the columns in the `warehouse_products` table.
 #[derive(
     Clone,
     Debug,
@@ -16,37 +16,38 @@ use serde::{Deserialize, Serialize};
     proc::DeriveToFilterQuery,
     proc::DeriveToSortQuery,
 )]
-#[sea_orm(table_name = "warehouse_recipes")]
+#[sea_orm(table_name = "warehouse_product")]
+
 pub struct Model {
     /// The unique identifier for the warehouse.
     #[sea_orm(primary_key, auto_increment = false)]
     pub warehouse_id: Uuid,
-
-    /// The unique identifier for the recipe.
+    /// The unique identifier for the product.
     #[sea_orm(primary_key, auto_increment = false)]
-    pub recipe_id: Uuid,
+    pub product_id: Uuid,
 
-    /// The priority of application for warehouse recipes
-    pub priority: i32,
+    /// The quantity of this product in this warehouse
+    #[sea_orm(column_type = "Decimal(Some((10, 2)))")]
+    pub quantity: Decimal,
 
     /// Timestamp for when the link was created.
     #[sea_orm(filter_override = "chrono::DateTime<chrono::Utc>", filter_plus_order)]
     pub created_at: DateTimeWithTimeZone,
 }
 
-/// Enum representing the relationships of the `warehouse_recipes` entity in SeaORM.
+/// Enum representing the relationships of the `warehouse_products` entity in SeaORM.
 /// Defines how `warehouse` is related to other entities, enabling query joins.
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    /// Represent the recipe of this many/many relation
+    /// Represent the product of this many/many relation
     #[sea_orm(
-        belongs_to = "super::recipe::Entity",
-        from = "Column::RecipeId",
-        to = "super::recipe::Column::Id",
+        belongs_to = "super::product::Entity",
+        from = "Column::ProductId",
+        to = "super::product::Column::Id",
         on_update = "Cascade",
         on_delete = "Cascade"
     )]
-    Recipe,
+    Product,
 
     /// Represent the warehouse of this many/many relation
     #[sea_orm(
@@ -59,9 +60,9 @@ pub enum Relation {
     Warehouse,
 }
 
-impl Related<super::recipe::Entity> for Entity {
+impl Related<super::product::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::Recipe.def()
+        Relation::Product.def()
     }
 }
 

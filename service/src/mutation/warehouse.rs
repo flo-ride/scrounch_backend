@@ -2,8 +2,8 @@
 use crate::r#macro::{cache_del, cache_mdel, cache_set};
 use crate::{mutation::Mutation, Connection};
 use ::entity::models::{
-    prelude::{Warehouse, WarehouseProducts, WarehouseRecipes},
-    warehouse, warehouse_products, warehouse_recipes,
+    prelude::{Warehouse, WarehouseProduct, WarehouseRecipe},
+    warehouse, warehouse_product, warehouse_recipe,
 };
 use sea_orm::*;
 
@@ -69,11 +69,11 @@ impl Mutation {
         Warehouse::delete_many().exec(db).await
     }
 
-    pub async fn create_warehouse_products<M: IntoActiveModel<warehouse_products::ActiveModel>>(
+    pub async fn create_warehouse_product<M: IntoActiveModel<warehouse_product::ActiveModel>>(
         conn: &Connection,
         warehouse_id: uuid::Uuid,
         form_data: M,
-    ) -> Result<warehouse_products::Model, DbErr> {
+    ) -> Result<warehouse_product::Model, DbErr> {
         let mut form_data = form_data.into_active_model();
         form_data.warehouse_id = Set(warehouse_id);
         let result = form_data.insert(&conn.db_connection).await;
@@ -86,12 +86,12 @@ impl Mutation {
         result
     }
 
-    pub async fn update_warehouse_product<M: IntoActiveModel<warehouse_products::ActiveModel>>(
+    pub async fn update_warehouse_product<M: IntoActiveModel<warehouse_product::ActiveModel>>(
         conn: &Connection,
         warehouse_id: uuid::Uuid,
         product_id: uuid::Uuid,
         form_data: M,
-    ) -> Result<warehouse_products::Model, DbErr> {
+    ) -> Result<warehouse_product::Model, DbErr> {
         let mut form_data = form_data.into_active_model();
         form_data.warehouse_id = Set(warehouse_id);
         form_data.product_id = Set(product_id);
@@ -115,8 +115,8 @@ impl Mutation {
         warehouse_id: uuid::Uuid,
         product_id: uuid::Uuid,
     ) -> Result<DeleteResult, DbErr> {
-        let warehouse: warehouse_products::ActiveModel =
-            WarehouseProducts::find_by_id((warehouse_id, product_id))
+        let warehouse: warehouse_product::ActiveModel =
+            WarehouseProduct::find_by_id((warehouse_id, product_id))
                 .one(&conn.db_connection)
                 .await?
                 .ok_or(DbErr::Custom(format!(
@@ -138,11 +138,11 @@ impl Mutation {
         result
     }
 
-    pub async fn create_warehouse_recipes<M: IntoActiveModel<warehouse_recipes::ActiveModel>>(
+    pub async fn create_warehouse_recipe<M: IntoActiveModel<warehouse_recipe::ActiveModel>>(
         conn: &Connection,
         warehouse_id: uuid::Uuid,
         form_data: M,
-    ) -> Result<warehouse_recipes::Model, DbErr> {
+    ) -> Result<warehouse_recipe::Model, DbErr> {
         let mut form_data = form_data.into_active_model();
         form_data.warehouse_id = Set(warehouse_id);
         let result = form_data.insert(&conn.db_connection).await;
@@ -155,12 +155,12 @@ impl Mutation {
         result
     }
 
-    pub async fn update_warehouse_recipe<M: IntoActiveModel<warehouse_recipes::ActiveModel>>(
+    pub async fn update_warehouse_recipe<M: IntoActiveModel<warehouse_recipe::ActiveModel>>(
         conn: &Connection,
         warehouse_id: uuid::Uuid,
         recipe_id: uuid::Uuid,
         form_data: M,
-    ) -> Result<warehouse_recipes::Model, DbErr> {
+    ) -> Result<warehouse_recipe::Model, DbErr> {
         let mut form_data = form_data.into_active_model();
         form_data.warehouse_id = Set(warehouse_id);
         form_data.recipe_id = Set(recipe_id);
@@ -181,8 +181,8 @@ impl Mutation {
         warehouse_id: uuid::Uuid,
         recipe_id: uuid::Uuid,
     ) -> Result<DeleteResult, DbErr> {
-        let warehouse: warehouse_recipes::ActiveModel =
-            WarehouseRecipes::find_by_id((warehouse_id, recipe_id))
+        let warehouse: warehouse_recipe::ActiveModel =
+            WarehouseRecipe::find_by_id((warehouse_id, recipe_id))
                 .one(&conn.db_connection)
                 .await?
                 .ok_or(DbErr::Custom(format!(
