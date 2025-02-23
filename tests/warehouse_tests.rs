@@ -428,7 +428,7 @@ async fn warehouse_edit_disabled() {
 }
 
 #[tokio::test]
-async fn warehouse_product() {
+async fn warehouse_product_create_single_product() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
     let cookies = create_realm_session(&mut server, realm.users).await;
@@ -440,7 +440,8 @@ async fn warehouse_product() {
         }))
         .add_cookie(cookies[0].clone())
         .await;
-    let id_warehouse = response.text();
+    response.assert_status(StatusCode::CREATED);
+    let warehouse_id = response.text();
 
     let response = server
         .post("/product")
@@ -449,38 +450,47 @@ async fn warehouse_product() {
         }))
         .add_cookie(cookies[0].clone())
         .await;
-    let id_product = response.text();
+    response.assert_status(StatusCode::CREATED);
+    let product_id = response.text();
 
     let response = server
-        .post(&format!("/warehouse/{id_warehouse}/products"))
-        .json(&json!([id_product]))
+        .post(&format!("/warehouse/{warehouse_id}/product/{product_id}"))
+        .json(&json!({
+            "quantity": 10
+        }))
         .add_cookie(cookies[0].clone())
         .await;
     response.assert_status(StatusCode::CREATED);
 
     let response = server
-        .get(&format!("/warehouse/{id_warehouse}/product/{id_product}"))
+        .get(&format!("/warehouse/{warehouse_id}/product/{product_id}"))
         .add_cookie(cookies[0].clone())
         .await;
     response.assert_status_ok();
-    response.assert_json_contains(&json!({ "name": "Product 1" }));
+    response.assert_json_contains(&json!({
+        "product": {
+            "name": "Product 1",
+        },
+    }));
 
     let response = server
-        .get(&format!("/warehouse/{id_warehouse}/products"))
+        .get(&format!("/warehouse/{warehouse_id}/product"))
         .add_cookie(cookies[0].clone())
         .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "products": [
             {
-                "name": "Product 1"
+                "product": {
+                    "name": "Product 1"
+                }
             },
         ]
     }));
 }
 
 #[tokio::test]
-async fn warehouse_products() {
+async fn warehouse_product_create_multiple_product() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
     let cookies = create_realm_session(&mut server, realm.users).await;
@@ -492,7 +502,8 @@ async fn warehouse_products() {
         }))
         .add_cookie(cookies[0].clone())
         .await;
-    let id_warehouse = response.text();
+    response.assert_status(StatusCode::CREATED);
+    let warehouse_id = response.text();
 
     let response = server
         .post("/product")
@@ -501,7 +512,8 @@ async fn warehouse_products() {
         }))
         .add_cookie(cookies[0].clone())
         .await;
-    let id_product_1 = response.text();
+    response.assert_status(StatusCode::CREATED);
+    let product_id_1 = response.text();
 
     let response = server
         .post("/product")
@@ -510,85 +522,99 @@ async fn warehouse_products() {
         }))
         .add_cookie(cookies[0].clone())
         .await;
-    let id_product_2 = response.text();
+    response.assert_status(StatusCode::CREATED);
+    let product_id_2 = response.text();
 
     let response = server
-        .post(&format!("/warehouse/{id_warehouse}/products"))
-        .json(&json!([id_product_1, id_product_2]))
+        .post("/product")
+        .json(&json!({
+            "name": "Product 3",
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status(StatusCode::CREATED);
+    let product_id_3 = response.text();
+
+    let response = server
+        .post(&format!("/warehouse/{warehouse_id}/product/{product_id_1}"))
+        .json(&json!({
+            "quantity": 1
+        }))
         .add_cookie(cookies[0].clone())
         .await;
     response.assert_status(StatusCode::CREATED);
 
     let response = server
-        .get(&format!("/warehouse/{id_warehouse}/product/{id_product_1}"))
+        .post(&format!("/warehouse/{warehouse_id}/product/{product_id_2}"))
+        .json(&json!({
+            "quantity": 1
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status(StatusCode::CREATED);
+
+    let response = server
+        .post(&format!("/warehouse/{warehouse_id}/product/{product_id_3}"))
+        .json(&json!({
+            "quantity": 1
+        }))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status(StatusCode::CREATED);
+
+    let response = server
+        .get(&format!("/warehouse/{warehouse_id}/product/{product_id_1}"))
         .add_cookie(cookies[0].clone())
         .await;
     response.assert_status_ok();
-    response.assert_json_contains(&json!({ "name": "Product 1" }));
-
+    response.assert_json_contains(&json!({
+        "product": {
+            "name": "Product 1",
+        },
+    }));
     let response = server
-        .get(&format!("/warehouse/{id_warehouse}/product/{id_product_2}"))
+        .get(&format!("/warehouse/{warehouse_id}/product/{product_id_2}"))
         .add_cookie(cookies[0].clone())
         .await;
     response.assert_status_ok();
-    response.assert_json_contains(&json!({ "name": "Product 2" }));
+    response.assert_json_contains(&json!({
+        "product": {
+            "name": "Product 2",
+        },
+    }));
+    let response = server
+        .get(&format!("/warehouse/{warehouse_id}/product/{product_id_3}"))
+        .add_cookie(cookies[0].clone())
+        .await;
+    response.assert_status_ok();
+    response.assert_json_contains(&json!({
+        "product": {
+            "name": "Product 3",
+        },
+    }));
 
     let response = server
-        .get(&format!("/warehouse/{id_warehouse}/products"))
+        .get(&format!("/warehouse/{warehouse_id}/product"))
         .add_cookie(cookies[0].clone())
         .await;
     response.assert_status_ok();
     response.assert_json_contains(&json!({
         "products": [
             {
-                "name": "Product 1"
+                "product": {
+                    "name": "Product 1"
+                }
             },
             {
-                "name": "Product 2"
+                "product": {
+                    "name": "Product 2"
+                }
+            },
+            {
+                "product": {
+                    "name": "Product 3"
+                }
             },
         ]
-    }));
-}
-
-#[tokio::test]
-async fn warehouse_not_product() {
-    let realm = Realm::default();
-    let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
-    let cookies = create_realm_session(&mut server, realm.users).await;
-
-    let response = server
-        .post("/warehouse")
-        .json(&json!({
-            "name": "Warehouse 1",
-        }))
-        .add_cookie(cookies[0].clone())
-        .await;
-    let id_warehouse = response.text();
-
-    let random_id_product = "8e28eca8-e4c8-4246-a81f-2e151ef33fb8";
-    let response = server
-        .post(&format!("/warehouse/{id_warehouse}/products"))
-        .json(&json!([random_id_product]))
-        .add_cookie(cookies[0].clone())
-        .await;
-    response.assert_status_bad_request();
-
-    let response = server
-        .get(&format!(
-            "/warehouse/{id_warehouse}/product/{random_id_product}"
-        ))
-        .add_cookie(cookies[0].clone())
-        .await;
-    response.assert_status_not_found();
-
-    let response = server
-        .get(&format!("/warehouse/{id_warehouse}/products"))
-        .add_cookie(cookies[0].clone())
-        .await;
-    response.assert_status_ok();
-    response.assert_json(&json!({
-        "products": [],
-        "page": 0,
-        "total": 1,
     }));
 }
