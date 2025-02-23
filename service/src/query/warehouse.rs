@@ -81,7 +81,42 @@ impl Query {
             .await
     }
 
-    pub async fn find_warehouse_products_by_id<
+    pub async fn find_warehouse_product_by_id(
+        conn: &Connection,
+        warehouse_id: uuid::Uuid,
+        product_id: uuid::Uuid,
+    ) -> Result<Option<(warehouse_product::Model, product::Model)>, DbErr> {
+        #[cfg(feature = "cache")]
+        cache_get!(
+            conn,
+            format!("warehouse_product:{warehouse_id}/{product_id}",),
+            (warehouse_product::Model, product::Model)
+        );
+
+        let result = WarehouseProduct::find_by_id((warehouse_id, product_id))
+            .find_also_related(Product)
+            .one(&conn.db_connection)
+            .await?;
+
+        match result {
+            Some((warehouse_product, Some(product))) => {
+                let result = (warehouse_product, product);
+                #[cfg(feature = "cache")]
+                cache_set!(
+                    conn,
+                    format!("warehouse_product:{warehouse_id}/{product_id}"),
+                    result,
+                    60 * 60 * 3
+                );
+
+                Ok(Some(result))
+            }
+            Some(_) => Ok(None),
+            None => Ok(None),
+        }
+    }
+
+    pub async fn list_warehouse_products<
         Filter: sea_query::IntoCondition + std::fmt::Debug + Clone,
         Sort: IntoIterator<Item = (impl IntoSimpleExpr, Order)> + std::fmt::Debug + Clone,
         Page: Into<u64> + Copy,
@@ -149,7 +184,7 @@ impl Query {
         }
     }
 
-    pub async fn count_warehouse_products_with_condition<Filter: sea_query::IntoCondition>(
+    pub async fn count_warehouse_products<Filter: sea_query::IntoCondition>(
         conn: &Connection,
         id: uuid::Uuid,
         filter: Filter,
