@@ -222,7 +222,10 @@ fn auth_optional_routes(path: &str) -> OpenApiRouter<state::AppState> {
                     .routes(routes!(api::warehouse::get::get_all_warehouses))
                     .routes(routes!(api::warehouse::new::post_new_warehouse))
                     .routes(routes!(api::warehouse::edit::edit_warehouse))
-                    .routes(routes!(api::warehouse::delete::delete_warehouse)),
+                    .routes(routes!(api::warehouse::delete::delete_warehouse))
+                    .routes(routes!(api::warehouse::new::post_new_warehouse_product))
+                    .routes(routes!(api::warehouse::get::get_warehouse_product))
+                    .routes(routes!(api::warehouse::get::get_all_warehouse_products)),
             ),
     )
 }
