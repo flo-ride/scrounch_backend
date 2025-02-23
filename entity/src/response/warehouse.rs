@@ -2,7 +2,12 @@
 
 use serde_with::skip_serializing_none;
 
-use super::product::ProductResponse;
+use crate::{
+    error::impl_from_error_to_string,
+    models::{product, warehouse, warehouse_product},
+};
+
+use super::product::{ProductResponse, ProductResponseError};
 
 /// Response structure for a warehouse, including its details.
 #[skip_serializing_none]
@@ -25,9 +30,9 @@ pub struct WarehouseResponse {
     /// Indicates whether the warehouse is currently disabled.
     pub disabled: bool,
 }
-impl From<crate::models::warehouse::Model> for WarehouseResponse {
+impl From<warehouse::Model> for WarehouseResponse {
     /// Constructs a WarehouseResponse from a warehouse model, returning an error if conversion fails.
-    fn from(value: crate::models::warehouse::Model) -> Self {
+    fn from(value: warehouse::Model) -> Self {
         Self {
             id: value.id,
             name: value.name,
@@ -64,6 +69,25 @@ pub struct WarehouseListResponse {
     pub warehouses: Vec<WarehouseResponse>,
 }
 
+/// Enum representing errors that can occur during product response construction.
+#[derive(Debug, PartialEq, Clone)]
+pub enum WarehouseProductResponseError {
+    /// Error for the linked product
+    ProductResponseError(ProductResponseError),
+}
+impl std::error::Error for WarehouseProductResponseError {}
+
+impl std::fmt::Display for WarehouseProductResponseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::ProductResponseError(err) => {
+                write!(f, "Product Response Error: {err}")
+            }
+        }
+    }
+}
+impl_from_error_to_string!(WarehouseProductResponseError, InternalError);
+
 /// Represent a link between a Warehouse and a Product
 #[skip_serializing_none]
 #[derive(Debug, Clone, PartialEq, serde::Serialize, utoipa::ToSchema)]
@@ -82,11 +106,28 @@ pub struct WarehouseProductResponse {
     pub created_at: chrono::DateTime<chrono::Utc>,
 }
 
+impl TryFrom<(warehouse_product::Model, product::Model)> for WarehouseProductResponse {
+    type Error = WarehouseProductResponseError;
+
+    /// Constructs a WarehouseResponse from a warehouse model, returning an error if conversion fails.
+    fn try_from(
+        (warehouse_product, product): (warehouse_product::Model, product::Model),
+    ) -> Result<Self, Self::Error> {
+        Ok(Self {
+            quantity: warehouse_product.quantity,
+            product: product
+                .try_into()
+                .map_err(WarehouseProductResponseError::ProductResponseError)?,
+            created_at: warehouse_product.created_at.into(),
+        })
+    }
+}
+
 /// Represent the lists of products for this Warehouse
 #[derive(Debug, Clone, PartialEq, serde::Serialize, utoipa::ToSchema)]
 pub struct WarehouseProductsListResponse {
     /// The lists of products for this Warehouse
-    pub products: Vec<ProductResponse>,
+    pub products: Vec<WarehouseProductResponse>,
 
     /// Total number of pages available.
     pub total_page: u64,
