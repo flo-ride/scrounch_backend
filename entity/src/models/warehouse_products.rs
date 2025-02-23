@@ -27,7 +27,8 @@ pub struct Model {
     pub product_id: Uuid,
 
     /// The quantity of this product in this warehouse
-    pub quantity: i32,
+    #[sea_orm(column_type = "Decimal(Some((10, 2)))")]
+    pub quantity: Decimal,
 
     /// Timestamp for when the link was created.
     #[sea_orm(filter_override = "chrono::DateTime<chrono::Utc>", filter_plus_order)]
