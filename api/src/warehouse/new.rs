@@ -5,11 +5,18 @@
 //! Admin privileges are required to access this route.
 
 use crate::utils::openapi::WAREHOUSE_TAG;
-use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
+use axum::{
+    extract::{Path, State},
+    http::StatusCode,
+    response::IntoResponse,
+    Json,
+};
 use entity::{
     error::{AppError, ErrorResponse},
-    models::warehouse::ActiveModel,
-    request::warehouse::NewWarehouseRequest,
+    models::{warehouse, warehouse_product},
+    request::warehouse::{
+        NewWarehouseProductRequest, NewWarehouseRequest, WarehouseProductRequestError,
+    },
 };
 use extractor::profile::admin::Admin;
 use service::Connection;
@@ -45,7 +52,7 @@ pub async fn post_new_warehouse(
     State(conn): State<Connection>,
     Json(warehouse): Json<NewWarehouseRequest>,
 ) -> Result<impl IntoResponse, AppError> {
-    let warehouse_model: ActiveModel = warehouse.clone().try_into()?;
+    let warehouse_model: warehouse::ActiveModel = warehouse.clone().try_into()?;
 
     let result = service::Mutation::create_warehouse(&conn, warehouse_model).await?;
     let id = result.id;
@@ -58,4 +65,70 @@ pub async fn post_new_warehouse(
     );
 
     Ok((StatusCode::CREATED, id.to_string()).into_response())
+}
+
+/// Handles the creation of a new warehouse product.
+///
+/// This endpoint allows an administrator to associate a product with a warehouse.
+/// It verifies the existence of both the warehouse and the product before proceeding
+/// with the creation. The function returns a `201 Created` response upon success,
+/// or an appropriate error response if the request is invalid or an internal error occurs.
+#[utoipa::path(
+    post,
+    path = "/{warehouse_id}/product/{product_id}", 
+    tag = WAREHOUSE_TAG,
+    request_body(content = NewWarehouseRequest, content_type = "application/json"), 
+    responses(
+        (status = 500, description = "An internal error, most likely related to the database, occurred."), 
+        (status = 404, description = "Can't find Warehouse or Product", body = ErrorResponse), 
+        (status = 400, description = "The request is improperly formatted.", body = ErrorResponse), 
+        (status = 201, description = "Successfully created a new warehouse product")
+    )
+)]
+pub async fn post_new_warehouse_product(
+    admin: Admin,
+    Path(warehouse_id): Path<uuid::Uuid>,
+    Path(product_id): Path<uuid::Uuid>,
+    State(conn): State<Connection>,
+    Json(warehouse_product): Json<NewWarehouseProductRequest>,
+) -> Result<impl IntoResponse, AppError> {
+    let result_warehouse = service::Query::find_warehouse_by_id(&conn, warehouse_id).await?;
+    let result_product = service::Query::find_product_by_id(&conn, product_id).await?;
+
+    match (result_warehouse, result_product) {
+        (Some(_warehouse), Some(_product)) => {
+            let warehouse_product_model: warehouse_product::ActiveModel =
+                warehouse_product.try_into()?;
+
+            let result = service::Mutation::create_warehouse_product(
+                &conn,
+                warehouse_id,
+                product_id,
+                warehouse_product_model,
+            )
+            .await?;
+
+            log::info!(
+        "{admin} added a new warehouse ({warehouse_id}) product ({product_id}) - {result:?}",
+    );
+
+            Ok((StatusCode::CREATED, warehouse_id.to_string()).into_response())
+        }
+        (warehouse_option, product_option) => {
+            if warehouse_option.is_none() {
+                return Err(WarehouseProductRequestError::WarehouseDoesntExist(
+                    warehouse_id,
+                ))?;
+            }
+
+            if product_option.is_none() {
+                return Err(WarehouseProductRequestError::ProductDoesntExist(product_id))?;
+            }
+
+            Err(AppError::InternalError(
+                "Something weird happened, both warehouse & product are here but not too"
+                    .to_string(),
+            ))
+        }
+    }
 }
