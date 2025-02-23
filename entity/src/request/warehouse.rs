@@ -117,7 +117,31 @@ impl TryFrom<EditWarehouseRequest> for warehouse::ActiveModel {
 pub enum WarehouseProductRequestError {
     /// Error when the quantity cannot be converted
     QuantityCannotBeNegative,
+
+    /// Error when the warehouse doesn't exist
+    WarehouseDoesntExist(uuid::Uuid),
+
+    /// Error when the product doesn't exist
+    ProductDoesntExist(uuid::Uuid),
 }
+
+impl std::error::Error for WarehouseProductRequestError {}
+
+/// Formats error messages for the `WarehouseRequestError` enum.
+impl std::fmt::Display for WarehouseProductRequestError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::WarehouseDoesntExist(id) => {
+                write!(f, "Warehouse with id \"{id}\" doesn't exist.")
+            }
+            Self::ProductDoesntExist(id) => {
+                write!(f, "Warehouse with id \"{id}\" doesn't exist.")
+            }
+            Self::QuantityCannotBeNegative => write!(f, "Quantity cannot be negative."),
+        }
+    }
+}
+impl_bad_request_app_error!(WarehouseProductRequestError);
 
 /// Request structure for creating a new warehouse, including validation rules.
 #[derive(Debug, Clone, PartialEq, serde::Deserialize, utoipa::ToSchema)]
