@@ -77,18 +77,21 @@ pub async fn post_new_warehouse(
     post,
     path = "/{warehouse_id}/product/{product_id}", 
     tag = WAREHOUSE_TAG,
-    request_body(content = NewWarehouseRequest, content_type = "application/json"), 
+    params(
+        ("warehouse_id" = uuid::Uuid, Path, description = "The database ID of the warehouse to retrieve."),
+        ("product_id" = uuid::Uuid, Path, description = "The database ID of the product to retrieve."),
+    ),
+    request_body(content = NewWarehouseProductRequest, content_type = "application/json"), 
     responses(
         (status = 500, description = "An internal error, most likely related to the database, occurred."), 
-        (status = 404, description = "Can't find Warehouse or Product", body = ErrorResponse), 
+        (status = 404, description = "Can't find Warehouse or Product"), 
         (status = 400, description = "The request is improperly formatted.", body = ErrorResponse), 
         (status = 201, description = "Successfully created a new warehouse product")
     )
 )]
 pub async fn post_new_warehouse_product(
     admin: Admin,
-    Path(warehouse_id): Path<uuid::Uuid>,
-    Path(product_id): Path<uuid::Uuid>,
+    Path((warehouse_id, product_id)): Path<(uuid::Uuid, uuid::Uuid)>,
     State(conn): State<Connection>,
     Json(warehouse_product): Json<NewWarehouseProductRequest>,
 ) -> Result<impl IntoResponse, AppError> {
@@ -112,7 +115,7 @@ pub async fn post_new_warehouse_product(
         "{admin} added a new warehouse ({warehouse_id}) product ({product_id}) - {result:?}",
     );
 
-            Ok((StatusCode::CREATED, warehouse_id.to_string()).into_response())
+            Ok((StatusCode::CREATED, ""))
         }
         (warehouse_option, product_option) => {
             if warehouse_option.is_none() {
