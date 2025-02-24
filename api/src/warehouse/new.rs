@@ -103,6 +103,16 @@ pub async fn post_new_warehouse_product(
             let warehouse_product_model: warehouse_product::ActiveModel =
                 warehouse_product.try_into()?;
 
+            if service::Query::find_warehouse_product_by_id(&conn, warehouse_id, product_id)
+                .await?
+                .is_some()
+            {
+                return Err(WarehouseProductRequestError::WarehouseProductAlreadyExist(
+                    warehouse_id,
+                    product_id,
+                ))?;
+            }
+
             let result = service::Mutation::create_warehouse_product(
                 &conn,
                 warehouse_id,

@@ -118,6 +118,9 @@ pub enum WarehouseProductRequestError {
     /// Error when the quantity cannot be converted
     QuantityCannotBeNegative,
 
+    /// Error when you attemp to add an existing link
+    WarehouseProductAlreadyExist(uuid::Uuid, uuid::Uuid),
+
     /// Error when the warehouse doesn't exist
     WarehouseDoesntExist(uuid::Uuid),
 
@@ -136,6 +139,9 @@ impl std::fmt::Display for WarehouseProductRequestError {
             }
             Self::ProductDoesntExist(id) => {
                 write!(f, "Warehouse with id \"{id}\" doesn't exist.")
+            }
+            Self::WarehouseProductAlreadyExist(warehouse_id, product_id) => {
+                write!(f, "Link between Warehouse \"{warehouse_id}\" and Product \"{product_id}\" already exist.")
             }
             Self::QuantityCannotBeNegative => write!(f, "Quantity cannot be negative."),
         }
