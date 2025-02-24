@@ -133,7 +133,7 @@ pub async fn get_all_warehouses(
         (status = 500, description = "An internal error, most likely related to the database, occurred."), 
         (status = 404, description = "The warehouse doesn't exist, or is disabled and the requester is not an admin."), 
         (status = 400, description = "The request is improperly formatted."), 
-        (status = 200, description = "The warehouse was successfully retrieved.", body = WarehouseResponse)
+        (status = 200, description = "The warehouse was successfully retrieved.", body = WarehouseProductResponse)
     ),
     security(
         (),
@@ -178,7 +178,7 @@ pub async fn get_warehouse_product(
         (status = 500, description = "An internal error, most likely related to the database, occurred."), 
         (status = 404, description = "The warehouse doesn't exist, or is disabled and the requester is not an admin."), 
         (status = 400, description = "The request is improperly formatted."), 
-        (status = 200, description = "The warehouse was successfully retrieved.", body = WarehouseResponse)
+        (status = 200, description = "The warehouse was successfully retrieved.", body = WarehouseProductsListResponse)
     ),
     security(
         (),
