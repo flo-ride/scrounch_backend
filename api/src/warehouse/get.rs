@@ -173,6 +173,9 @@ pub async fn get_warehouse_product(
     tag = WAREHOUSE_TAG,
     params(
         ("warehouse_id" = uuid::Uuid, Path, description = "The database ID of the warehouse to retrieve."),
+        Pagination,
+        Warehouse_productFilterQuery,
+        Warehouse_productSortQuery,
     ),
     responses(
         (status = 500, description = "An internal error, most likely related to the database, occurred."), 
