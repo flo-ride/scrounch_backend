@@ -2,8 +2,8 @@
 
 use crate::utils::openapi::USER_TAG;
 use axum::{
-    extract::{Path, State},
     Json,
+    extract::{Path, State},
 };
 use axum_extra::extract::Query;
 use entity::models::user::{UserFilterQuery, UserSortQuery};

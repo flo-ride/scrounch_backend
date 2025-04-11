@@ -1,9 +1,9 @@
 //! This file is inspired from https://github.com/pfzetto/axum-oidc
 
 use testcontainers::{
+    ContainerAsync,
     core::{CmdWaitFor, ExecCommand, Image, WaitFor},
     runners::AsyncRunner,
-    ContainerAsync,
 };
 
 #[derive(Debug, Default, Clone)]
@@ -22,8 +22,11 @@ impl Image for KeycloakImage {
     }
 
     fn ready_conditions(&self) -> Vec<WaitFor> {
-        vec![WaitFor::message_on_stdout("Listening on:"),
-        WaitFor::message_on_stdout("Running the server in development mode. DO NOT use this configuration in production.")
+        vec![
+            WaitFor::message_on_stdout("Listening on:"),
+            WaitFor::message_on_stdout(
+                "Running the server in development mode. DO NOT use this configuration in production.",
+            ),
         ]
     }
 

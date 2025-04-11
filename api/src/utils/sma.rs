@@ -4,8 +4,8 @@
 
 use super::openapi::MISC_TAG;
 use axum::{
-    extract::{Query, State},
     Json,
+    extract::{Query, State},
 };
 use entity::{
     error::AppError,
@@ -18,7 +18,7 @@ use entity::{
 use extractor::{profile::admin::Admin, utils::SmaParams};
 use futures::future::join_all;
 use sea_orm::ActiveValue::Set;
-use service::{s3::FileType, Connection};
+use service::{Connection, s3::FileType};
 
 /// Enum representing changes in SMA products.
 ///

@@ -60,13 +60,19 @@ impl std::fmt::Display for ProductRequestError {
                 max_quantity_per_command,
                 max,
             ) => {
-                write!(f, "Max Quantity Per Command \"{max_quantity_per_command}\" cannot be bigger than {max}")
+                write!(
+                    f,
+                    "Max Quantity Per Command \"{max_quantity_per_command}\" cannot be bigger than {max}"
+                )
             }
             ProductRequestError::MaxQuantityPerCommandCannotBeConvertedToI16(
                 max_quantity_per_command,
                 err,
             ) => {
-                write!(f, "Max Quantity Per Command \"{max_quantity_per_command}\" cannot be converted to i16 {err}")
+                write!(
+                    f,
+                    "Max Quantity Per Command \"{max_quantity_per_command}\" cannot be converted to i16 {err}"
+                )
             }
             ProductRequestError::ImageDoesNotExist(image) => {
                 write!(f, "Image \"{image}\" does't exist in S3")
@@ -153,7 +159,7 @@ impl TryFrom<NewProductRequest> for ActiveModel {
                     match Decimal::from_str_exact(&price) {
                         Ok(price) => Set(Some(price)),
                         Err(err) => {
-                            return Err(Self::Error::PriceCannotBeConvertedInDecimal(price, err))
+                            return Err(Self::Error::PriceCannotBeConvertedInDecimal(price, err));
                         }
                     }
                 }
@@ -187,7 +193,7 @@ impl TryFrom<NewProductRequest> for ActiveModel {
                         Err(err) => {
                             return Err(Self::Error::MaxQuantityPerCommandCannotBeConvertedToI16(
                                 max, err,
-                            ))
+                            ));
                         }
                     }
                 }
@@ -298,7 +304,7 @@ impl TryFrom<EditProductRequest> for ActiveModel {
                             Err(err) => {
                                 return Err(Self::Error::PriceCannotBeConvertedInDecimal(
                                     price, err,
-                                ))
+                                ));
                             }
                         }
                     }
@@ -331,7 +337,7 @@ impl TryFrom<EditProductRequest> for ActiveModel {
                                     Self::Error::MaxQuantityPerCommandCannotBeConvertedToI16(
                                         max, err,
                                     ),
-                                )
+                                );
                             }
                         }
                     }

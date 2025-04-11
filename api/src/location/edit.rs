@@ -2,10 +2,10 @@
 
 use crate::utils::openapi::LOCATION_TAG;
 use axum::{
+    Json,
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
-    Json,
 };
 use entity::{
     error::{AppError, ErrorResponse},

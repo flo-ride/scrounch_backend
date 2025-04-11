@@ -9,7 +9,7 @@ use super::openapi::MISC_TAG;
 use axum::{
     body::Body,
     extract::{Path, Query, State},
-    http::{header::CACHE_CONTROL, HeaderMap, HeaderValue},
+    http::{HeaderMap, HeaderValue, header::CACHE_CONTROL},
     response::IntoResponse,
 };
 use entity::error::AppError;

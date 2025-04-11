@@ -5,14 +5,14 @@
 //! Admin privileges are required to access this route.
 
 use crate::utils::openapi::PRODUCT_TAG;
-use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
+use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
 use entity::{
     error::{AppError, ErrorResponse},
     models::product::ActiveModel,
     request::product::NewProductRequest,
 };
 use extractor::profile::admin::Admin;
-use service::{s3::FileType, Connection};
+use service::{Connection, s3::FileType};
 
 /// Handler for creating a new product.
 ///

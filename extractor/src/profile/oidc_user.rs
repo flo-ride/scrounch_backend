@@ -6,7 +6,7 @@
 //! representation of OIDC user data for further use in profile-related operations.
 
 use axum::http::StatusCode;
-use axum_oidc::{error::ExtractorError, EmptyAdditionalClaims, OidcClaims};
+use axum_oidc::{EmptyAdditionalClaims, OidcClaims, error::ExtractorError};
 
 /// Represents an OpenID Connect (OIDC) user with essential profile information.
 ///

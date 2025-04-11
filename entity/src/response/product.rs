@@ -27,7 +27,10 @@ impl std::fmt::Display for ProductResponseError {
                 write!(f, "Price \"{price}\" cannot be converted in : {err}")
             }
             Self::MaxPerCommandCannotBeConverted(max_quantity_per_command, err) => {
-                write!(f, "Max Quantity Per Command \"{max_quantity_per_command}\" cannot be converted {err}")
+                write!(
+                    f,
+                    "Max Quantity Per Command \"{max_quantity_per_command}\" cannot be converted {err}"
+                )
             }
             Self::DisplayOrderCannotBeConverted(display_order, err) => {
                 write!(

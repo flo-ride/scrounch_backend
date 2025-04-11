@@ -2,14 +2,14 @@
 
 use crate::utils::openapi::PRODUCT_TAG;
 use axum::{
+    Json,
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
-    Json,
 };
 use entity::{error::AppError, models::product::ActiveModel, request::product::EditProductRequest};
 use extractor::profile::admin::Admin;
-use service::{s3::FileType, Connection};
+use service::{Connection, s3::FileType};
 
 /// Edit an existing product by ID in the store.
 ///

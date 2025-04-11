@@ -1,6 +1,6 @@
 #[cfg(feature = "cache")]
 use crate::r#macro::{cache_del, cache_mdel, cache_set};
-use crate::{mutation::Mutation, Connection};
+use crate::{Connection, mutation::Mutation};
 use ::entity::models::{
     prelude::{Warehouse, WarehouseProduct, WarehouseRecipe},
     warehouse, warehouse_product, warehouse_recipe,

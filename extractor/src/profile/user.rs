@@ -10,7 +10,7 @@ use axum::{
     http::StatusCode,
 };
 use entity::response::user::UserResponse;
-use service::{sea_orm::DbErr, Connection};
+use service::{Connection, sea_orm::DbErr};
 
 use super::oidc_user::{OidcUser, OidcUserExtractorError};
 

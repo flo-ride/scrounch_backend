@@ -2,10 +2,10 @@
 
 use crate::utils::openapi::USER_TAG;
 use axum::{
+    Json,
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
-    Json,
 };
 use entity::{error::AppError, request::user::EditUserRequest};
 use extractor::profile::{admin::Admin, user::User};

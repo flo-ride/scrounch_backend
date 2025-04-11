@@ -141,7 +141,10 @@ impl std::fmt::Display for WarehouseProductRequestError {
                 write!(f, "Warehouse with id \"{id}\" doesn't exist.")
             }
             Self::WarehouseProductAlreadyExist(warehouse_id, product_id) => {
-                write!(f, "Link between Warehouse \"{warehouse_id}\" and Product \"{product_id}\" already exist.")
+                write!(
+                    f,
+                    "Link between Warehouse \"{warehouse_id}\" and Product \"{product_id}\" already exist."
+                )
             }
             Self::QuantityCannotBeNegative => write!(f, "Quantity cannot be negative."),
         }

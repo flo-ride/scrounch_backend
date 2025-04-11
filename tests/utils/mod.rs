@@ -3,7 +3,7 @@ use axum_test::{TestServer, TestServerBuilder};
 use containers::keycloak::{Keycloak, Realm, User};
 use futures::future::join_all;
 use scrounch_backend::app;
-use testcontainers::{runners::AsyncRunner, ContainerAsync};
+use testcontainers::{ContainerAsync, runners::AsyncRunner};
 use testcontainers_modules::{minio::MinIO, postgres::Postgres, redis::Redis};
 
 use crate::utils;

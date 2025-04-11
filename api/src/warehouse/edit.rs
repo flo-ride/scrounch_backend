@@ -2,10 +2,10 @@
 
 use crate::utils::openapi::WAREHOUSE_TAG;
 use axum::{
+    Json,
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
-    Json,
 };
 use entity::{error::AppError, models::warehouse, request::warehouse::EditWarehouseRequest};
 use extractor::profile::admin::Admin;

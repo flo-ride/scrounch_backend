@@ -7,7 +7,7 @@
 use std::str::FromStr;
 
 use axum::response::IntoResponse;
-use axum_oidc::{error::MiddlewareError, EmptyAdditionalClaims};
+use axum_oidc::{EmptyAdditionalClaims, error::MiddlewareError};
 
 /// Provides a session layer for managing user sessions.
 ///

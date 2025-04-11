@@ -7,7 +7,7 @@
 
 #[cfg(feature = "cache")]
 use crate::r#macro::{cache_get, cache_mget, cache_mset, cache_set};
-use crate::{query::Query, Connection};
+use crate::{Connection, query::Query};
 use ::entity::models::{user, user::Entity as User};
 use sea_orm::*;
 

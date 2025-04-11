@@ -85,7 +85,7 @@ impl TryFrom<crate::models::refill::Model> for RefillResponse {
             price: match value.price.try_into() {
                 Ok(price) => price,
                 Err(err) => {
-                    return Err(Self::Error::AmountInEuroCannotBeConverted(value.price, err))
+                    return Err(Self::Error::AmountInEuroCannotBeConverted(value.price, err));
                 }
             },
             price_currency: value.price_currency.into(),
@@ -95,7 +95,7 @@ impl TryFrom<crate::models::refill::Model> for RefillResponse {
                     return Err(Self::Error::AmountInEpicoinCannotBeConverted(
                         value.credit,
                         err,
-                    ))
+                    ));
                 }
             },
             credit_currency: value.credit_currency.into(),

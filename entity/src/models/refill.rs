@@ -2,7 +2,7 @@
 //! structure of refills, including unique identifiers, timestamps, amounts
 //! in euros and "epicoin", and an active state marker.
 
-use sea_orm::{entity::prelude::*, ActiveValue::Set};
+use sea_orm::{ActiveValue::Set, entity::prelude::*};
 use serde::{Deserialize, Serialize};
 
 use super::sea_orm_active_enums::Currency;

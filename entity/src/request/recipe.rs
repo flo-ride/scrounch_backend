@@ -165,7 +165,7 @@ impl TryFrom<RecipeIngredientRequest> for recipe_ingredients::ActiveModel {
                     Err(err) => {
                         return Err(Self::Error::QuantityCannotBeConvertedInDecimal(
                             quantity, err,
-                        ))
+                        ));
                     }
                 }
             },

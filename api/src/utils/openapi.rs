@@ -11,8 +11,8 @@
 
 use service::s3::FileType;
 use utoipa::openapi::{
-    security::{ApiKey, ApiKeyValue, SecurityScheme},
     LicenseBuilder, OpenApi,
+    security::{ApiKey, ApiKeyValue, SecurityScheme},
 };
 use utoipa_swagger_ui::SwaggerUi;
 

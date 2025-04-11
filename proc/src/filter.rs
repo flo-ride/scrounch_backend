@@ -1,7 +1,7 @@
 use crate::helper::{CaseStyle, CaseStyleHelpers};
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
-use syn::{parse_macro_input, Attribute, Data, DeriveInput, Fields, LitStr};
+use syn::{Attribute, Data, DeriveInput, Fields, LitStr, parse_macro_input};
 
 /// Namespace and attribute keys for `flo_orm`.
 const FLO_ORM_NAMESPACE: &str = "sea_orm";

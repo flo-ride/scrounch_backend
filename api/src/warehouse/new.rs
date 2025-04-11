@@ -6,10 +6,10 @@
 
 use crate::utils::openapi::WAREHOUSE_TAG;
 use axum::{
+    Json,
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
-    Json,
 };
 use entity::{
     error::{AppError, ErrorResponse},
@@ -122,8 +122,8 @@ pub async fn post_new_warehouse_product(
             .await?;
 
             log::info!(
-        "{admin} added a new warehouse ({warehouse_id}) product ({product_id}) - {result:?}",
-    );
+                "{admin} added a new warehouse ({warehouse_id}) product ({product_id}) - {result:?}",
+            );
 
             Ok((StatusCode::CREATED, ""))
         }

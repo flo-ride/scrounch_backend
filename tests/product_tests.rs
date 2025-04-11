@@ -1,7 +1,7 @@
 mod utils;
 
 use axum::http::StatusCode;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use utils::{create_basic_session, create_realm_session, generation::get_multipart_random_image};
 
 use crate::utils::containers::keycloak::Realm;

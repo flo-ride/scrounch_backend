@@ -5,7 +5,7 @@
 //! Admin privileges are required to access this route.
 
 use crate::utils::openapi::REFILL_TAG;
-use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
+use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
 use entity::{
     error::{AppError, ErrorResponse},
     models::refill::ActiveModel,

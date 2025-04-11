@@ -110,7 +110,7 @@ impl TryFrom<NewRefillRequest> for ActiveModel {
                 match Decimal::from_str_exact(&price) {
                     Ok(price) => Set(price),
                     Err(err) => {
-                        return Err(Self::Error::PriceCannotBeConvertedInDecimal(price, err))
+                        return Err(Self::Error::PriceCannotBeConvertedInDecimal(price, err));
                     }
                 }
             },
@@ -124,7 +124,7 @@ impl TryFrom<NewRefillRequest> for ActiveModel {
                 match Decimal::from_str_exact(&credit) {
                     Ok(credit) => Set(credit),
                     Err(err) => {
-                        return Err(Self::Error::CreditCannotBeConvertedInDecimal(credit, err))
+                        return Err(Self::Error::CreditCannotBeConvertedInDecimal(credit, err));
                     }
                 }
             },
@@ -196,7 +196,7 @@ impl TryFrom<EditRefillRequest> for ActiveModel {
                     match Decimal::from_str_exact(&price) {
                         Ok(price) => Set(price),
                         Err(err) => {
-                            return Err(Self::Error::PriceCannotBeConvertedInDecimal(price, err))
+                            return Err(Self::Error::PriceCannotBeConvertedInDecimal(price, err));
                         }
                     }
                 }
@@ -215,7 +215,7 @@ impl TryFrom<EditRefillRequest> for ActiveModel {
                     match Decimal::from_str_exact(&credit) {
                         Ok(credit) => Set(credit),
                         Err(err) => {
-                            return Err(Self::Error::CreditCannotBeConvertedInDecimal(credit, err))
+                            return Err(Self::Error::CreditCannotBeConvertedInDecimal(credit, err));
                         }
                     }
                 }

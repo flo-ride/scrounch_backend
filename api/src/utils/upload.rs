@@ -4,8 +4,8 @@
 //! for processing user-uploaded content such as images, documents, or other assets.
 
 use axum::{
-    extract::{Multipart, Query, State},
     Json,
+    extract::{Multipart, Query, State},
 };
 use entity::error::AppError;
 use extractor::profile::admin::Admin;

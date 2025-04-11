@@ -1,6 +1,6 @@
 #[cfg(feature = "cache")]
 use crate::r#macro::{cache_del, cache_mdel, cache_set};
-use crate::{mutation::Mutation, Connection};
+use crate::{Connection, mutation::Mutation};
 use ::entity::models::product::{self, Entity as Product};
 use sea_orm::*;
 
