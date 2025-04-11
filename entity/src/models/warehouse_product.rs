@@ -17,7 +17,6 @@ use serde::{Deserialize, Serialize};
     proc::DeriveToSortQuery,
 )]
 #[sea_orm(table_name = "warehouse_product")]
-
 pub struct Model {
     /// The unique identifier for the warehouse.
     #[sea_orm(primary_key, auto_increment = false)]
