@@ -8,6 +8,16 @@ publish = false
 name = "service"
 path = "src/lib.rs"
 
+[features]
+native-tls = [
+    "fred?/enable-native-tls", 
+]
+rustls-tls = [
+    "fred?/enable-rustls", 
+]
+
+cache = ["dep:fred", "dep:tokio"]
+
 [dependencies]
 # Internal
 entity = { path = "../entity" }
@@ -44,5 +54,3 @@ features = [
     "with-uuid"
 ]
 
-[features]
-cache = ["dep:fred", "dep:tokio"]

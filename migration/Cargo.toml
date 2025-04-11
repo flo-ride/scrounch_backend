@@ -8,17 +8,27 @@ publish = false
 name = "migration"
 path = "src/lib.rs"
 
+[features]
+native-tls = [
+    "sea-orm/runtime-tokio-native-tls", 
+    "sea-orm-migration/runtime-tokio-native-tls", 
+]
+rustls-tls = [
+    "sea-orm/runtime-tokio-rustls", 
+    "sea-orm-migration/runtime-tokio-rustls", 
+]
+
 [dependencies]
 async-std = { workspace = true, features = ["attributes", "tokio1"] }
 
 [dependencies.sea-orm]
 workspace = true
 features = [
-    "runtime-tokio-native-tls",
+    "runtime-tokio",
     "sqlx-postgres",
     "with-chrono",
 ]
 
 [dependencies.sea-orm-migration]
 workspace = true
-features = ["runtime-tokio-rustls", "sqlx-postgres"]
+features = ["runtime-tokio", "sqlx-postgres"]

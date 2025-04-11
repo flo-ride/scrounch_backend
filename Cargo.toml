@@ -52,10 +52,10 @@ fred =  "9.2.1"
 tower-sessions-redis-store = "0.14.0"
 
 # S3 / Minio
-rust-s3 = "0.35.1"
+rust-s3 = { version = "0.35.1", default-features = false }
 
 # HTTP Client
-reqwest =  "0.12.7"
+reqwest =  { version = "0.12.7", default-features = false }
 
 # Utils
 uuid = "1.10.0"
@@ -78,8 +78,32 @@ testcontainers = "0.22.0"
 testcontainers-modules = "0.10.0"
 
 [features]
-default = ["cache"]
-cache = ["dep:fred", "dep:tower-sessions-redis-store", "service/cache" ]
+default = ["cache", "native-tls"]
+
+native-tls = [
+    "sea-orm/runtime-tokio-native-tls", 
+    "fred?/enable-native-tls", 
+    "tower-sessions-redis-store?/enable-native-tls",
+    "rust-s3/use-tokio-native-tls",
+    "reqwest/native-tls",
+    "service/native-tls",
+    "migration/native-tls",
+    "entity/native-tls",
+    "api/native-tls"
+]
+rustls-tls = [
+    "sea-orm/runtime-tokio-rustls", 
+    "fred?/enable-rustls", 
+    "tower-sessions-redis-store?/enable-rustls",
+    "rust-s3/tokio-rustls-tls",
+    "reqwest/rustls-tls",
+    "service/rustls-tls",
+    "migration/rustls-tls",
+    "entity/rustls-tls",
+    "api/rustls-tls"
+]
+
+cache = ["dep:fred", "dep:tower-sessions-redis-store", "service/cache"]
 
 
 [dependencies]
@@ -100,7 +124,7 @@ tokio-util = { workspace = true, features = ["io"] }
 futures = { workspace = true }
 
 # Database
-sea-orm = { workspace = true, features = ["sqlx-postgres", "runtime-tokio-rustls", "with-chrono"] }
+sea-orm = { workspace = true, features = ["sqlx-postgres", "with-chrono", "runtime-tokio"] }
 
 # CLI + Env + Config
 clap = { workspace = true, features = ["derive", "env"] }
@@ -131,10 +155,10 @@ fred = { workspace = true, optional = true, features = ["partial-tracing", "serd
 tower-sessions-redis-store = { workspace = true, optional = true }
 
 # S3 / Minio
-rust-s3 = { workspace = true }
+rust-s3 = { workspace = true, features = ["fail-on-err", "tags", "with-tokio"] }
 
 # HTTP Client
-reqwest = { workspace = true, features = ["json", "cookies"] }
+reqwest = { workspace = true, features = ["charset", "http2", "macos-system-configuration", "json", "cookies"] }
 
 # Utils
 uuid = { workspace = true, features = ["v4", "fast-rng", "serde"] }

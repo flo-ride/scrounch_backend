@@ -3,6 +3,16 @@ name = "api"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+native-tls = [
+    "sea-orm/runtime-tokio-native-tls", 
+    "rust-s3/use-tokio-native-tls",
+]
+rustls-tls = [
+    "sea-orm/runtime-tokio-rustls", 
+    "rust-s3/tokio-rustls-tls",
+]
+
 [dependencies]
 # Internal
 entity = { path = "../entity" }
@@ -17,7 +27,7 @@ axum-extra = { workspace = true, features = ["query"] }
 log = { workspace = true }
 
 # Database
-sea-orm = { workspace = true, features = ["sqlx-postgres", "runtime-tokio-rustls", "with-chrono"] }
+sea-orm = { workspace = true, features = ["sqlx-postgres", "runtime-tokio", "with-chrono"] }
 
 # Runtime
 tokio = { workspace = true, features = ["full"] }
@@ -38,7 +48,7 @@ serde_json = { workspace = true }
 serde_with = { workspace = true, features = ["macros"] }
 
 # S3 / Minio
-rust-s3 = { workspace = true }
+rust-s3 = { workspace = true, features = ["fail-on-err", "tags", "with-tokio"] }
 
 # HTTP Client
 reqwest = { workspace = true, features = ["json", "cookies"] }
