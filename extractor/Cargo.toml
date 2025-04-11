@@ -9,28 +9,28 @@ name = "extractor"
 path = "src/lib.rs"
 
 [dependencies]
-## Rest API
-axum = { version = "0.7.6", features = ["multipart"] }
-tower = "0.5.1"
-
 # Internal
 service = { path = "../service" }
 entity = { path = "../entity" }
 
+## Rest API
+axum = { workspace = true, features = ["multipart"] }
+tower = { workspace = true }
+
 # Log
-log = "0.4.22"
+log = { workspace = true }
 
 # OpenAPI
-utoipa = { version = "5.2.0", features = ["axum_extras", "uuid", "chrono", "time", "decimal", "non_strict_integers"] }
+utoipa = { workspace = true, features = ["axum_extras", "uuid", "chrono", "time", "decimal", "non_strict_integers"] }
 
 # Auth + OIDC
-axum-oidc = "0.5.0"
+axum-oidc = { workspace = true }
 
 # Serialisation + Deserialisation 
-serde = { version = "1.0.210", features = ["derive"] }
-serde_json = { version = "1.0.114" }
-serde_with = { version ="3.11.0", features = ["macros"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+serde_with = { workspace = true, features = ["macros"] }
 
 # Utils
-uuid = { version = "1.10.0", features = ["v4", "fast-rng", "serde"] }
-chrono = "0.4.38"
+uuid = { workspace = true, features = ["v4", "fast-rng", "serde"] }
+chrono = { workspace = true }

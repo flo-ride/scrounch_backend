@@ -10,41 +10,41 @@ service = { path = "../service" }
 extractor = { path = "../extractor" }
 
 ## Rest API
-axum = { version = "0.7.6", features = ["multipart"] }
-axum-extra = { version = "0.9.6", features = ["query"] }
+axum = { workspace = true, features = ["multipart"] }
+axum-extra = { workspace = true, features = ["query"] }
 
 # Trace + Log
-log = "0.4.22"
+log = { workspace = true }
 
 # Database
-sea-orm = { version = "1.0.1", features = ["sqlx-postgres", "runtime-tokio-rustls", "with-chrono"] }
+sea-orm = { workspace = true, features = ["sqlx-postgres", "runtime-tokio-rustls", "with-chrono"] }
 
 # Runtime
-tokio = { version = "1.40.0", features = ["full"] }
-tokio-util = { version = "0.7.12", features = ["io"] }
-futures = "0.3.30"
+tokio = { workspace = true, features = ["full"] }
+tokio-util = { workspace = true, features = ["io"] }
+futures = { workspace = true }
 
 # OpenAPI
-utoipa = { version = "5.2.0", features = ["axum_extras", "uuid", "chrono", "time", "decimal", "non_strict_integers"] }
-utoipa-axum = "0.1.2"
-utoipa-swagger-ui = { version = "8.0.3", features = ["axum"] }
+utoipa = { workspace = true, features = ["axum_extras", "uuid", "chrono", "time", "decimal", "non_strict_integers"] }
+utoipa-axum = { workspace = true }
+utoipa-swagger-ui = { workspace = true, features = ["axum"] }
 
 # Auth + OIDC
-axum-oidc = "0.5.0"
+axum-oidc = { workspace = true }
 
 # Serialisation + Deserialisation 
-serde = { version = "1.0.210", features = ["derive"] }
-serde_json = { version = "1.0.114" }
-serde_with = { version ="3.11.0", features = ["macros"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+serde_with = { workspace = true, features = ["macros"] }
 
 # S3 / Minio
-rust-s3 = "0.35.1"
+rust-s3 = { workspace = true }
 
 # HTTP Client
-reqwest = { version = "0.12.7", features = ["json", "cookies"] }
+reqwest = { workspace = true, features = ["json", "cookies"] }
 
 # Utils
-uuid = { version = "1.10.0", features = ["v4", "fast-rng", "serde"] }
-chrono = "0.4.38"
-url = "2.5.2"
-rust_decimal = "1.36.0"
+uuid = { workspace = true, features = ["v4", "fast-rng", "serde"] }
+chrono = { workspace = true }
+url = { workspace = true }
+rust_decimal = { workspace = true }

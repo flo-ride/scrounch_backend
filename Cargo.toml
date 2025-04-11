@@ -6,37 +6,83 @@ edition = "2021"
 [workspace]
 members = [".", "migration", "entity", "service", "extractor", "api", "proc"]
 
-# Enable high optimizations for dependencies:
-[profile.dev.package."*"]
-opt-level = 3
-
-# Git hooks
-[dev-dependencies.cargo-husky]
-version = "1.5.0"
-default-features = false
-features = ["precommit-hook", "run-cargo-check", "run-cargo-clippy", "run-cargo-fmt"]
-
-[dev-dependencies]
-http-body-util = { version = "0.1.0" }
-tower = { version = "0.5.1", features = ["util"] }
-testcontainers = "0.22.0"
-testcontainers-modules = { version = "0.10.0", features = ["postgres", "minio", "redis"] }
-regex = "1.10.6"
-axum-test = "16.2.0"
-
-[dependencies]
-## Rest API
-axum = { version = "0.7.6", features = ["multipart"] }
+[workspace.dependencies]
+# Rest API
+axum =  "0.7.6"
+axum-extra = "0.9.6"
 tower = "0.5.1"
+http-body-util =  "0.1.0"
 
 # Runtime
-tokio = { version = "1.40.0", features = ["full"] }
-tokio-util = { version = "0.7.12", features = ["io"] }
+tokio = "1.40.0"
+tokio-util =  "0.7.12"
 futures = "0.3.30"
+async-std =  "1"
 
 # Database
-sea-orm = { version = "1.0.1", features = ["sqlx-postgres", "runtime-tokio-rustls", "with-chrono"] }
+sea-orm = "1.0.1"
+sea-orm-migration = "1.0.1"
 
+# CLI + Env + Config
+clap = "4.5.17"
+dotenvy = "0.15.7"
+
+# Trace + Log
+tower-http = "0.5.2"
+tracing =  "0.1.40"
+tracing-subscriber = "0.3.18"
+log = "0.4.22"
+
+# OpenAPI
+utoipa = "5.2.0"
+utoipa-axum = "0.1.2"
+utoipa-swagger-ui =  "8.0.3"
+
+# Auth + OIDC
+axum-oidc = "0.5.0"
+tower-sessions = "0.13.0"
+
+# Serialisation + Deserialisation 
+serde = "1.0.210"
+serde_json =  "1.0.114"
+serde_with = "3.11.0"
+
+# Cache (Redis/Valkey)
+fred =  "9.2.1"
+tower-sessions-redis-store = "0.14.0"
+
+# S3 / Minio
+rust-s3 = "0.35.1"
+
+# HTTP Client
+reqwest =  "0.12.7"
+
+# Utils
+uuid = "1.10.0"
+chrono = "0.4.38"
+url = "2.5.2"
+rust_decimal = "1.36.0"
+humantime = "2.1.0"
+strum_macros = "0.26.4"
+regex = "1.10.6"
+
+# Procs Macro
+syn =  "2.0.89"
+quote = "1.0.37"
+proc-macro2 = "1.0.92"
+heck = "0.5.0"
+
+# Tests
+axum-test = "16.2.0"
+testcontainers = "0.22.0"
+testcontainers-modules = "0.10.0"
+
+[features]
+default = ["cache"]
+cache = ["dep:fred", "dep:tower-sessions-redis-store", "service/cache" ]
+
+
+[dependencies]
 # Internal
 migration = { path = "migration" }
 entity = { path = "entity" }
@@ -44,47 +90,73 @@ service = { path = "service" }
 extractor = { path = "extractor" }
 api = { path = "api" }
 
+## Rest API
+axum = { workspace = true, features = ["multipart"] }
+tower = { workspace = true }
+
+# Runtime
+tokio = { workspace = true, features = ["full"] }
+tokio-util = { workspace = true, features = ["io"] }
+futures = { workspace = true }
+
+# Database
+sea-orm = { workspace = true, features = ["sqlx-postgres", "runtime-tokio-rustls", "with-chrono"] }
+
 # CLI + Env + Config
-clap = { version = "4.5.17", features = ["derive", "env"] }
-dotenvy = { version = "0.15.7", features = ["clap"] }
+clap = { workspace = true, features = ["derive", "env"] }
+dotenvy = { workspace = true, features = ["clap"] }
 
 # Trace + Log
-tower-http = { version = "0.5.2", features = ["trace", "cors"] }
-tracing = { version = "0.1.40" }
-tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
-log = "0.4.22"
+tower-http = { workspace = true, features = ["trace", "cors"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
+log = { workspace = true }
 
 # OpenAPI
-utoipa = { version = "5.2.0", features = ["axum_extras", "uuid", "chrono", "time", "decimal", "non_strict_integers"] }
-utoipa-axum = "0.1.2"
-utoipa-swagger-ui = { version = "8.0.3", features = ["axum"] }
+utoipa = { workspace = true, features = ["axum_extras", "uuid", "chrono", "time", "decimal", "non_strict_integers"] }
+utoipa-axum = { workspace = true }
+utoipa-swagger-ui = { workspace = true, features = ["axum"] }
 
 # Auth + OIDC
-axum-oidc = "0.5.0"
-tower-sessions = "0.13.0"
+axum-oidc = { workspace = true }
+tower-sessions = { workspace = true }
 
 # Serialisation + Deserialisation 
-serde = { version = "1.0.210", features = ["derive"] }
-serde_json = { version = "1.0.114" }
-serde_with = { version ="3.11.0", features = ["macros"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+serde_with = { workspace = true, features = ["macros"] }
 
 # Cache (Redis/Valkey)
-fred = { version = "9.2.1", optional = true, features = ["partial-tracing", "serde-json"] }
-tower-sessions-redis-store = { version = "0.14.0", optional = true }
+fred = { workspace = true, optional = true, features = ["partial-tracing", "serde-json"] }
+tower-sessions-redis-store = { workspace = true, optional = true }
 
 # S3 / Minio
-rust-s3 = "0.35.1"
+rust-s3 = { workspace = true }
 
 # HTTP Client
-reqwest = { version = "0.12.7", features = ["json", "cookies"] }
+reqwest = { workspace = true, features = ["json", "cookies"] }
 
 # Utils
-uuid = { version = "1.10.0", features = ["v4", "fast-rng", "serde"] }
-chrono = "0.4.38"
-url = "2.5.2"
-rust_decimal = "1.36.0"
-humantime = "2.1.0"
+uuid = { workspace = true, features = ["v4", "fast-rng", "serde"] }
+chrono = { workspace = true }
+url = { workspace = true }
+rust_decimal = { workspace = true }
+humantime = { workspace = true }
 
-[features]
-default = ["cache"]
-cache = ["dep:fred", "dep:tower-sessions-redis-store", "service/cache" ]
+[dev-dependencies]
+http-body-util = { workspace = true }
+testcontainers = { workspace = true }
+testcontainers-modules = { workspace = true, features = ["postgres", "minio", "redis"] }
+regex = { workspace = true }
+axum-test = { workspace = true }
+
+# Git hooks
+[dev-dependencies.cargo-husky]
+version = "1.5.0"
+default-features = false
+features = ["precommit-hook", "run-cargo-check", "run-cargo-clippy", "run-cargo-fmt"]
+
+# Enable high optimizations for dependencies:
+[profile.dev.package."*"]
+opt-level = 3
+

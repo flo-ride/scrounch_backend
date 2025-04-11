@@ -9,10 +9,10 @@ name = "migration"
 path = "src/lib.rs"
 
 [dependencies]
-async-std = { version = "1", features = ["attributes", "tokio1"] }
+async-std = { workspace = true, features = ["attributes", "tokio1"] }
 
 [dependencies.sea-orm]
-version = "1.0.1"
+workspace = true
 features = [
     "runtime-tokio-native-tls",
     "sqlx-postgres",
@@ -20,5 +20,5 @@ features = [
 ]
 
 [dependencies.sea-orm-migration]
-version = "1.0.1"
+workspace = true
 features = ["runtime-tokio-rustls", "sqlx-postgres"]

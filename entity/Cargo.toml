@@ -12,30 +12,30 @@ path = "src/lib.rs"
 proc = { path = "../proc" }
 
 ## Rest API
-axum = { version = "0.7.6", features = ["multipart"] }
+axum = { workspace = true, features = ["multipart"] }
 
 # S3 / Minio
-rust-s3 = "0.35.1"
+rust-s3 = { workspace = true }
 
 # Serialisation + Deserialisation 
-serde = { version = "1.0.210", features = ["derive"] }
-serde_json = { version = "1.0.114" }
-serde_with = { version ="3.11.0", features = ["macros"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+serde_with = { workspace = true, features = ["macros"] }
 
 # Log
-log = "0.4.22"
+log = { workspace = true }
 
 # OpenAPI
-utoipa = { version = "5.2.0", features = ["axum_extras", "uuid", "chrono", "time", "decimal", "non_strict_integers"] }
+utoipa = { workspace = true, features = ["axum_extras", "uuid", "chrono", "time", "decimal", "non_strict_integers"] }
 
 # Utils
-uuid = { version = "1.10.0", features = ["v4", "fast-rng", "serde"] }
-chrono = "0.4.38"
-rust_decimal = "1.36.0"
-strum_macros = "0.26.4"
+uuid = { workspace = true, features = ["v4", "fast-rng", "serde"] }
+chrono = { workspace = true }
+rust_decimal = { workspace = true }
+strum_macros = { workspace = true }
 
 [dependencies.sea-orm]
-version = "1.0.1"
+workspace = true
 features = [
     "runtime-tokio-native-tls",
     "sqlx-postgres",

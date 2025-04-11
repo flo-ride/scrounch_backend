@@ -13,28 +13,28 @@ path = "src/lib.rs"
 entity = { path = "../entity" }
 
 # Cache
-fred = { version = "9.2.1", optional = true, features = ["serde-json"] }
+fred = { workspace = true, optional = true, features = ["serde-json"] }
 
 # Serialisation + Deserialisation 
-serde = { version = "1.0.210", features = ["derive"] }
-serde_json = { version = "1.0.114" }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
 
 # Runtime
-tokio = { version = "1.40.0", features = ["full"], optional = true }
-futures = "0.3.31"
+tokio = { workspace = true, features = ["full"], optional = true }
+futures = { workspace = true }
 
 # Log
-log = "0.4.22"
+log = { workspace = true }
 
 # OpenAPI
-utoipa = { version = "5.2.0", features = ["axum_extras", "uuid", "chrono", "time", "decimal", "non_strict_integers"] }
+utoipa = { workspace = true, features = ["axum_extras", "uuid", "chrono", "time", "decimal", "non_strict_integers"] }
 
 # Utils
-chrono = "0.4.38"
-uuid = { version = "1.10.0", features = ["v4", "fast-rng", "serde"] }
+chrono = { workspace = true }
+uuid = { workspace = true, features = ["v4", "fast-rng", "serde"] }
 
 [dependencies.sea-orm]
-version = "1.0.1"
+workspace = true
 features = [
     "debug-print",
     "runtime-tokio-native-tls",
