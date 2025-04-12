@@ -52,7 +52,8 @@ fred =  "9.2.1"
 tower-sessions-redis-store = "0.14.0"
 
 # S3 / Minio
-rust-s3 = { version = "0.35.1", default-features = false }
+aws-sdk-s3 = { version = "1.82.0", default-features = false, features = ["default-https-client", "rt-tokio", "sigv4a", "behavior-version-latest"] }
+aws-config = { version = "1.6.1",  features = ["behavior-version-latest"]  }
 
 # HTTP Client
 reqwest =  { version = "0.12.7", default-features = false }
@@ -84,7 +85,6 @@ native-tls = [
     "sea-orm/runtime-tokio-native-tls", 
     "fred?/enable-native-tls", 
     "tower-sessions-redis-store?/enable-native-tls",
-    "rust-s3/use-tokio-native-tls",
     "reqwest/native-tls",
     "service/native-tls",
     "migration/native-tls",
@@ -95,8 +95,9 @@ rustls-tls = [
     "sea-orm/runtime-tokio-rustls", 
     "fred?/enable-rustls", 
     "tower-sessions-redis-store?/enable-rustls",
-    "rust-s3/tokio-rustls-tls",
     "reqwest/rustls-tls",
+    "aws-sdk-s3/rustls",
+    "aws-config/rustls",
     "service/rustls-tls",
     "migration/rustls-tls",
     "entity/rustls-tls",
@@ -155,7 +156,8 @@ fred = { workspace = true, optional = true, features = ["partial-tracing", "serd
 tower-sessions-redis-store = { workspace = true, optional = true }
 
 # S3 / Minio
-rust-s3 = { workspace = true, features = ["fail-on-err", "tags", "with-tokio"] }
+aws-sdk-s3 = { workspace = true }
+aws-config = { workspace = true }
 
 # HTTP Client
 reqwest = { workspace = true, features = ["charset", "http2", "macos-system-configuration", "json", "cookies"] }

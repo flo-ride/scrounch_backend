@@ -96,7 +96,16 @@ pub enum AppError {
 }
 
 impl_from_error_to_string!(sea_orm::DbErr, InternalError);
-impl_from_error_to_string!(s3::error::S3Error, InternalError);
+impl_from_error_to_string!(
+    aws_sdk_s3::operation::head_object::HeadObjectError,
+    InternalError
+);
+impl_from_error_to_string!(
+    aws_sdk_s3::operation::get_object::GetObjectError,
+    InternalError
+);
+impl_from_error_to_string!(aws_sdk_s3::primitives::ByteStreamError, InternalError);
+impl_from_error_to_string!(axum::extract::multipart::MultipartError, InternalError);
 impl_from_error!(ErrorResponse, BadRequest);
 
 impl axum::response::IntoResponse for AppError {
@@ -115,5 +124,11 @@ impl axum::response::IntoResponse for AppError {
             }
             Self::NoContent => (StatusCode::NO_CONTENT, "You're not logged in").into_response(),
         }
+    }
+}
+
+impl<E, R> From<aws_sdk_s3::error::SdkError<E, R>> for AppError {
+    fn from(value: aws_sdk_s3::error::SdkError<E, R>) -> Self {
+        Self::InternalError(value.to_string())
     }
 }

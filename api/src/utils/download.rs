@@ -7,13 +7,11 @@
 
 use super::openapi::MISC_TAG;
 use axum::{
-    body::Body,
     extract::{Path, Query, State},
     http::{HeaderMap, HeaderValue, header::CACHE_CONTROL},
     response::IntoResponse,
 };
 use entity::error::AppError;
-use s3::error::S3Error;
 use service::s3::FileParams;
 
 /// Downloads files from the server's storage.
@@ -50,21 +48,26 @@ use service::s3::FileParams;
 )]
 pub async fn download_file(
     Path(filename): Path<String>,
-    State(conn): State<s3::Bucket>,
+    State(conn): State<entity::s3::S3FileStorage>,
     params: Query<FileParams>,
 ) -> Result<impl IntoResponse, AppError> {
     let path = format!("{}/{filename}", params.file_type);
 
     let stream = conn
-        .get_object_stream(path)
+        .client
+        .get_object()
+        .bucket(&conn.bucket)
+        .key(path)
+        .send()
         .await
-        .map_err(|err| match err {
-            S3Error::HttpFailWithBody(404, _body) => {
+        .map_err(|err| match err.into_service_error() {
+            aws_sdk_s3::operation::get_object::GetObjectError::NoSuchKey(_not_found) => {
                 AppError::NotFound(format!("The file you've asked doesn't exist: {filename}"))
             }
-            _ => err.into(),
+            err => err.into(),
         })?;
-    let body = Body::from_stream(stream.bytes);
+    let content = stream.body.collect().await?.into_bytes();
+    let body = axum::body::Body::from(content);
 
     let headers = HeaderMap::from_iter([(
         CACHE_CONTROL,

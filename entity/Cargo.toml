@@ -11,11 +11,11 @@ path = "src/lib.rs"
 [features]
 native-tls = [
     "sea-orm/runtime-tokio-native-tls", 
-    "rust-s3/use-tokio-native-tls",
 ]
 rustls-tls = [
     "sea-orm/runtime-tokio-rustls", 
-    "rust-s3/tokio-rustls-tls",
+    "aws-sdk-s3/rustls",
+    "aws-config/rustls",
 ]
 
 
@@ -26,7 +26,8 @@ proc = { path = "../proc" }
 axum = { workspace = true, features = ["multipart"] }
 
 # S3 / Minio
-rust-s3 = { workspace = true, features = ["fail-on-err", "tags", "with-tokio"] }
+aws-sdk-s3 = { workspace = true }
+aws-config = { workspace = true }
 
 # Serialisation + Deserialisation 
 serde = { workspace = true, features = ["derive"] }

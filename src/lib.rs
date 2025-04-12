@@ -37,8 +37,7 @@ pub async fn app(arguments: Arguments) -> axum::Router {
         arguments.aws_access_key_id.clone(),
         arguments.aws_secret_access_key.clone(),
     )
-    .await
-    .expect("Couldn't connect to S3 Bucket");
+    .await;
 
     migration::Migrator::up(&db_pool, None)
         .await
@@ -49,7 +48,7 @@ pub async fn app(arguments: Arguments) -> axum::Router {
         db_pool,
         #[cfg(feature = "cache")]
         cache_pool: None,
-        s3_bucket,
+        s3_storage: s3_bucket,
     };
 
     state.arguments = arguments.clone();
@@ -250,29 +249,43 @@ async fn get_database_conn(
 }
 
 async fn get_bucket_conn(
-    bucket_name: String,
-    region: String,
+    bucket: String,
+    region_name: String,
     endpoint: String,
     access_key: String,
     secret_key: String,
-) -> Result<s3::Bucket, s3::error::S3Error> {
-    let region = s3::Region::Custom { region, endpoint };
-    let credentials =
-        s3::creds::Credentials::new(Some(&access_key), Some(&secret_key), None, None, None)?;
-    let bucket =
-        s3::Bucket::new(&bucket_name, region.clone(), credentials.clone())?.with_path_style();
+) -> entity::s3::S3FileStorage {
+    let credentials = aws_sdk_s3::config::Credentials::new(
+        access_key,
+        secret_key,
+        None,
+        None,
+        "loaded-from-custom-env",
+    );
 
-    match bucket.exists().await? {
-        true => Ok(*bucket),
-        false => {
-            s3::Bucket::create_with_path_style(
-                &bucket_name,
-                region,
-                credentials,
-                s3::BucketConfiguration::default(),
-            )
-            .await?;
-            Ok(*bucket)
-        }
-    }
+    let region = aws_config::Region::new(region_name.clone());
+
+    let s3_config = aws_sdk_s3::config::Builder::new()
+        .endpoint_url(endpoint)
+        .credentials_provider(credentials)
+        .region(region.clone())
+        .force_path_style(true)
+        .build();
+    let client = aws_sdk_s3::Client::from_conf(s3_config);
+
+    let constraint = aws_sdk_s3::types::BucketLocationConstraint::from(region_name.as_str());
+
+    let config = aws_sdk_s3::types::CreateBucketConfiguration::builder()
+        .location_constraint(constraint)
+        .build();
+
+    client
+        .create_bucket()
+        .create_bucket_configuration(config)
+        .bucket(&bucket)
+        .send()
+        .await
+        .ok();
+
+    entity::s3::S3FileStorage { bucket, client }
 }

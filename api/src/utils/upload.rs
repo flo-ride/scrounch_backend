@@ -9,7 +9,6 @@ use axum::{
 };
 use entity::error::AppError;
 use extractor::profile::admin::Admin;
-use futures::stream::TryStreamExt;
 use service::s3::FileParams;
 
 use super::openapi::MISC_TAG;
@@ -50,7 +49,7 @@ pub struct FileSchema {
 )]
 pub async fn post_upload_files(
     user: Admin,
-    State(conn): State<s3::Bucket>,
+    State(conn): State<entity::s3::S3FileStorage>,
     params: Query<FileParams>,
     mut multipart: Multipart,
 ) -> Result<Json<Vec<(String, String)>>, AppError> {
@@ -62,33 +61,21 @@ pub async fn post_upload_files(
             .and_then(std::ffi::OsStr::to_str)
             .or(None);
 
-        let mimetype = field
-            .content_type()
-            .unwrap_or("application/octet-stream")
-            .to_string();
-
-        let body_with_io_error =
-            field.map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err));
-
-        let reader = tokio_util::io::StreamReader::new(body_with_io_error);
-
-        futures::pin_mut!(reader);
+        let bytes = field.bytes().await?;
+        let byte_stream = aws_sdk_s3::primitives::ByteStream::from(bytes);
 
         let new_filename = match extension {
             Some(extension) => format!("{}.{extension}", uuid::Uuid::new_v4()),
             None => uuid::Uuid::new_v4().to_string(),
         };
         let s3_path = format!("{}/{new_filename}", params.file_type);
-        conn.put_object_stream_with_content_type(&mut reader, &s3_path, &mimetype)
+        conn.client
+            .put_object()
+            .bucket(&conn.bucket)
+            .key(&s3_path)
+            .body(byte_stream)
+            .send()
             .await?;
-        conn.put_object_tagging(
-            &s3_path,
-            &[
-                ("Author", &user.id.to_string()),
-                ("Type", &params.file_type.to_string()),
-            ],
-        )
-        .await?;
 
         log::info!("{user} just uploaded a new file: \"{filename}\" -> \"{s3_path}\"",);
         result.push((filename, new_filename));
