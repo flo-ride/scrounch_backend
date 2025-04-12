@@ -6,11 +6,11 @@ edition = "2024"
 [features]
 native-tls = [
     "sea-orm/runtime-tokio-native-tls", 
-    "rust-s3/use-tokio-native-tls",
 ]
 rustls-tls = [
     "sea-orm/runtime-tokio-rustls", 
-    "rust-s3/tokio-rustls-tls",
+    "aws-sdk-s3/rustls",
+    "aws-config/rustls",
 ]
 
 [dependencies]
@@ -48,7 +48,8 @@ serde_json = { workspace = true }
 serde_with = { workspace = true, features = ["macros"] }
 
 # S3 / Minio
-rust-s3 = { workspace = true, features = ["fail-on-err", "tags", "with-tokio"] }
+aws-sdk-s3 = { workspace = true }
+aws-config = { workspace = true }
 
 # HTTP Client
 reqwest = { workspace = true, features = ["json", "cookies"] }
