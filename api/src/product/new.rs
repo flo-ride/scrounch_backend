@@ -43,19 +43,26 @@ use service::{Connection, s3::FileType};
 pub async fn post_new_product(
     admin: Admin,
     State(conn): State<Connection>,
-    State(s3): State<s3::Bucket>,
+    State(s3): State<entity::s3::S3FileStorage>,
     Json(product): Json<NewProductRequest>,
 ) -> Result<impl IntoResponse, AppError> {
     // Check if image exist
     if let Some(image) = product.image.clone() {
-        let (_result, _code) = s3
-            .head_object(format!("{}/{}", FileType::Product, image))
+        let _result = s3
+            .client
+            .head_object()
+            .bucket(s3.bucket)
+            .key(format!("{}/{}", FileType::Product, image))
+            .send()
             .await
-            .map_err(|err| match err {
-                s3::error::S3Error::HttpFailWithBody(404, _body) => AppError::BadRequest(
-                    entity::request::product::ProductRequestError::ImageDoesNotExist(image).into(),
-                ),
-                _ => err.into(),
+            .map_err(|err| match err.into_service_error() {
+                aws_sdk_s3::operation::head_object::HeadObjectError::NotFound(_not_found) => {
+                    AppError::BadRequest(
+                        entity::request::product::ProductRequestError::ImageDoesNotExist(image)
+                            .into(),
+                    )
+                }
+                err => err.into(),
             })?;
     }
 

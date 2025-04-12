@@ -38,7 +38,7 @@ pub async fn edit_product(
     admin: Admin,
     Path(id): Path<uuid::Uuid>,
     State(conn): State<Connection>,
-    State(s3): State<s3::Bucket>,
+    State(s3): State<entity::s3::S3FileStorage>,
     Json(edit_product): Json<EditProductRequest>,
 ) -> Result<impl IntoResponse, AppError> {
     let result = service::Query::find_product_by_id(&conn, id).await?;
@@ -69,22 +69,31 @@ pub async fn edit_product(
             }
 
             if let Some(image) = check_image {
-                let (_result, _code) = s3
-                    .head_object(format!("{}/{}", FileType::Product, image))
+                s3.client
+                    .head_object()
+                    .bucket(&s3.bucket)
+                    .key(format!("{}/{}", FileType::Product, image))
+                    .send()
                     .await
-                    .map_err(|err| match err {
-                        s3::error::S3Error::HttpFailWithBody(404, _body) => AppError::BadRequest(
+                    .map_err(|err| match err.into_service_error() {
+                        aws_sdk_s3::operation::head_object::HeadObjectError::NotFound(
+                            _not_found,
+                        ) => AppError::BadRequest(
                             entity::request::product::ProductRequestError::ImageDoesNotExist(image)
                                 .into(),
                         ),
-                        _ => err.into(),
+                        err => err.into(),
                     })?;
             }
 
             let result = service::Mutation::update_product(&conn, id, edit_product).await?;
 
             if let Some(image) = delete_image {
-                s3.delete_object(format!("{}/{}", FileType::Product, image))
+                s3.client
+                    .delete_object()
+                    .bucket(s3.bucket)
+                    .key(format!("{}/{}", FileType::Product, image))
+                    .send()
                     .await?;
             }
 

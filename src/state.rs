@@ -14,7 +14,7 @@ pub struct AppState {
     #[cfg(feature = "cache")]
     pub cache_pool: Option<fred::clients::RedisPool>,
 
-    pub s3_bucket: s3::Bucket,
+    pub s3_storage: entity::s3::S3FileStorage,
 }
 
 impl axum::extract::FromRef<AppState> for FrontendUrl {
@@ -43,13 +43,13 @@ impl axum::extract::FromRef<AppState> for DatabaseConnection {
     }
 }
 
-/// Allows Axum to extract the `Bucket` from `AppState`.
+/// Allows Axum to extract the FileStorage from `AppState`.
 ///
 /// This implementation enables Axum's request handlers to extract the s3 connection
 /// from the shared application state using the `FromRef` trait.
-impl axum::extract::FromRef<AppState> for s3::Bucket {
+impl axum::extract::FromRef<AppState> for entity::s3::S3FileStorage {
     fn from_ref(state: &AppState) -> Self {
-        state.s3_bucket.clone()
+        state.s3_storage.clone()
     }
 }
 

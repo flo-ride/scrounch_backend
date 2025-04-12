@@ -225,7 +225,7 @@ pub async fn post_update_from_sma(
     admin: Admin,
     State(conn): State<Connection>,
     State(arguments): State<SmaParams>,
-    State(s3): State<s3::Bucket>,
+    State(s3): State<entity::s3::S3FileStorage>,
     Query(params): Query<SmaChangeTypeMatrix>,
 ) -> Result<Json<SmaResponse>, AppError> {
     log::info!("{admin} just asked for an SMA update",);
@@ -340,7 +340,7 @@ pub async fn post_update_from_sma(
 /// the changes indicated by the `overwrite_matrix`; otherwise, a new product will be cre
 async fn create_or_update_sma_product(
     conn: &Connection,
-    s3: &s3::Bucket,
+    s3: &entity::s3::S3FileStorage,
     product: SmaProduct,
     overwrite_matrix: SmaChangeTypeMatrix,
 ) -> Result<SmaChange, AppError> {
@@ -414,7 +414,15 @@ async fn create_or_update_sma_product(
                 let image = image.bytes().await.map_err(|err| {
                     AppError::InternalError(format!("Cannot get bytes of image - {err}"))
                 })?;
-                s3.put_object(s3_path, &image).await?;
+
+                let bytes_stream = aws_sdk_s3::primitives::ByteStream::from(image);
+                s3.client
+                    .put_object()
+                    .bucket(&s3.bucket)
+                    .key(s3_path)
+                    .body(bytes_stream)
+                    .send()
+                    .await?;
 
                 filename = Some(name.clone());
 
