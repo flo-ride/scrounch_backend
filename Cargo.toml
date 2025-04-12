@@ -66,6 +66,7 @@ rust_decimal = "1.36.0"
 humantime = "2.1.0"
 strum_macros = "0.26.4"
 regex = "1.10.6"
+native-tls = "0.2.14"
 
 # Procs Macro
 syn =  "2.0.89"
@@ -79,13 +80,14 @@ testcontainers = "0.22.0"
 testcontainers-modules = "0.10.0"
 
 [features]
-default = ["cache", "native-tls"]
+default = ["cache"]
 
 native-tls = [
     "sea-orm/runtime-tokio-native-tls", 
     "fred?/enable-native-tls", 
     "tower-sessions-redis-store?/enable-native-tls",
     "reqwest/native-tls",
+    "dep:native-tls",
     "service/native-tls",
     "migration/native-tls",
     "entity/native-tls",
@@ -168,6 +170,7 @@ chrono = { workspace = true }
 url = { workspace = true }
 rust_decimal = { workspace = true }
 humantime = { workspace = true }
+native-tls = { workspace = true, optional = true }
 
 [dev-dependencies]
 http-body-util = { workspace = true }
