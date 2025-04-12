@@ -105,6 +105,7 @@ rustls-tls = [
     "entity/rustls-tls",
     "api/rustls-tls"
 ]
+vendored = ["native-tls?/vendored"]
 
 cache = ["dep:fred", "dep:tower-sessions-redis-store", "service/cache"]
 
