@@ -9,7 +9,7 @@ use serde_json::json;
 use testcontainers::runners::AsyncRunner;
 use testcontainers_modules::{minio::MinIO, postgres::Postgres};
 
-#[tokio::test(flavor = "multi_thread")]
+#[test_log::test(tokio::test)]
 async fn basic_login_oidc() {
     let john = User {
         username: "jojo".to_string(),

@@ -6,7 +6,7 @@ use utils::{containers::keycloak::User, create_basic_session, create_realm_sessi
 
 use crate::utils::containers::keycloak::{Client, Realm};
 
-#[tokio::test(flavor = "multi_thread")]
+#[test_log::test(tokio::test)]
 async fn user_test_1() {
     let realm = Realm {
         name: "user_test".to_string(),
