@@ -16,7 +16,7 @@
 
 use clap::Parser;
 use tower_http::trace::TraceLayer;
-use tracing_subscriber::{fmt, prelude::*};
+use tracing_subscriber::prelude::*;
 
 /// The main entry point for the scrounch_backend application.
 ///
@@ -29,29 +29,17 @@ async fn main() {
 
     let tracing_is_enable = !cli.disable_tracing;
     if tracing_is_enable {
-        let filter = tracing_subscriber::filter::Targets::new()
-            .with_target("tower_http::trace::on_response", tracing::Level::TRACE)
-            .with_target("tower_http::trace::on_request", tracing::Level::TRACE)
-            .with_target("tower_http::trace::make_span", tracing::Level::DEBUG)
-            .with_target("migration", tracing::Level::INFO)
-            .with_target("entity", tracing::Level::INFO)
-            .with_target("service", tracing::Level::INFO)
-            .with_target("sea_orm_migration::migrator", tracing::Level::INFO)
-            .with_target("sqlx::query", tracing::Level::WARN)
-            .with_target("sqlx::postgres::notice", tracing::Level::WARN)
-            .with_target("scrounch_backend", tracing::Level::INFO)
-            .with_default(tracing::Level::INFO);
-
-        let tracing_layer = fmt::layer();
-
-        let env_filter = tracing_subscriber::EnvFilter::builder()
-            .with_default_directive(tracing_subscriber::filter::LevelFilter::INFO.into())
-            .from_env_lossy();
-
         tracing_subscriber::registry()
-            .with(tracing_layer)
-            .with(env_filter)
-            .with(filter)
+            .with(
+                tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+                    format!(
+                        "{}=info,tower_http=warn,axum::rejection=info,sea_orm_migration::migrator=info",
+                        env!("CARGO_CRATE_NAME")
+                    )
+                    .into()
+                }),
+            )
+            .with(tracing_subscriber::fmt::layer().pretty())
             .init();
     }
 
