@@ -78,6 +78,7 @@ heck = "0.5.0"
 axum-test = "16.2.0"
 testcontainers = "0.22.0"
 testcontainers-modules = "0.10.0"
+test-log = "0.2.17"
 
 [features]
 default = ["cache"]
@@ -179,6 +180,7 @@ testcontainers = { workspace = true }
 testcontainers-modules = { workspace = true, features = ["postgres", "minio", "redis"] }
 regex = { workspace = true }
 axum-test = { workspace = true }
+test-log = { workspace = true }
 
 # Git hooks
 [dev-dependencies.cargo-husky]
