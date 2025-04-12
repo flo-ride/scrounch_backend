@@ -6,7 +6,7 @@ use utils::{create_basic_session, create_realm_session};
 
 use crate::utils::containers::keycloak::Realm;
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn recipe_create_zero_ingredient() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -72,7 +72,7 @@ async fn recipe_create_zero_ingredient() {
     ));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn recipe_create_one_ingredient() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -155,7 +155,7 @@ async fn recipe_create_one_ingredient() {
     ));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn recipe_create_multiple_ingredients() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -265,7 +265,7 @@ async fn recipe_create_multiple_ingredients() {
     ));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn recipe_edit_add_ingredient() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -386,7 +386,7 @@ async fn recipe_edit_add_ingredient() {
     ));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn recipe_edit_remove_ingredient() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -505,7 +505,7 @@ async fn recipe_edit_remove_ingredient() {
     ));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn recipe_edit_add_remove_ingredients() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -623,7 +623,7 @@ async fn recipe_edit_add_remove_ingredients() {
     ));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn recipe_edit_quantity() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;

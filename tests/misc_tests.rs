@@ -3,7 +3,7 @@ mod utils;
 use crate::utils::containers::keycloak::{Client, Realm};
 use utils::create_basic_session;
 
-#[tokio::test(flavor = "multi_thread")]
+#[test_log::test(tokio::test)]
 async fn basic_swagger_test() {
     let realm = Realm {
         name: "misc_test".to_string(),
@@ -20,7 +20,7 @@ async fn basic_swagger_test() {
     response.assert_status_ok();
 }
 
-#[tokio::test(flavor = "multi_thread")]
+#[test_log::test(tokio::test)]
 async fn basic_status_test() {
     let realm = Realm {
         name: "misc_test".to_string(),

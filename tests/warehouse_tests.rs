@@ -6,7 +6,7 @@ use utils::{create_basic_session, create_realm_session};
 
 use crate::utils::containers::keycloak::Realm;
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn warehouse_create_name() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -46,7 +46,7 @@ async fn warehouse_create_name() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn warehouse_create_missing_name() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -71,7 +71,7 @@ async fn warehouse_create_missing_name() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn warehouse_create_empty_name() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -98,7 +98,7 @@ async fn warehouse_create_empty_name() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn warehouse_create_too_long_name() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -125,7 +125,7 @@ async fn warehouse_create_too_long_name() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn warehouse_create_not_name() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -192,7 +192,7 @@ async fn warehouse_create_not_name() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn warehouse_edit_name() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -241,7 +241,7 @@ async fn warehouse_edit_name() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn warehouse_edit_empty_name() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -290,7 +290,7 @@ async fn warehouse_edit_empty_name() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn warehouse_edit_too_long_name() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -339,7 +339,7 @@ async fn warehouse_edit_too_long_name() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn warehouse_create_disabled() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -378,7 +378,7 @@ async fn warehouse_create_disabled() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn warehouse_edit_disabled() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -427,7 +427,7 @@ async fn warehouse_edit_disabled() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn warehouse_product_create_single_product() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -489,7 +489,7 @@ async fn warehouse_product_create_single_product() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn warehouse_product_create_multiple_product() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -619,7 +619,7 @@ async fn warehouse_product_create_multiple_product() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn warehouse_product_create_existing_link() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -690,7 +690,7 @@ async fn warehouse_product_create_existing_link() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn warehouse_product_create_null_quantity() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -752,7 +752,7 @@ async fn warehouse_product_create_null_quantity() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn warehouse_product_create_decimal_quantity() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -814,7 +814,7 @@ async fn warehouse_product_create_decimal_quantity() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn warehouse_product_create_negative_quantity() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;

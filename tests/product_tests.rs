@@ -6,7 +6,7 @@ use utils::{create_basic_session, create_realm_session, generation::get_multipar
 
 use crate::utils::containers::keycloak::Realm;
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn product_test_1() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -159,7 +159,7 @@ async fn product_test_1() {
     response.assert_status_not_found();
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn product_test_2() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -781,7 +781,7 @@ async fn product_test_2() {
         ));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn product_create_name() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -817,7 +817,7 @@ async fn product_create_name() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn product_create_missing_name() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -842,7 +842,7 @@ async fn product_create_missing_name() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn product_create_empty_name() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -868,7 +868,7 @@ async fn product_create_empty_name() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn product_create_too_long_name() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -894,7 +894,7 @@ async fn product_create_too_long_name() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn product_create_not_name() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -958,7 +958,7 @@ async fn product_create_not_name() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn product_edit_name() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -1003,7 +1003,7 @@ async fn product_edit_name() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn product_edit_empty_name() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -1048,7 +1048,7 @@ async fn product_edit_empty_name() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn product_edit_too_long_name() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -1093,7 +1093,7 @@ async fn product_edit_too_long_name() {
     }));
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn product_create_image() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -1147,7 +1147,7 @@ async fn product_create_image() {
     response.assert_status_ok();
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn product_create_image_doesnt_exit() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -1167,7 +1167,7 @@ async fn product_create_image_doesnt_exit() {
     response.assert_status_bad_request()
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn product_edit_image() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -1247,7 +1247,7 @@ async fn product_edit_image() {
     response.assert_status_ok();
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn product_edit_image_doesnt_exist() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
@@ -1311,7 +1311,7 @@ async fn product_edit_image_doesnt_exist() {
     response.assert_status_ok();
 }
 
-#[tokio::test]
+#[test_log::test(tokio::test)]
 async fn product_append_image_after_creation() {
     let realm = Realm::default();
     let (mut server, _ids, _nodes) = create_basic_session(realm.clone()).await;
