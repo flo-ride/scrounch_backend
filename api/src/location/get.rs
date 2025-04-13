@@ -118,7 +118,7 @@ pub async fn get_all_locations(
             .await?;
 
     let total_locations = service::Query::count_locations_with_condition(&conn, filter).await?;
-    let total_page = ((total_locations - 1) / per_page) + 1;
+    let total_page = ((total_locations.max(1) - 1) / per_page) + 1;
 
     let locations = result.into_iter().map(Into::into).collect();
     Ok(Json(LocationListResponse {
