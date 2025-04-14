@@ -52,6 +52,7 @@
             cargo-msrv
             cargo-hack
             cargo-nextest
+            cargo-audit
             rust-analyzer
             lldb
             sea-orm-cli
