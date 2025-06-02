@@ -24,7 +24,7 @@ sea-orm = "1.0.1"
 sea-orm-migration = "1.0.1"
 
 # CLI + Env + Config
-clap = "4.5.17"
+clap = "4.5.39"
 dotenvy = "0.15.7"
 
 # Trace + Log
